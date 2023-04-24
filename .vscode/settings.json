@@ -18,18 +18,14 @@
 
     "cSpell.diagnosticLevel": "Hint",
 
-    "prettier.arrowParens": "always",
-    "prettier.bracketSpacing": true,
-    "prettier.bracketSameLine": true,
-    "prettier.singleQuote": true,
-    "prettier.trailingComma": "es5",
-    "prettier.tabWidth": 4,
-    "prettier.endOfLine": "auto",
-    "prettier.semi": false,
-    "prettier.printWidth": 140,
-
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "[javascript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "files.associations": {
+        "**/.api/**/*.*": "plaintext"
+    },
+    "[plaintext]": {
+        "editor.formatOnSave": false
     }
 }

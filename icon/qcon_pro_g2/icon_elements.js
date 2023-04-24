@@ -141,8 +141,9 @@ function makeLedButton(surface, midiInput, midiOutput, note, x, y, w, h, circle)
 
     button.mSurfaceValue.mOnProcessValueChange = function (/** @type {MR_ActiveDevice} */ activeDevice) {
         // console.log("LedButton ProcessValue Change:"+button.mSurfaceValue.getProcessValue(activeDevice))
-        if (button.mSurfaceValue.getProcessValue(activeDevice) > 0) this.midiOutput.sendMidi(activeDevice, [0x90, note, 127])
-        else {
+        if (button.mSurfaceValue.getProcessValue(activeDevice) > 0) {
+            this.midiOutput.sendMidi(activeDevice, [0x90, note, 127])
+        } else {
             this.midiOutput.sendMidi(activeDevice, [0x90, note, 0])
         }
     }.bind({ midiOutput })
@@ -268,56 +269,36 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, instance, surf
     channelControl.pushEncoder.mPushValue.mMidiBinding.setInputPort(midiInput).bindToNote(0, 32 + channelControl.instance)
 
     // Fader + Fader Touch
-    var fader_x = channelControl.x
-    var fader_y = y + 7
+    var fader_x = channelControl.x + 0.5
+    var fader_y = y + 20
     var tf = makeTouchFader(surface, midiInput, channelControl.midiOutput, instance, fader_x, fader_y, 3, 18)
     channelControl.fader = tf[0]
     channelControl.fader_touch = tf[1]
 
     // Channel Buttons
-    channelControl.sel_button = makeLedButton(
-        surface,
-        midiInput,
-        midiOutput,
-        24 + channelControl.instance,
-        fader_x + 4,
-        fader_y + 6,
-        3,
-        3,
-        false
-    )
+    channelControl.rec_button = makeLedButton(surface, midiInput, midiOutput, 0 + channelControl.instance, fader_x + 0, y + 6, 3, 3, false)
+    channelControl.solo_button = makeLedButton(surface, midiInput, midiOutput, 8 + channelControl.instance, fader_x + 0, y + 9, 3, 3, false)
     channelControl.mute_button = makeLedButton(
         surface,
         midiInput,
         midiOutput,
         16 + channelControl.instance,
-        fader_x + 4,
-        fader_y + 9,
+        fader_x + 0,
+        y + 12,
         3,
         3,
         false
     )
-    channelControl.solo_button = makeLedButton(
+    channelControl.sel_button = makeLedButton(
         surface,
         midiInput,
         midiOutput,
-        8 + channelControl.instance,
-        fader_x + 4,
-        fader_y + 12,
+        24 + channelControl.instance,
+        fader_x + 0,
+        y + 15,
         3,
         3,
         false
-    )
-    channelControl.rec_button = makeLedButton(
-        surface,
-        midiInput,
-        midiOutput,
-        0 + channelControl.instance,
-        fader_x + 4,
-        fader_y + 15,
-        3,
-        3,
-        true
     )
 
     var channelIndex = channelControl.instance
@@ -592,6 +573,7 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, instance, surfa
     masterControl.mixer_button = makeLedButton(surface, midiInput, midiOutput, 84, fader_x + 3, fader_y + 6, 3, 3, false)
     masterControl.read_button = makeLedButton(surface, midiInput, midiOutput, 74, fader_x + 3, fader_y + 9, 3, 3, false)
     masterControl.write_button = makeLedButton(surface, midiInput, midiOutput, 75, fader_x + 3, fader_y + 12, 3, 3, false)
+
     masterControl.mixer_button.mSurfaceValue.mOnProcessValueChange = function (activeDevice) {
         var value = masterControl.mixer_button.mSurfaceValue.getProcessValue(activeDevice)
         if (value == 1) {
@@ -603,10 +585,12 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, instance, surfa
             }
             activeDevice.setState('displayType', displayType)
 
-            if (displayType === 'Pan') midiOutput.sendMidi(activeDevice, [0x90, 84, 127])
-            else {
+            if (displayType === 'Pan') {
+                midiOutput.sendMidi(activeDevice, [0x90, 84, 127])
+            } else {
                 midiOutput.sendMidi(activeDevice, [0x90, 84, 0])
             }
+
             Helper_updateDisplay(
                 activeDevice.getState('Display - idRow1'),
                 activeDevice.getState('Display - idRow2'),
@@ -645,6 +629,12 @@ function makeTransport(surface, midiInput, midiOutput, x, y, surfaceElements) {
         return 'Class Transport'
     }
 
+    /**
+     * Bind button to Midi Note Utility Function
+     * @param {MR_Button} button
+     * @param {number} chn
+     * @param {number} num
+     */
     function bindMidiNote(button, chn, num) {
         button.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToNote(chn, num)
     }
@@ -667,15 +657,17 @@ function makeTransport(surface, midiInput, midiOutput, x, y, surfaceElements) {
     // The Note on/off events for the special functions are timestamped at the same time
     // Cubase midi remote doesn't show anything on screen though a note is sent
     // Flip - Simultaneous press of Pre Chn+Pre Bank
-    transport.btnFlip = surface.makeButton(x + 0.5, y + 15, 2, 2).setShapeCircle()
-    bindMidiNote(transport.btnFlip, 0, 50)
+    // transport.btnFlip = surface.makeButton(x + 0.5, y + 15, 2, 2).setShapeCircle()
+    // bindMidiNote(transport.btnFlip, 0, 50)
+    transport.btnFlip = makeLedButton(surface, midiInput, midiOutput, 50, x + 0.5, y + 15, 2, 2, false)
 
     // Pressing the Zoom keys simultaneously will toggle on and off a note event. If on
     // either zoom button will send a Note 100 when zoom is activated or deactivated by either button
     // If zoom is active and you simply press then other button the event will not be sent
     //
-    transport.btnZoomOnOff = surface.makeButton(x + 3.5, y + 15, 2, 2).setShapeCircle()
-    bindMidiNote(transport.btnZoomOnOff, 0, 100)
+    // transport.btnZoomOnOff = surface.makeButton(x + 3.5, y + 15, 2, 2).setShapeCircle()
+    // bindMidiNote(transport.btnZoomOnOff, 0, 100)
+    transport.btnZoomOnOff = makeLedButton(surface, midiInput, midiOutput, 100, x + 3.5, y + 15, 2, 2, false)
 
     // The Jog wheel will change CC/Note based on which of the Zoom buttons have been activated
     // None - CC 60
@@ -687,7 +679,7 @@ function makeTransport(surface, midiInput, midiOutput, x, y, surfaceElements) {
     // In the Jog (or more correctly Nudge Cursor) mapping we use this to "tap the key severel times" - giving the impact of fine grain control if turned slowly
     // or large nudges if turned quickly.
     // ? One weird side effect of this is the Knob displayed in Cubase will show its "value" in a weird way.
-    // todo I wonder if there is a way to change that behavior?
+    // TODO: I wonder if there is a way to change that behavior?
     transport.jog_wheel = surface.makePushEncoder(x, y + 17, 6, 6)
     transport.jog_wheel.mEncoderValue.mMidiBinding.setInputPort(midiInput).setIsConsuming(true).bindToControlChange(0, 60).setTypeAbsolute()
     transport.jog_wheel.mPushValue.mMidiBinding.setInputPort(midiInput).bindToNote(0, 101)

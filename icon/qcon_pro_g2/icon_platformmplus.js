@@ -102,13 +102,21 @@ var surfaceElements = makeSurfaceElements()
 //-----------------------------------------------------------------------------
 
 // Helper functions
+
+/**
+ * Make a Sub Page
+ * @param {MR_SubPageArea} subPageArea
+ * @param {string} name
+ * @returns sub page
+ */
 function makeSubPage(subPageArea, name) {
     var subPage = subPageArea.makeSubPage(name)
     var msgText = 'sub page ' + name + ' activated'
+
     subPage.mOnActivate = function (/** @type {MR_ActiveDevice} **/ activeDevice) {
         console.log(msgText)
         activeDevice.setState('activeSubPage', name)
-        var data = [0xf0, 0x00, 0x00, 0x66, 0x14, 0x12]
+
         switch (name) {
             case 'Scrub':
                 activeDevice.setState('indicator2', 'S')
@@ -208,9 +216,9 @@ function makeSubPage(subPageArea, name) {
 }
 
 /**
+ * Mappings for the default areas - transport, zoom, knob
  * @param {string} name
  */
-// Mappings for the default areas - transport, zoom, knob
 function makePageWithDefaults(name) {
     var page = deviceDriver.mMapping.makePage(name)
     var jogSubPageArea = page.makeSubPageArea('Jog')
@@ -237,6 +245,7 @@ function makePageWithDefaults(name) {
     page.makeCommandBinding(surfaceElements.transport.zoomVertOut.mSurfaceValue, 'Zoom', 'Zoom Out Vertically').setSubPage(subPageJogZoom)
     page.makeCommandBinding(surfaceElements.transport.zoomHorizIn.mSurfaceValue, 'Zoom', 'Zoom In').setSubPage(subPageJogZoom)
     page.makeCommandBinding(surfaceElements.transport.zoomHorizOut.mSurfaceValue, 'Zoom', 'Zoom Out').setSubPage(subPageJogZoom)
+
     // Nav Pages
     page.makeActionBinding(
         surfaceElements.transport.zoomVertIn.mSurfaceValue,
@@ -250,6 +259,7 @@ function makePageWithDefaults(name) {
     page.makeCommandBinding(surfaceElements.transport.zoomHorizOut.mSurfaceValue, 'Transport', 'Locate Previous Event').setSubPage(
         subPageJobNav
     )
+
     // Switch Zoom and Nav via simultaneous press of Zoom buttons
     page.makeActionBinding(surfaceElements.transport.btnZoomOnOff.mSurfaceValue, zoomSubPageArea.mAction.mNext)
     // page.makeActionBinding(surfaceElements.transport.zoomState.mSurfaceValue, zoomSubPageArea.mAction.mNext)
@@ -258,9 +268,11 @@ function makePageWithDefaults(name) {
     // Nudge
     page.makeCommandBinding(surfaceElements.transport.jogLeftVariable, 'Transport', 'Nudge Cursor Left').setSubPage(subPageJogNudge)
     page.makeCommandBinding(surfaceElements.transport.jogRightVariable, 'Transport', 'Nudge Cursor Right').setSubPage(subPageJogNudge)
+
     // Scrub (Jog in Cubase)
     page.makeCommandBinding(surfaceElements.transport.jogLeftVariable, 'Transport', 'Jog Left').setSubPage(subPageJogScrub)
     page.makeCommandBinding(surfaceElements.transport.jogRightVariable, 'Transport', 'Jog Right').setSubPage(subPageJogScrub)
+
     // Switch between Nudge and Scrub by tapping knob
     page.makeActionBinding(surfaceElements.transport.jog_wheel.mPushValue, jogSubPageArea.mAction.mNext)
 
