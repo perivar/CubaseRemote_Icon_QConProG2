@@ -101,8 +101,10 @@ function Helper_updateDisplay(idRow1, idRow2, idAltRow1, idAltRow2, activeDevice
         var data = [0xf0, 0x00, 0x00, 0x66, 0x14, 0x12]
 
         if (row === 0) {
+            // write at position 55 (just before last character in row 1)
             data.push(55)
         } else {
+            // write at position 111 (just before last character in row 2)
             data.push(111)
         }
 
