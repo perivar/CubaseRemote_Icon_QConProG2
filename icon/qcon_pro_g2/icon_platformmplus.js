@@ -1,4 +1,4 @@
-// Icon Icon QConProG2 midi Remote
+// Icon Platform M+ midi Remote
 // Robert Woodcock
 // https://github.com/woodcockr/midiremote-userscripts/blob/develop/icon/platformmplus/icon_platformmplus.js
 //
@@ -34,7 +34,7 @@ var midiOutput = deviceDriver.mPorts.makeMidiOutput('Platform M+')
 var midiPageOutput = deviceDriver.mPorts.makeMidiOutput('Icon - CC - Out')
 
 deviceDriver.mOnActivate = function (activeDevice) {
-    console.log('Icon Platform M+ Activated');
+    console.log('Icon Platform M+ Activated')
     clearAllLeds(activeDevice, midiOutput)
 }
 
@@ -43,7 +43,9 @@ deviceDriver.mOnActivate = function (activeDevice) {
 // deviceDriver.makeDetectionUnit().detectPortPair(midiInput, midiOutput)
 //     .expectInputNameEquals('Platform M+ V2.15') // Platform M+ v2.15
 //     .expectOutputNameEquals('Platform M+ V2.15') // Platform M+ v2.15
-deviceDriver.makeDetectionUnit().detectPortPair(midiInput, midiOutput)
+deviceDriver
+    .makeDetectionUnit()
+    .detectPortPair(midiInput, midiOutput)
     .expectInputNameContains('Platform M+')
     .expectOutputNameContains('Platform M+')
 
@@ -73,11 +75,19 @@ function makeSurfaceElements() {
         surfaceElements.channelControls[i] = makeChannelControl(surface, midiInput, midiOutput, xKnobStrip, yKnobStrip, i, surfaceElements)
     }
 
-    surfaceElements.faderMaster = makeMasterControl(surface, midiInput, midiOutput, xKnobStrip + 1, yKnobStrip + 4, surfaceElements.numStrips, surfaceElements)
+    surfaceElements.faderMaster = makeMasterControl(
+        surface,
+        midiInput,
+        midiOutput,
+        xKnobStrip + 1,
+        yKnobStrip + 4,
+        surfaceElements.numStrips,
+        surfaceElements
+    )
     surfaceElements.transport = makeTransport(surface, midiInput, midiOutput, xKnobStrip + 63, yKnobStrip + 4, surfaceElements)
 
     // Track the selected track name
-    surfaceElements.selectedTrack = surface.makeCustomValueVariable('selectedTrack');
+    surfaceElements.selectedTrack = surface.makeCustomValueVariable('selectedTrack')
     surfaceElements.selectedTrack.mOnTitleChange = function (activeDevice, objectTitle, valueTitle) {
         console.log('selectedTrack title change:' + objectTitle)
         activeDevice.setState('selectedTrackName', objectTitle)
@@ -87,7 +97,6 @@ function makeSurfaceElements() {
 
 var surfaceElements = makeSurfaceElements()
 
-
 //-----------------------------------------------------------------------------
 // 3. HOST MAPPING - create mapping mixerPages and host bindings
 //-----------------------------------------------------------------------------
@@ -96,56 +105,56 @@ var surfaceElements = makeSurfaceElements()
 function makeSubPage(subPageArea, name) {
     var subPage = subPageArea.makeSubPage(name)
     var msgText = 'sub page ' + name + ' activated'
-    subPage.mOnActivate = (function (/** @type {MR_ActiveDevice} **/activeDevice) {
+    subPage.mOnActivate = function (/** @type {MR_ActiveDevice} **/ activeDevice) {
         console.log(msgText)
-        activeDevice.setState("activeSubPage", name)
+        activeDevice.setState('activeSubPage', name)
         var data = [0xf0, 0x00, 0x00, 0x66, 0x14, 0x12]
         switch (name) {
-            case "Scrub":
-                activeDevice.setState("indicator2", "S")
-                break;
-            case "Nudge":
-                activeDevice.setState("indicator2", "N")
-                break;
-            case "Nav":
-                activeDevice.setState("indicator1", "N")
-                break;
-            case "Zoom":
-                activeDevice.setState("indicator1", "Z")
-                break;
-            case "SendsQC":
+            case 'Scrub':
+                activeDevice.setState('indicator2', 'S')
+                break
+            case 'Nudge':
+                activeDevice.setState('indicator2', 'N')
+                break
+            case 'Nav':
+                activeDevice.setState('indicator1', 'N')
+                break
+            case 'Zoom':
+                activeDevice.setState('indicator1', 'Z')
+                break
+            case 'SendsQC':
                 // An action binding cannot be set to ta Toggle type button so manually adjust the rec button lights
                 // based on the subpage selection.
                 midiOutput.sendMidi(activeDevice, [0x90, 0, 127])
                 midiOutput.sendMidi(activeDevice, [0x90, 1, 0])
                 midiOutput.sendMidi(activeDevice, [0x90, 2, 0])
                 midiOutput.sendMidi(activeDevice, [0x90, 3, 0])
-                break;
-            case "EQ":
+                break
+            case 'EQ':
                 // An action binding cannot be set to ta Toggle type button so manually adjust the rec button lights
                 // based on the subpage selection.
                 midiOutput.sendMidi(activeDevice, [0x90, 0, 0])
                 midiOutput.sendMidi(activeDevice, [0x90, 1, 127])
                 midiOutput.sendMidi(activeDevice, [0x90, 2, 0])
                 midiOutput.sendMidi(activeDevice, [0x90, 3, 0])
-                break;
-            case "PreFilter":
+                break
+            case 'PreFilter':
                 // An action binding cannot be set to ta Toggle type button so manually adjust the rec button lights
                 // based on the subpage selection.
                 midiOutput.sendMidi(activeDevice, [0x90, 0, 0])
                 midiOutput.sendMidi(activeDevice, [0x90, 1, 0])
                 midiOutput.sendMidi(activeDevice, [0x90, 2, 127])
                 midiOutput.sendMidi(activeDevice, [0x90, 3, 0])
-                break;
-            case "CueSends":
+                break
+            case 'CueSends':
                 // An action binding cannot be set to ta Toggle type button so manually adjust the rec button lights
                 // based on the subpage selection.
                 midiOutput.sendMidi(activeDevice, [0x90, 0, 0])
                 midiOutput.sendMidi(activeDevice, [0x90, 1, 0])
                 midiOutput.sendMidi(activeDevice, [0x90, 2, 0])
                 midiOutput.sendMidi(activeDevice, [0x90, 3, 127])
-                break;
-            case "Gate":
+                break
+            case 'Gate':
                 // An action binding cannot be set to ta Toggle type button so manually adjust the sel button lights
                 // based on the subpage selection.
                 midiOutput.sendMidi(activeDevice, [0x90, 24, 127])
@@ -153,8 +162,8 @@ function makeSubPage(subPageArea, name) {
                 midiOutput.sendMidi(activeDevice, [0x90, 26, 0])
                 midiOutput.sendMidi(activeDevice, [0x90, 27, 0])
                 midiOutput.sendMidi(activeDevice, [0x90, 28, 0])
-                break;
-            case "Compressor":
+                break
+            case 'Compressor':
                 // An action binding cannot be set to ta Toggle type button so manually adjust the sel button lights
                 // based on the subpage selection.
                 midiOutput.sendMidi(activeDevice, [0x90, 24, 0])
@@ -162,8 +171,8 @@ function makeSubPage(subPageArea, name) {
                 midiOutput.sendMidi(activeDevice, [0x90, 26, 0])
                 midiOutput.sendMidi(activeDevice, [0x90, 27, 0])
                 midiOutput.sendMidi(activeDevice, [0x90, 28, 0])
-                break;
-            case "Tools":
+                break
+            case 'Tools':
                 // An action binding cannot be set to ta Toggle type button so manually adjust the sel button lights
                 // based on the subpage selection.
                 midiOutput.sendMidi(activeDevice, [0x90, 24, 0])
@@ -171,8 +180,8 @@ function makeSubPage(subPageArea, name) {
                 midiOutput.sendMidi(activeDevice, [0x90, 26, 127])
                 midiOutput.sendMidi(activeDevice, [0x90, 27, 0])
                 midiOutput.sendMidi(activeDevice, [0x90, 28, 0])
-                break;
-            case "Saturator":
+                break
+            case 'Saturator':
                 // An action binding cannot be set to ta Toggle type button so manually adjust the sel button lights
                 // based on the subpage selection.
                 midiOutput.sendMidi(activeDevice, [0x90, 24, 0])
@@ -180,8 +189,8 @@ function makeSubPage(subPageArea, name) {
                 midiOutput.sendMidi(activeDevice, [0x90, 26, 0])
                 midiOutput.sendMidi(activeDevice, [0x90, 27, 127])
                 midiOutput.sendMidi(activeDevice, [0x90, 28, 0])
-                break;
-            case "Limiter":
+                break
+            case 'Limiter':
                 // An action binding cannot be set to ta Toggle type button so manually adjust the sel button lights
                 // based on the subpage selection.
                 midiOutput.sendMidi(activeDevice, [0x90, 24, 0])
@@ -189,18 +198,18 @@ function makeSubPage(subPageArea, name) {
                 midiOutput.sendMidi(activeDevice, [0x90, 26, 0])
                 midiOutput.sendMidi(activeDevice, [0x90, 27, 0])
                 midiOutput.sendMidi(activeDevice, [0x90, 28, 127])
-                break;
+                break
         }
 
         Helper_updateDisplay('Row1', 'Row2', 'AltRow1', 'AltRow2', activeDevice, midiOutput)
-    }).bind({ subPage, name })
+    }.bind({ subPage, name })
 
     return subPage
 }
 
 /**
  * @param {string} name
-*/
+ */
 // Mappings for the default areas - transport, zoom, knob
 function makePageWithDefaults(name) {
     var page = deviceDriver.mMapping.makePage(name)
@@ -229,10 +238,18 @@ function makePageWithDefaults(name) {
     page.makeCommandBinding(surfaceElements.transport.zoomHorizIn.mSurfaceValue, 'Zoom', 'Zoom In').setSubPage(subPageJogZoom)
     page.makeCommandBinding(surfaceElements.transport.zoomHorizOut.mSurfaceValue, 'Zoom', 'Zoom Out').setSubPage(subPageJogZoom)
     // Nav Pages
-    page.makeActionBinding(surfaceElements.transport.zoomVertIn.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mNextTrack).setSubPage(subPageJobNav)
-    page.makeActionBinding(surfaceElements.transport.zoomVertOut.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mPrevTrack).setSubPage(subPageJobNav)
+    page.makeActionBinding(
+        surfaceElements.transport.zoomVertIn.mSurfaceValue,
+        page.mHostAccess.mTrackSelection.mAction.mNextTrack
+    ).setSubPage(subPageJobNav)
+    page.makeActionBinding(
+        surfaceElements.transport.zoomVertOut.mSurfaceValue,
+        page.mHostAccess.mTrackSelection.mAction.mPrevTrack
+    ).setSubPage(subPageJobNav)
     page.makeCommandBinding(surfaceElements.transport.zoomHorizIn.mSurfaceValue, 'Transport', 'Locate Next Event').setSubPage(subPageJobNav)
-    page.makeCommandBinding(surfaceElements.transport.zoomHorizOut.mSurfaceValue, 'Transport', 'Locate Previous Event').setSubPage(subPageJobNav)
+    page.makeCommandBinding(surfaceElements.transport.zoomHorizOut.mSurfaceValue, 'Transport', 'Locate Previous Event').setSubPage(
+        subPageJobNav
+    )
     // Switch Zoom and Nav via simultaneous press of Zoom buttons
     page.makeActionBinding(surfaceElements.transport.btnZoomOnOff.mSurfaceValue, zoomSubPageArea.mAction.mNext)
     // page.makeActionBinding(surfaceElements.transport.zoomState.mSurfaceValue, zoomSubPageArea.mAction.mNext)
@@ -250,14 +267,22 @@ function makePageWithDefaults(name) {
     var MasterFaderSubPageArea = page.makeSubPageArea('MasterFader')
     var subPageMasterFaderValue = makeSubPage(MasterFaderSubPageArea, 'MF_ValueUnderCursor')
 
-    page.makeValueBinding(surfaceElements.faderMaster.fader.mSurfaceValue, page.mHostAccess.mMouseCursor.mValueUnderMouse).setValueTakeOverModeJump().setSubPage(subPageMasterFaderValue)
+    page.makeValueBinding(surfaceElements.faderMaster.fader.mSurfaceValue, page.mHostAccess.mMouseCursor.mValueUnderMouse)
+        .setValueTakeOverModeJump()
+        .setSubPage(subPageMasterFaderValue)
 
     // Automation for selected tracks
     var selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
 
     // Automation for selected tracks
-    page.makeValueBinding(surfaceElements.faderMaster.read_button.mSurfaceValue, selectedTrackChannel.mValue.mAutomationRead).setTypeToggle()
-    page.makeValueBinding(surfaceElements.faderMaster.write_button.mSurfaceValue, selectedTrackChannel.mValue.mAutomationWrite).setTypeToggle()
+    page.makeValueBinding(
+        surfaceElements.faderMaster.read_button.mSurfaceValue,
+        selectedTrackChannel.mValue.mAutomationRead
+    ).setTypeToggle()
+    page.makeValueBinding(
+        surfaceElements.faderMaster.write_button.mSurfaceValue,
+        selectedTrackChannel.mValue.mAutomationWrite
+    ).setTypeToggle()
 
     return page
 }
@@ -271,7 +296,8 @@ function makePageMixer() {
     var ButtonSubPageArea = page.makeSubPageArea('Buttons')
     var subPageButtonDefaultSet = makeSubPage(ButtonSubPageArea, 'DefaultSet')
 
-    var hostMixerBankZone = page.mHostAccess.mMixConsole.makeMixerBankZone("AudioInstrBanks")
+    var hostMixerBankZone = page.mHostAccess.mMixConsole
+        .makeMixerBankZone('AudioInstrBanks')
         .includeAudioChannels()
         .includeInstrumentChannels()
         .setFollowVisibility(true)
@@ -279,23 +305,33 @@ function makePageMixer() {
     for (var channelIndex = 0; channelIndex < surfaceElements.numStrips; ++channelIndex) {
         var hostMixerBankChannel = hostMixerBankZone.makeMixerBankChannel()
 
-        var knobSurfaceValue = surfaceElements.channelControls[channelIndex].pushEncoder.mEncoderValue;
-        var knobPushValue = surfaceElements.channelControls[channelIndex].pushEncoder.mPushValue;
-        var faderSurfaceValue = surfaceElements.channelControls[channelIndex].fader.mSurfaceValue;
-        var faderTouchSurfaceValue = surfaceElements.channelControls[channelIndex].fader_touch.mSurfaceValue;
-        var sel_buttonSurfaceValue = surfaceElements.channelControls[channelIndex].sel_button.mSurfaceValue;
-        var mute_buttonSurfaceValue = surfaceElements.channelControls[channelIndex].mute_button.mSurfaceValue;
-        var solo_buttonSurfaceValue = surfaceElements.channelControls[channelIndex].solo_button.mSurfaceValue;
-        var rec_buttonSurfaceValue = surfaceElements.channelControls[channelIndex].rec_button.mSurfaceValue;
+        var knobSurfaceValue = surfaceElements.channelControls[channelIndex].pushEncoder.mEncoderValue
+        var knobPushValue = surfaceElements.channelControls[channelIndex].pushEncoder.mPushValue
+        var faderSurfaceValue = surfaceElements.channelControls[channelIndex].fader.mSurfaceValue
+        var faderTouchSurfaceValue = surfaceElements.channelControls[channelIndex].fader_touch.mSurfaceValue
+        var sel_buttonSurfaceValue = surfaceElements.channelControls[channelIndex].sel_button.mSurfaceValue
+        var mute_buttonSurfaceValue = surfaceElements.channelControls[channelIndex].mute_button.mSurfaceValue
+        var solo_buttonSurfaceValue = surfaceElements.channelControls[channelIndex].solo_button.mSurfaceValue
+        var rec_buttonSurfaceValue = surfaceElements.channelControls[channelIndex].rec_button.mSurfaceValue
 
         // FaderKnobs - Volume, Pan, Editor Open
         page.makeValueBinding(knobSurfaceValue, hostMixerBankChannel.mValue.mPan).setSubPage(subPageFaderVolume)
         page.makeValueBinding(knobPushValue, hostMixerBankChannel.mValue.mEditorOpen).setTypeToggle().setSubPage(subPageFaderVolume)
-        page.makeValueBinding(faderSurfaceValue, hostMixerBankChannel.mValue.mVolume).setValueTakeOverModeJump().setSubPage(subPageFaderVolume)
-        page.makeValueBinding(sel_buttonSurfaceValue, hostMixerBankChannel.mValue.mSelected).setTypeToggle().setSubPage(subPageButtonDefaultSet)
-        page.makeValueBinding(mute_buttonSurfaceValue, hostMixerBankChannel.mValue.mMute).setTypeToggle().setSubPage(subPageButtonDefaultSet)
-        page.makeValueBinding(solo_buttonSurfaceValue, hostMixerBankChannel.mValue.mSolo).setTypeToggle().setSubPage(subPageButtonDefaultSet)
-        page.makeValueBinding(rec_buttonSurfaceValue, hostMixerBankChannel.mValue.mRecordEnable).setTypeToggle().setSubPage(subPageButtonDefaultSet)
+        page.makeValueBinding(faderSurfaceValue, hostMixerBankChannel.mValue.mVolume)
+            .setValueTakeOverModeJump()
+            .setSubPage(subPageFaderVolume)
+        page.makeValueBinding(sel_buttonSurfaceValue, hostMixerBankChannel.mValue.mSelected)
+            .setTypeToggle()
+            .setSubPage(subPageButtonDefaultSet)
+        page.makeValueBinding(mute_buttonSurfaceValue, hostMixerBankChannel.mValue.mMute)
+            .setTypeToggle()
+            .setSubPage(subPageButtonDefaultSet)
+        page.makeValueBinding(solo_buttonSurfaceValue, hostMixerBankChannel.mValue.mSolo)
+            .setTypeToggle()
+            .setSubPage(subPageButtonDefaultSet)
+        page.makeValueBinding(rec_buttonSurfaceValue, hostMixerBankChannel.mValue.mRecordEnable)
+            .setTypeToggle()
+            .setSubPage(subPageButtonDefaultSet)
     }
 
     return page
@@ -320,39 +356,85 @@ function makePageSelectedTrack() {
     // Focus QC on Faders
     // Fader
     for (var idx = 0; idx < surfaceElements.numStrips; ++idx) {
-        var knobSurfaceValue = surfaceElements.channelControls[idx].pushEncoder.mEncoderValue;
-        var knobPushValue = surfaceElements.channelControls[idx].pushEncoder.mPushValue;
-        var faderSurfaceValue = surfaceElements.channelControls[idx].fader.mSurfaceValue;
+        var knobSurfaceValue = surfaceElements.channelControls[idx].pushEncoder.mEncoderValue
+        var knobPushValue = surfaceElements.channelControls[idx].pushEncoder.mPushValue
+        var faderSurfaceValue = surfaceElements.channelControls[idx].fader.mSurfaceValue
 
         page.makeValueBinding(knobSurfaceValue, selectedTrackChannel.mSends.getByIndex(idx).mLevel).setSubPage(subPageSendsQC)
         page.makeValueBinding(knobPushValue, selectedTrackChannel.mSends.getByIndex(idx).mOn).setTypeToggle().setSubPage(subPageSendsQC)
-        page.makeValueBinding(faderSurfaceValue, page.mHostAccess.mFocusedQuickControls.getByIndex(idx)).setValueTakeOverModeJump().setSubPage(subPageSendsQC)
+        page.makeValueBinding(faderSurfaceValue, page.mHostAccess.mFocusedQuickControls.getByIndex(idx))
+            .setValueTakeOverModeJump()
+            .setSubPage(subPageSendsQC)
 
-        page.makeValueBinding(surfaceElements.channelControls[idx].sel_button.mSurfaceValue, selectedTrackChannel.mSends.getByIndex(idx).mOn).setTypeToggle().setSubPage(subPageSendsQC)
-        page.makeValueBinding(surfaceElements.channelControls[idx].mute_button.mSurfaceValue, selectedTrackChannel.mSends.getByIndex(idx).mPrePost).setTypeToggle().setSubPage(subPageSendsQC)
+        page.makeValueBinding(
+            surfaceElements.channelControls[idx].sel_button.mSurfaceValue,
+            selectedTrackChannel.mSends.getByIndex(idx).mOn
+        )
+            .setTypeToggle()
+            .setSubPage(subPageSendsQC)
+        page.makeValueBinding(
+            surfaceElements.channelControls[idx].mute_button.mSurfaceValue,
+            selectedTrackChannel.mSends.getByIndex(idx).mPrePost
+        )
+            .setTypeToggle()
+            .setSubPage(subPageSendsQC)
     }
 
     // Handy controls for easy access
-    page.makeCommandBinding(surfaceElements.channelControls[4].solo_button.mSurfaceValue, 'Automation', 'Show Used Automation (Selected Tracks)').setSubPage(subPageSendsQC)
-    page.makeCommandBinding(surfaceElements.channelControls[5].solo_button.mSurfaceValue, 'Automation', 'Hide Automation').setSubPage(subPageSendsQC)
-    page.makeValueBinding(surfaceElements.channelControls[6].solo_button.mSurfaceValue, selectedTrackChannel.mValue.mEditorOpen).setTypeToggle().setSubPage(subPageSendsQC)
-    page.makeValueBinding(surfaceElements.channelControls[7].solo_button.mSurfaceValue, selectedTrackChannel.mValue.mInstrumentOpen).setTypeToggle().setSubPage(subPageSendsQC)
+    page.makeCommandBinding(
+        surfaceElements.channelControls[4].solo_button.mSurfaceValue,
+        'Automation',
+        'Show Used Automation (Selected Tracks)'
+    ).setSubPage(subPageSendsQC)
+    page.makeCommandBinding(surfaceElements.channelControls[5].solo_button.mSurfaceValue, 'Automation', 'Hide Automation').setSubPage(
+        subPageSendsQC
+    )
+    page.makeValueBinding(surfaceElements.channelControls[6].solo_button.mSurfaceValue, selectedTrackChannel.mValue.mEditorOpen)
+        .setTypeToggle()
+        .setSubPage(subPageSendsQC)
+    page.makeValueBinding(surfaceElements.channelControls[7].solo_button.mSurfaceValue, selectedTrackChannel.mValue.mInstrumentOpen)
+        .setTypeToggle()
+        .setSubPage(subPageSendsQC)
 
-    page.makeValueBinding(surfaceElements.channelControls[4].rec_button.mSurfaceValue, selectedTrackChannel.mValue.mMonitorEnable).setTypeToggle().setSubPage(subPageSendsQC)
-    page.makeValueBinding(surfaceElements.channelControls[5].rec_button.mSurfaceValue, selectedTrackChannel.mValue.mMute).setTypeToggle().setSubPage(subPageSendsQC)
-    page.makeValueBinding(surfaceElements.channelControls[6].rec_button.mSurfaceValue, selectedTrackChannel.mValue.mSolo).setTypeToggle().setSubPage(subPageSendsQC)
-    page.makeValueBinding(surfaceElements.channelControls[7].rec_button.mSurfaceValue, selectedTrackChannel.mValue.mRecordEnable).setTypeToggle().setSubPage(subPageSendsQC)
+    page.makeValueBinding(surfaceElements.channelControls[4].rec_button.mSurfaceValue, selectedTrackChannel.mValue.mMonitorEnable)
+        .setTypeToggle()
+        .setSubPage(subPageSendsQC)
+    page.makeValueBinding(surfaceElements.channelControls[5].rec_button.mSurfaceValue, selectedTrackChannel.mValue.mMute)
+        .setTypeToggle()
+        .setSubPage(subPageSendsQC)
+    page.makeValueBinding(surfaceElements.channelControls[6].rec_button.mSurfaceValue, selectedTrackChannel.mValue.mSolo)
+        .setTypeToggle()
+        .setSubPage(subPageSendsQC)
+    page.makeValueBinding(surfaceElements.channelControls[7].rec_button.mSurfaceValue, selectedTrackChannel.mValue.mRecordEnable)
+        .setTypeToggle()
+        .setSubPage(subPageSendsQC)
 
     // EQ Related but on Sends page so you know EQ activated...not sure the best option but hey, more buttons and lights is cool!
-    page.makeValueBinding(surfaceElements.channelControls[0].solo_button.mSurfaceValue, selectedTrackChannel.mChannelEQ.mBand1.mOn).setTypeToggle().setSubPage(subPageSendsQC)
-    page.makeValueBinding(surfaceElements.channelControls[1].solo_button.mSurfaceValue, selectedTrackChannel.mChannelEQ.mBand2.mOn).setTypeToggle().setSubPage(subPageSendsQC)
-    page.makeValueBinding(surfaceElements.channelControls[2].solo_button.mSurfaceValue, selectedTrackChannel.mChannelEQ.mBand3.mOn).setTypeToggle().setSubPage(subPageSendsQC)
-    page.makeValueBinding(surfaceElements.channelControls[3].solo_button.mSurfaceValue, selectedTrackChannel.mChannelEQ.mBand4.mOn).setTypeToggle().setSubPage(subPageSendsQC)
+    page.makeValueBinding(surfaceElements.channelControls[0].solo_button.mSurfaceValue, selectedTrackChannel.mChannelEQ.mBand1.mOn)
+        .setTypeToggle()
+        .setSubPage(subPageSendsQC)
+    page.makeValueBinding(surfaceElements.channelControls[1].solo_button.mSurfaceValue, selectedTrackChannel.mChannelEQ.mBand2.mOn)
+        .setTypeToggle()
+        .setSubPage(subPageSendsQC)
+    page.makeValueBinding(surfaceElements.channelControls[2].solo_button.mSurfaceValue, selectedTrackChannel.mChannelEQ.mBand3.mOn)
+        .setTypeToggle()
+        .setSubPage(subPageSendsQC)
+    page.makeValueBinding(surfaceElements.channelControls[3].solo_button.mSurfaceValue, selectedTrackChannel.mChannelEQ.mBand4.mOn)
+        .setTypeToggle()
+        .setSubPage(subPageSendsQC)
 
-    page.makeActionBinding(surfaceElements.channelControls[0].rec_button.mSurfaceValue, subPageSendsQC.mAction.mActivate).setSubPage(subPageSendsQC)
-    page.makeActionBinding(surfaceElements.channelControls[1].rec_button.mSurfaceValue, subPageEQ.mAction.mActivate).setSubPage(subPageSendsQC)
-    page.makeActionBinding(surfaceElements.channelControls[2].rec_button.mSurfaceValue, subPagePreFilter.mAction.mActivate).setSubPage(subPageSendsQC)
-    page.makeActionBinding(surfaceElements.channelControls[3].rec_button.mSurfaceValue, subPageCueSends.mAction.mActivate).setSubPage(subPageSendsQC)
+    page.makeActionBinding(surfaceElements.channelControls[0].rec_button.mSurfaceValue, subPageSendsQC.mAction.mActivate).setSubPage(
+        subPageSendsQC
+    )
+    page.makeActionBinding(surfaceElements.channelControls[1].rec_button.mSurfaceValue, subPageEQ.mAction.mActivate).setSubPage(
+        subPageSendsQC
+    )
+    page.makeActionBinding(surfaceElements.channelControls[2].rec_button.mSurfaceValue, subPagePreFilter.mAction.mActivate).setSubPage(
+        subPageSendsQC
+    )
+    page.makeActionBinding(surfaceElements.channelControls[3].rec_button.mSurfaceValue, subPageCueSends.mAction.mActivate).setSubPage(
+        subPageSendsQC
+    )
 
     // EQ Subpage
     const eqBand = []
@@ -361,12 +443,12 @@ function makePageSelectedTrack() {
     eqBand[2] = selectedTrackChannel.mChannelEQ.mBand3
     eqBand[3] = selectedTrackChannel.mChannelEQ.mBand4
     for (var idx = 0; idx < 4; ++idx) {
-        var knobSurfaceValue = surfaceElements.channelControls[idx].pushEncoder.mEncoderValue;
-        var knob2SurfaceValue = surfaceElements.channelControls[idx + 4].pushEncoder.mEncoderValue;
-        var knobPushValue = surfaceElements.channelControls[idx].pushEncoder.mPushValue;
-        var knob2PushValue = surfaceElements.channelControls[idx + 4].pushEncoder.mPushValue;
-        var faderSurfaceValue = surfaceElements.channelControls[idx].fader.mSurfaceValue;
-        var fader2SurfaceValue = surfaceElements.channelControls[idx + 4].fader.mSurfaceValue;
+        var knobSurfaceValue = surfaceElements.channelControls[idx].pushEncoder.mEncoderValue
+        var knob2SurfaceValue = surfaceElements.channelControls[idx + 4].pushEncoder.mEncoderValue
+        var knobPushValue = surfaceElements.channelControls[idx].pushEncoder.mPushValue
+        var knob2PushValue = surfaceElements.channelControls[idx + 4].pushEncoder.mPushValue
+        var faderSurfaceValue = surfaceElements.channelControls[idx].fader.mSurfaceValue
+        var fader2SurfaceValue = surfaceElements.channelControls[idx + 4].fader.mSurfaceValue
 
         page.makeValueBinding(knobSurfaceValue, eqBand[idx].mFilterType).setSubPage(subPageEQ)
         page.makeValueBinding(knob2SurfaceValue, eqBand[idx].mQ).setSubPage(subPageEQ)
@@ -378,38 +460,56 @@ function makePageSelectedTrack() {
 
     /// CueSends subPage
     for (var idx = 0; idx < selectedTrackChannel.mCueSends.getSize(); ++idx) {
-        var knobSurfaceValue = surfaceElements.channelControls[idx].pushEncoder.mEncoderValue;
-        var knobPushValue = surfaceElements.channelControls[idx].pushEncoder.mPushValue;
-        var faderSurfaceValue = surfaceElements.channelControls[idx].fader.mSurfaceValue;
+        var knobSurfaceValue = surfaceElements.channelControls[idx].pushEncoder.mEncoderValue
+        var knobPushValue = surfaceElements.channelControls[idx].pushEncoder.mPushValue
+        var faderSurfaceValue = surfaceElements.channelControls[idx].fader.mSurfaceValue
 
         page.makeValueBinding(knobSurfaceValue, selectedTrackChannel.mCueSends.getByIndex(idx).mPan).setSubPage(subPageCueSends)
         page.makeValueBinding(knobPushValue, selectedTrackChannel.mCueSends.getByIndex(idx).mOn).setTypeToggle().setSubPage(subPageCueSends)
         page.makeValueBinding(faderSurfaceValue, selectedTrackChannel.mCueSends.getByIndex(idx).mLevel).setSubPage(subPageCueSends)
 
-        page.makeValueBinding(surfaceElements.channelControls[idx].sel_button.mSurfaceValue, selectedTrackChannel.mCueSends.getByIndex(idx).mOn).setTypeToggle().setSubPage(subPageCueSends)
-        page.makeValueBinding(surfaceElements.channelControls[idx].mute_button.mSurfaceValue, selectedTrackChannel.mCueSends.getByIndex(idx).mPrePost).setTypeToggle().setSubPage(subPageCueSends)
+        page.makeValueBinding(
+            surfaceElements.channelControls[idx].sel_button.mSurfaceValue,
+            selectedTrackChannel.mCueSends.getByIndex(idx).mOn
+        )
+            .setTypeToggle()
+            .setSubPage(subPageCueSends)
+        page.makeValueBinding(
+            surfaceElements.channelControls[idx].mute_button.mSurfaceValue,
+            selectedTrackChannel.mCueSends.getByIndex(idx).mPrePost
+        )
+            .setTypeToggle()
+            .setSubPage(subPageCueSends)
     }
 
     // PreFilter subPage
-    var knobSurfaceValue = surfaceElements.channelControls[0].pushEncoder.mEncoderValue;
-    var knob2SurfaceValue = surfaceElements.channelControls[1].pushEncoder.mEncoderValue;
-    var knob3SurfaceValue = surfaceElements.channelControls[2].pushEncoder.mEncoderValue;
+    var knobSurfaceValue = surfaceElements.channelControls[0].pushEncoder.mEncoderValue
+    var knob2SurfaceValue = surfaceElements.channelControls[1].pushEncoder.mEncoderValue
+    var knob3SurfaceValue = surfaceElements.channelControls[2].pushEncoder.mEncoderValue
 
-    var knobPushValue = surfaceElements.channelControls[0].pushEncoder.mPushValue;
-    var knob2PushValue = surfaceElements.channelControls[1].pushEncoder.mPushValue;
-    var knob3PushValue = surfaceElements.channelControls[2].pushEncoder.mPushValue;
+    var knobPushValue = surfaceElements.channelControls[0].pushEncoder.mPushValue
+    var knob2PushValue = surfaceElements.channelControls[1].pushEncoder.mPushValue
+    var knob3PushValue = surfaceElements.channelControls[2].pushEncoder.mPushValue
 
-    var faderSurfaceValue = surfaceElements.channelControls[0].fader.mSurfaceValue;
-    var fader2SurfaceValue = surfaceElements.channelControls[1].fader.mSurfaceValue;
-    var fader3SurfaceValue = surfaceElements.channelControls[2].fader.mSurfaceValue;
+    var faderSurfaceValue = surfaceElements.channelControls[0].fader.mSurfaceValue
+    var fader2SurfaceValue = surfaceElements.channelControls[1].fader.mSurfaceValue
+    var fader3SurfaceValue = surfaceElements.channelControls[2].fader.mSurfaceValue
 
     var preFilter = selectedTrackChannel.mPreFilter
 
-    page.makeValueBinding(surfaceElements.channelControls[0].sel_button.mSurfaceValue, preFilter.mBypass).setTypeToggle().setSubPage(subPagePreFilter)
-    page.makeValueBinding(surfaceElements.channelControls[0].mute_button.mSurfaceValue, preFilter.mPhaseSwitch).setTypeToggle().setSubPage(subPagePreFilter)
+    page.makeValueBinding(surfaceElements.channelControls[0].sel_button.mSurfaceValue, preFilter.mBypass)
+        .setTypeToggle()
+        .setSubPage(subPagePreFilter)
+    page.makeValueBinding(surfaceElements.channelControls[0].mute_button.mSurfaceValue, preFilter.mPhaseSwitch)
+        .setTypeToggle()
+        .setSubPage(subPagePreFilter)
 
-    page.makeValueBinding(surfaceElements.channelControls[1].sel_button.mSurfaceValue, preFilter.mHighCutOn).setTypeToggle().setSubPage(subPagePreFilter)
-    page.makeValueBinding(surfaceElements.channelControls[2].sel_button.mSurfaceValue, preFilter.mLowCutOn).setTypeToggle().setSubPage(subPagePreFilter)
+    page.makeValueBinding(surfaceElements.channelControls[1].sel_button.mSurfaceValue, preFilter.mHighCutOn)
+        .setTypeToggle()
+        .setSubPage(subPagePreFilter)
+    page.makeValueBinding(surfaceElements.channelControls[2].sel_button.mSurfaceValue, preFilter.mLowCutOn)
+        .setTypeToggle()
+        .setSubPage(subPagePreFilter)
 
     page.makeValueBinding(knob2SurfaceValue, preFilter.mHighCutSlope).setSubPage(subPagePreFilter)
     page.makeValueBinding(knob3SurfaceValue, preFilter.mLowCutSlope).setSubPage(subPagePreFilter)
@@ -433,15 +533,16 @@ function makePageChannelStrip() {
     var saturatorPage = makeSubPage(strip, 'Saturator')
     var limiterPage = makeSubPage(strip, 'Limiter')
 
-
     var selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
     var stripEffects = selectedTrackChannel.mInsertAndStripEffects.mStripEffects
 
     for (var idx = 0; idx < surfaceElements.numStrips; ++idx) {
-        var faderSurfaceValue = surfaceElements.channelControls[idx].fader.mSurfaceValue;
+        var faderSurfaceValue = surfaceElements.channelControls[idx].fader.mSurfaceValue
 
         page.makeValueBinding(faderSurfaceValue, stripEffects.mGate.mParameterBankZone.makeParameterValue()).setSubPage(gatePage)
-        page.makeValueBinding(faderSurfaceValue, stripEffects.mCompressor.mParameterBankZone.makeParameterValue()).setSubPage(compressorPage)
+        page.makeValueBinding(faderSurfaceValue, stripEffects.mCompressor.mParameterBankZone.makeParameterValue()).setSubPage(
+            compressorPage
+        )
         page.makeValueBinding(faderSurfaceValue, stripEffects.mTools.mParameterBankZone.makeParameterValue()).setSubPage(toolsPage)
         page.makeValueBinding(faderSurfaceValue, stripEffects.mSaturator.mParameterBankZone.makeParameterValue()).setSubPage(saturatorPage)
         page.makeValueBinding(faderSurfaceValue, stripEffects.mLimiter.mParameterBankZone.makeParameterValue()).setSubPage(limiterPage)
@@ -469,25 +570,39 @@ function makePageControlRoom() {
     var controlRoom = page.mHostAccess.mControlRoom
 
     // Main
-    page.makeValueBinding(surfaceElements.channelControls[0].fader.mSurfaceValue, controlRoom.mMainChannel.mLevelValue).setValueTakeOverModeJump()
+    page.makeValueBinding(
+        surfaceElements.channelControls[0].fader.mSurfaceValue,
+        controlRoom.mMainChannel.mLevelValue
+    ).setValueTakeOverModeJump()
     page.makeValueBinding(surfaceElements.channelControls[0].mute_button.mSurfaceValue, controlRoom.mMainChannel.mMuteValue).setTypeToggle()
-    page.makeValueBinding(surfaceElements.channelControls[0].sel_button.mSurfaceValue, controlRoom.mMainChannel.mMetronomeClickActiveValue).setTypeToggle()
+    page.makeValueBinding(
+        surfaceElements.channelControls[0].sel_button.mSurfaceValue,
+        controlRoom.mMainChannel.mMetronomeClickActiveValue
+    ).setTypeToggle()
     // Phones[0]
-    page.makeValueBinding(surfaceElements.channelControls[1].fader.mSurfaceValue, controlRoom.getPhonesChannelByIndex(0).mLevelValue).setValueTakeOverModeJump()
-    page.makeValueBinding(surfaceElements.channelControls[1].mute_button.mSurfaceValue, controlRoom.getPhonesChannelByIndex(0).mMuteValue).setTypeToggle()
-    page.makeValueBinding(surfaceElements.channelControls[1].sel_button.mSurfaceValue, controlRoom.getPhonesChannelByIndex(0).mMetronomeClickActiveValue).setTypeToggle()
+    page.makeValueBinding(
+        surfaceElements.channelControls[1].fader.mSurfaceValue,
+        controlRoom.getPhonesChannelByIndex(0).mLevelValue
+    ).setValueTakeOverModeJump()
+    page.makeValueBinding(
+        surfaceElements.channelControls[1].mute_button.mSurfaceValue,
+        controlRoom.getPhonesChannelByIndex(0).mMuteValue
+    ).setTypeToggle()
+    page.makeValueBinding(
+        surfaceElements.channelControls[1].sel_button.mSurfaceValue,
+        controlRoom.getPhonesChannelByIndex(0).mMetronomeClickActiveValue
+    ).setTypeToggle()
 
     var maxCueSends = controlRoom.getMaxCueChannels() < 8 ? controlRoom.getMaxCueChannels() : 8
 
     for (var i = 0; i < maxCueSends; ++i) {
         var cueSend = controlRoom.getCueChannelByIndex(i)
 
-        var knobSurfaceValue = surfaceElements.channelControls[i].pushEncoder.mEncoderValue;
-        var knobPushValue = surfaceElements.channelControls[i].pushEncoder.mPushValue;
+        var knobSurfaceValue = surfaceElements.channelControls[i].pushEncoder.mEncoderValue
+        var knobPushValue = surfaceElements.channelControls[i].pushEncoder.mPushValue
 
         page.makeValueBinding(knobSurfaceValue, cueSend.mLevelValue)
         page.makeValueBinding(knobPushValue, cueSend.mMuteValue).setTypeToggle()
-
     }
 
     return page
@@ -496,36 +611,52 @@ function makePageControlRoom() {
 function makePageMidi() {
     var page = makePageWithDefaults('Midi')
 
-    function makeMidiCCBinding( /** @type {MR_FactoryMappingPage} */page, /** @type {string} */displayName, /** @type {number} */cc, /** @type {number} */fader) {
+    function makeMidiCCBinding(
+        /** @type {MR_FactoryMappingPage} */ page,
+        /** @type {string} */ displayName,
+        /** @type {number} */ cc,
+        /** @type {number} */ fader
+    ) {
         // ? I have no idea what page.mCustom.makeHostValueVariable actually does- all I know is I can make a value binding this way. I can't seem to be able to look it up
         // ? or access it all once made.
-        page.makeValueBinding(surfaceElements.channelControls[fader].fader.mSurfaceValue, page.mCustom.makeHostValueVariable(displayName)).setValueTakeOverModeJump()
-            .mOnValueChange = function (activeDevice, mapping, value, value2) {
-                // console.log(displayName + ":" + mapping + "::" + value + "::" + value2)
-                var activePage = activeDevice.getState("activePage")
-                var faderValueTitles = activeDevice.getState(activePage + ' - Fader - ValueTitles')
-                var faderValues = activeDevice.getState(activePage + ' - Fader - Values')
+        page
+            .makeValueBinding(surfaceElements.channelControls[fader].fader.mSurfaceValue, page.mCustom.makeHostValueVariable(displayName))
+            .setValueTakeOverModeJump().mOnValueChange = function (activeDevice, mapping, value, value2) {
+            // console.log(displayName + ":" + mapping + "::" + value + "::" + value2)
+            var activePage = activeDevice.getState('activePage')
+            var faderValueTitles = activeDevice.getState(activePage + ' - Fader - ValueTitles')
+            var faderValues = activeDevice.getState(activePage + ' - Fader - Values')
 
-                var ccValue = Math.ceil(value * 127)
-                var pitchBendValue = Math.ceil(value * 16383)
-                var value1 = pitchBendValue % 128
-                var value2 = Math.floor(pitchBendValue / 128)
+            var ccValue = Math.ceil(value * 127)
+            var pitchBendValue = Math.ceil(value * 16383)
+            var value1 = pitchBendValue % 128
+            var value2 = Math.floor(pitchBendValue / 128)
 
-                // this is the value going back to the icon Fader
-                midiOutput.sendMidi(activeDevice, [0xE0 + fader, value1, value2])
-                
-                // this is the value going back to Cubendo
-                midiPageOutput.sendMidi(activeDevice, [0xB0, cc, ccValue])
-                
-                // and this updates the D2 Display
-                activeDevice.setState(activePage + ' - Fader - ValueTitles', setTextOfColumn(fader, makeLabel(displayName, 6), faderValueTitles))
-                activeDevice.setState(activePage + ' - Fader - Values', setTextOfColumn(fader, makeLabel(ccValue.toString(), 6), faderValues))
-                Helper_updateDisplay(activePage + ' - Fader - ValueTitles', activePage + ' - Fader - Values', activePage + ' - Pan - ValueTitles', activePage + ' - Pan - Values', activeDevice, midiOutput)
-            }
+            // this is the value going back to the icon Fader
+            midiOutput.sendMidi(activeDevice, [0xe0 + fader, value1, value2])
+
+            // this is the value going back to Cubendo
+            midiPageOutput.sendMidi(activeDevice, [0xb0, cc, ccValue])
+
+            // and this updates the D2 Display
+            activeDevice.setState(
+                activePage + ' - Fader - ValueTitles',
+                setTextOfColumn(fader, makeLabel(displayName, 6), faderValueTitles)
+            )
+            activeDevice.setState(activePage + ' - Fader - Values', setTextOfColumn(fader, makeLabel(ccValue.toString(), 6), faderValues))
+            Helper_updateDisplay(
+                activePage + ' - Fader - ValueTitles',
+                activePage + ' - Fader - Values',
+                activePage + ' - Pan - ValueTitles',
+                activePage + ' - Pan - Values',
+                activeDevice,
+                midiOutput
+            )
+        }
     }
 
-    makeMidiCCBinding(page, "CC1", 1, 0)
-    makeMidiCCBinding(page, "CC11", 11, 1)
+    makeMidiCCBinding(page, 'CC1', 1, 0)
+    makeMidiCCBinding(page, 'CC11', 11, 1)
 
     // In order to bind a fader so we can get it's value I'm using a dummy function.
     // var dummy = page.makeSubPageArea('Dummy')
@@ -558,10 +689,8 @@ function makePageMidi() {
 
     // This sends CC1 feeding back the values to the Icon, in order for the fader to stay where you release it. Definitely not the best way, but at least one way.
 
-
     return page
 }
-
 
 var mixerPage = makePageMixer()
 var selectedTrackPage = makePageSelectedTrack()
@@ -571,66 +700,66 @@ var midiPage = makePageMidi()
 
 // Function to clear out the Channel State for the display titles/values
 // the OnDisplayChange callback is not called if the Channel doesn't have an updated
-// Title. So swtiching to QC would leave the old Mixer Page "Volume" title kicking around
+// Title. So switching to QC would leave the old Mixer Page "Volume" title kicking around
 // in the state. By clearing state on the page activation it will update all that are changing.
-function clearChannelState(/** @type {MR_ActiveDevice} */activeDevice) {
-    var activePage = activeDevice.getState("activePage")
+function clearChannelState(/** @type {MR_ActiveDevice} */ activeDevice) {
+    var activePage = activeDevice.getState('activePage')
 
-    activeDevice.setState(activePage + ' - Fader - Title', "")
-    activeDevice.setState(activePage + ' - Fader - ValueTitles', "")
-    activeDevice.setState(activePage + ' - Fader - Values', "")
-    activeDevice.setState(activePage + ' - Pan - Title', "")
-    activeDevice.setState(activePage + ' - Pan - ValueTitles', "")
-    activeDevice.setState(activePage + ' - Pan - Values', "")
+    activeDevice.setState(activePage + ' - Fader - Title', '')
+    activeDevice.setState(activePage + ' - Fader - ValueTitles', '')
+    activeDevice.setState(activePage + ' - Fader - Values', '')
+    activeDevice.setState(activePage + ' - Pan - Title', '')
+    activeDevice.setState(activePage + ' - Pan - ValueTitles', '')
+    activeDevice.setState(activePage + ' - Pan - Values', '')
 
-    activeDevice.setState("displayType", "Fader")
+    activeDevice.setState('displayType', 'Fader')
 }
 
-mixerPage.mOnActivate = (function (/** @type {MR_ActiveDevice} */activeDevice) {
-    console.log('from script: Icon QConProG2 page "Mixer" activated')
-    activeDevice.setState("activePage", "Mixer")
+mixerPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+    console.log('from script: Icon Platform M+ page "Mixer" activated')
+    activeDevice.setState('activePage', 'Mixer')
     clearAllLeds(activeDevice, midiOutput)
     clearChannelState(activeDevice)
-}).bind({ midiOutput })
+}.bind({ midiOutput })
 
-selectedTrackPage.mOnActivate = (function (/** @type {MR_ActiveDevice} */activeDevice) {
-    console.log('from script: Icon QConProG2 page "Selected Track" activated')
-    activeDevice.setState("activePage", "SelectedTrack")
+selectedTrackPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+    console.log('from script: Icon Platform M+ page "Selected Track" activated')
+    activeDevice.setState('activePage', 'SelectedTrack')
     clearAllLeds(activeDevice, midiOutput)
     clearChannelState(activeDevice)
-    
+
     // Set the Rec leds which correspond to the different subages to their starting state
-    activeDevice.setState("activeSubPage", "SendsQC")
+    activeDevice.setState('activeSubPage', 'SendsQC')
     midiOutput.sendMidi(activeDevice, [0x90, 0, 127])
     midiOutput.sendMidi(activeDevice, [0x90, 1, 0])
     midiOutput.sendMidi(activeDevice, [0x90, 2, 0])
     midiOutput.sendMidi(activeDevice, [0x90, 3, 0])
-}).bind({ midiOutput })
+}.bind({ midiOutput })
 
-channelStripPage.mOnActivate = (function (/** @type {MR_ActiveDevice} */activeDevice) {
-    console.log('from script: Icon QConProG2 page "Channel Strip" activated')
-    activeDevice.setState("activePage", "ChannelStrip")
+channelStripPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+    console.log('from script: Icon Platform M+ page "Channel Strip" activated')
+    activeDevice.setState('activePage', 'ChannelStrip')
     clearAllLeds(activeDevice, midiOutput)
     clearChannelState(activeDevice)
-    activeDevice.setState("activeSubPage", "Gate")
+    activeDevice.setState('activeSubPage', 'Gate')
     midiOutput.sendMidi(activeDevice, [0x90, 24, 127])
     midiOutput.sendMidi(activeDevice, [0x90, 25, 0])
     midiOutput.sendMidi(activeDevice, [0x90, 26, 0])
     midiOutput.sendMidi(activeDevice, [0x90, 27, 0])
     midiOutput.sendMidi(activeDevice, [0x90, 28, 0])
-}).bind({ midiOutput })
+}.bind({ midiOutput })
 
-controlRoomPage.mOnActivate = (function (/** @type {MR_ActiveDevice} */activeDevice) {
-    console.log('from script: Icon QConProG2 page "ControlRoom" activated')
-    activeDevice.setState("activePage", "ControlRoom")
+controlRoomPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+    console.log('from script: Icon Platform M+ page "ControlRoom" activated')
+    activeDevice.setState('activePage', 'ControlRoom')
     clearAllLeds(activeDevice, midiOutput)
     clearChannelState(activeDevice)
-}).bind({ midiOutput })
+}.bind({ midiOutput })
 
-midiPage.mOnActivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
-    console.log('from script: Icon QConProG2 page "Midi" activated')
-    var activePage = "Midi"
-    activeDevice.setState("activePage", activePage)
+midiPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+    console.log('from script: Icon Platform M+ page "Midi" activated')
+    var activePage = 'Midi'
+    activeDevice.setState('activePage', activePage)
     clearAllLeds(activeDevice, midiOutput)
     // clearChannelState(activeDevice)
     // On load I'm setting the pitchbend fader to the center position. Whenever you release it it will jump back to this point
@@ -638,8 +767,15 @@ midiPage.mOnActivate = function (/** @type {MR_ActiveDevice} */activeDevice) {
     // ! This init must match the CC bindings create in the makeMidiPage function - it's annoying and needs a refactor
     // WIP Refactor me
     var faderValueTitles = activeDevice.getState(activePage + ' - Fader - ValueTitles')
-    faderValueTitles = setTextOfColumn(0, makeLabel("CC1", 6), faderValueTitles)
-    faderValueTitles = setTextOfColumn(1, makeLabel("CC11", 6), faderValueTitles)
+    faderValueTitles = setTextOfColumn(0, makeLabel('CC1', 6), faderValueTitles)
+    faderValueTitles = setTextOfColumn(1, makeLabel('CC11', 6), faderValueTitles)
     activeDevice.setState(activePage + ' - Fader - ValueTitles', setTextOfLine(faderValueTitles))
-    Helper_updateDisplay(activePage + ' - Fader - ValueTitles', activePage + ' - Fader - Values', activePage + ' - Pan - ValueTitles', activePage + ' - Pan - Values', activeDevice, midiOutput)
+    Helper_updateDisplay(
+        activePage + ' - Fader - ValueTitles',
+        activePage + ' - Fader - Values',
+        activePage + ' - Pan - ValueTitles',
+        activePage + ' - Pan - Values',
+        activeDevice,
+        midiOutput
+    )
 }

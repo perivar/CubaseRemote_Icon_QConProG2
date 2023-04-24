@@ -1,0 +1,35 @@
+{
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": "active",
+    "workbench.colorCustomizations": {
+        "editorBracketHighlight.foreground1": "#5caeef",
+        "editorBracketHighlight.foreground2": "#dfb976",
+        "editorBracketHighlight.foreground3": "#c172d9",
+        "editorBracketHighlight.foreground4": "#4fb1bc",
+        "editorBracketHighlight.foreground5": "#97c26c",
+        "editorBracketHighlight.foreground6": "#abb2c0",
+        "editorBracketHighlight.unexpectedBracket.foreground": "#db6165",
+
+        // will change the color of three dots to red
+        "editorHint.foreground": "#db6165"
+    },
+
+    "editor.formatOnSave": true,
+
+    "cSpell.diagnosticLevel": "Hint",
+
+    "prettier.arrowParens": "always",
+    "prettier.bracketSpacing": true,
+    "prettier.bracketSameLine": true,
+    "prettier.singleQuote": true,
+    "prettier.trailingComma": "es5",
+    "prettier.tabWidth": 4,
+    "prettier.endOfLine": "auto",
+    "prettier.semi": false,
+    "prettier.printWidth": 140,
+
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
+}
