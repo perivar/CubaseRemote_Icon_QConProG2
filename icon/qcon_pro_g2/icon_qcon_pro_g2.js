@@ -106,10 +106,10 @@ var surfaceElements = makeSurfaceElements()
  */
 function makeSubPage(subPageArea, name) {
     var subPage = subPageArea.makeSubPage(name)
-    var msgText = 'sub page ' + name + ' activated'
 
     subPage.mOnActivate = function (/** @type {MR_ActiveDevice} **/ activeDevice) {
-        console.log(msgText)
+        console.log('sub page ' + this.name + ' activated')
+
         activeDevice.setState('activeSubPage', name)
 
         switch (name) {

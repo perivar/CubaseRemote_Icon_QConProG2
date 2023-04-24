@@ -139,14 +139,26 @@ function makeLedButton(surface, midiInput, midiOutput, note, x, y, w, h, circle)
         button.setShapeCircle()
     }
 
-    button.mSurfaceValue.mOnProcessValueChange = function (/** @type {MR_ActiveDevice} */ activeDevice) {
-        // console.log("LedButton ProcessValue Change:"+button.mSurfaceValue.getProcessValue(activeDevice))
-        if (button.mSurfaceValue.getProcessValue(activeDevice) > 0) {
-            this.midiOutput.sendMidi(activeDevice, [0x90, note, 127])
+    // button.mSurfaceValue.mOnProcessValueChange = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+    //     // console.log("LedButton ProcessValue Change:"+button.mSurfaceValue.getProcessValue(activeDevice))
+    //     if (button.mSurfaceValue.getProcessValue(activeDevice) > 0) {
+    //         this.midiOutput.sendMidi(activeDevice, [0x90, note, 127])
+    //     } else {
+    //         this.midiOutput.sendMidi(activeDevice, [0x90, note, 0])
+    //     }
+    // }.bind({ midiOutput })
+
+    // when registering a callback function, best thing is to use the “bind”-method to bind members to the “this” object within the callback function.
+    // If you get used to it, you’ll see you don’t even need the activeDevice.getState/setState any more.
+    button.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value) {
+        if (value) {
+            this.midiOutput.sendMidi(activeDevice, [0x90, this.note, 127])
+            console.log('NOTE_ON =>' + this.note)
         } else {
-            this.midiOutput.sendMidi(activeDevice, [0x90, note, 0])
+            this.midiOutput.sendMidi(activeDevice, [0x90, this.note, 0])
+            console.log('NOTE_OFF =>' + this.note)
         }
-    }.bind({ midiOutput })
+    }.bind({ midiOutput, note })
 
     return button
 }
@@ -227,8 +239,9 @@ function repeatCommand(activeDevice, command, repeats) {
  */
 function bindCommandKnob(pushEncoder, commandIncrease, commandDecrease) {
     // console.log('from script: createCommandKnob')
+
     pushEncoder.mOnProcessValueChange = function (activeDevice, value) {
-        console.log('value changed: ' + value)
+        console.log('pushEncoder value changed: ' + value)
         if (value < 0.5) {
             var jump_rate = Math.floor(value * 127)
             repeatCommand(activeDevice, commandIncrease, jump_rate)
@@ -523,7 +536,9 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, instance, surfa
 
     masterControl.fader.mSurfaceValue.mOnDisplayValueChange = function (activeDevice, value, units) {
         activeDevice.setState('MasterFader - Values', value + units)
+
         // console.log("MasterFader Display Value Change: " + value + ":" + units)
+
         // Check to see if we are in the correct display mode - otherwise don't display
         // ! This isn't done via the touch value as the touch onProcessValueChange may be processed after the mOnDisplayValueChange
         if (activeDevice.getState('Display - idRow1') === 'MasterFader - Title') {
@@ -533,13 +548,14 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, instance, surfa
                 'MasterFader - Title',
                 'MasterFader - Values',
                 activeDevice,
-                midiOutput
+                this.midiOutput
             )
         }
     }.bind({ midiOutput })
 
     masterControl.fader_touch.mSurfaceValue.mOnProcessValueChange = function (activeDevice, touched, value2) {
         // console.log("masterFader Touch Change: " + touched + ":" + value2)
+
         // value===-1 means touch released
         if (value2 == -1) {
             // Reset the display to previous values
@@ -549,7 +565,7 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, instance, surfa
                 activeDevice.getState('MasterFader - stashAltRow1'),
                 activeDevice.getState('MasterFader - stashAltRow2'),
                 activeDevice,
-                midiOutput
+                this.midiOutput
             )
         } else {
             // Stash previous display state
@@ -564,7 +580,7 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, instance, surfa
                 'MasterFader - Title',
                 'MasterFader - Values',
                 activeDevice,
-                midiOutput
+                this.midiOutput
             )
         }
     }.bind({ midiOutput })
@@ -576,6 +592,7 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, instance, surfa
 
     masterControl.mixer_button.mSurfaceValue.mOnProcessValueChange = function (activeDevice) {
         var value = masterControl.mixer_button.mSurfaceValue.getProcessValue(activeDevice)
+
         if (value == 1) {
             var displayType = activeDevice.getState('displayType')
             if (displayType === 'Fader') {
@@ -680,7 +697,7 @@ function makeTransport(surface, midiInput, midiOutput, x, y, surfaceElements) {
     // or large nudges if turned quickly.
     // ? One weird side effect of this is the Knob displayed in Cubase will show its "value" in a weird way.
     // TODO: I wonder if there is a way to change that behavior?
-    transport.jog_wheel = surface.makePushEncoder(x, y + 17, 6, 6)
+    transport.jog_wheel = surface.makePushEncoder(x, y + 20, 8, 8)
     transport.jog_wheel.mEncoderValue.mMidiBinding.setInputPort(midiInput).setIsConsuming(true).bindToControlChange(0, 60).setTypeAbsolute()
     transport.jog_wheel.mPushValue.mMidiBinding.setInputPort(midiInput).bindToNote(0, 101)
 

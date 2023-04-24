@@ -291,6 +291,7 @@ function makePageWithDefaults(name) {
         surfaceElements.faderMaster.read_button.mSurfaceValue,
         selectedTrackChannel.mValue.mAutomationRead
     ).setTypeToggle()
+
     page.makeValueBinding(
         surfaceElements.faderMaster.write_button.mSurfaceValue,
         selectedTrackChannel.mValue.mAutomationWrite
