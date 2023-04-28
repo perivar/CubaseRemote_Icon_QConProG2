@@ -249,29 +249,27 @@ const lookupBinding = (objects: any, id: number) => {
 };
 
 const addBindingToOutput = (outputArray: any[], name: string, id: string, field: string, binding: any) => {
-  switch (binding.type) {
+  switch (binding?.type) {
     case 'MidiBindingToNote':
-      // outputArray.push(`\t// ${binding?.type} ch: ${binding?.members?.ChannelNumber} pitch: ${binding?.members?.Pitch}`);
       outputArray.push(
         `\tsurfaceElements.${name}${id}.${field}.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(${binding?.members?.ChannelNumber}, ${binding?.members?.Pitch})`
       );
       break;
 
     case 'MidiBindingToControlChange':
-      // outputArray.push(`\t// ${binding?.type} ch: ${binding?.members?.ChannelNumber} cc: ${binding?.members?.ControlChangeNumber}`);
       outputArray.push(
         `\tsurfaceElements.${name}${id}.${field}.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToControlChange(${binding?.members?.ChannelNumber}, ${binding?.members?.ControlChangeNumber})`
       );
       break;
 
     case 'MidiBindingToPitchBend':
-      // outputArray.push(`\t// ${binding?.type} ch: ${binding?.members?.ChannelNumber}`);
       outputArray.push(
         `\tsurfaceElements.${name}${id}.${field}.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(${binding?.members?.ChannelNumber})`
       );
       break;
 
     default:
+      outputArray.push(`\t// unknown type: ${binding?.type}`);
       break;
   }
 };
