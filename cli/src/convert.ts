@@ -207,10 +207,12 @@ export const handler = async (argv: Arguments<Args>): Promise<void> => {
                 );
                 break;
             }
+
+            // add spacer
+            outputArray.push(``);
           });
 
           // write footer
-          outputArray.push(``);
           outputArray.push(`\treturn surfaceElements`);
           outputArray.push(`}`);
           outputArray.push(``);
@@ -258,7 +260,9 @@ const addBindingToOutput = (outputArray: any[], name: string, id: string, field:
 
     case 'MidiBindingToControlChange':
       outputArray.push(
-        `\tsurfaceElements.${name}${id}.${field}.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToControlChange(${binding?.members?.ChannelNumber}, ${binding?.members?.ControlChangeNumber})`
+        `\tsurfaceElements.${name}${id}.${field}.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToControlChange(${
+          binding?.members?.ChannelNumber
+        }, ${binding?.members?.ControlChangeNumber})${binding?.members?.Type ? '.setType' + binding.members.Type + '()' : ''}`
       );
       break;
 
