@@ -145,6 +145,13 @@ export const handler = async (argv: Arguments<Args>): Promise<void> => {
                 outputArray.push(
                   `\tsurfaceElements.pushEncoder${id} = surface.makePushEncoder(${memberPos.X}, ${memberPos.Y}, ${memberPos.W}, ${memberPos.H})`
                 );
+
+                // lookup bindings
+                const encoderBinding = lookupBinding(objects, memberEncoderValue);
+                addBindingToOutput(outputArray, 'pushEncoder', id, 'mEncoderValue', encoderBinding);
+
+                const pushBinding = lookupBinding(objects, memberPushValue);
+                addBindingToOutput(outputArray, 'pushEncoder', id, 'mPushValue', pushBinding);
                 break;
 
               case 'Button':
@@ -156,6 +163,10 @@ export const handler = async (argv: Arguments<Args>): Promise<void> => {
                     memberShape === 'Circle' ? '.setShapeCircle()' : ''
                   }`
                 );
+
+                // lookup binding
+                const buttonBinding = lookupBinding(objects, memberSurfaceValue);
+                addBindingToOutput(outputArray, 'button', id, 'mSurfaceValue', buttonBinding);
                 break;
 
               case 'Fader':
@@ -165,6 +176,10 @@ export const handler = async (argv: Arguments<Args>): Promise<void> => {
                     memberType === 'Vertical' ? '.setTypeVertical()' : ''
                   }`
                 );
+
+                // lookup binding
+                const faderBinding = lookupBinding(objects, memberSurfaceValue);
+                addBindingToOutput(outputArray, 'fader', id, 'mSurfaceValue', faderBinding);
                 break;
 
               case 'BlindPanel':
@@ -179,6 +194,10 @@ export const handler = async (argv: Arguments<Args>): Promise<void> => {
                 outputArray.push(
                   `\tsurfaceElements.knob${id} = surface.makeKnob(${memberPos.X}, ${memberPos.Y}, ${memberPos.W}, ${memberPos.H})`
                 );
+
+                // lookup binding
+                const knobBinding = lookupBinding(objects, memberSurfaceValue);
+                addBindingToOutput(outputArray, 'knob', id, 'mSurfaceValue', knobBinding);
                 break;
 
               default:
@@ -218,4 +237,41 @@ const writeToFile = (data: any[], fileName: string) => {
   fs.writeFile(fileName, data.join('\n'), err => {
     console.log(err ? 'Error :' + err : 'ok');
   });
+};
+
+const lookupBinding = (objects: any, id: number) => {
+  const surfaceElement = objects.find((a: any) => a.type === 'SurfaceElementValue' && a.id === id);
+  const memberMidiBinding = surfaceElement.members?.MidiBinding;
+  const surfaceValueMidiBinding = objects.find((a: any) => a.type === 'SurfaceValueMidiBinding' && a.id === memberMidiBinding);
+  const midiChannelBinding = surfaceValueMidiBinding.members?.MidiChannelBinding;
+  const midiBinding = objects.find((a: any) => a.id === midiChannelBinding);
+  return midiBinding;
+};
+
+const addBindingToOutput = (outputArray: any[], name: string, id: string, field: string, binding: any) => {
+  switch (binding.type) {
+    case 'MidiBindingToNote':
+      // outputArray.push(`\t// ${binding?.type} ch: ${binding?.members?.ChannelNumber} pitch: ${binding?.members?.Pitch}`);
+      outputArray.push(
+        `\tsurfaceElements.${name}${id}.${field}.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(${binding?.members?.ChannelNumber}, ${binding?.members?.Pitch})`
+      );
+      break;
+
+    case 'MidiBindingToControlChange':
+      // outputArray.push(`\t// ${binding?.type} ch: ${binding?.members?.ChannelNumber} cc: ${binding?.members?.ControlChangeNumber}`);
+      outputArray.push(
+        `\tsurfaceElements.${name}${id}.${field}.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToControlChange(${binding?.members?.ChannelNumber}, ${binding?.members?.ControlChangeNumber})`
+      );
+      break;
+
+    case 'MidiBindingToPitchBend':
+      // outputArray.push(`\t// ${binding?.type} ch: ${binding?.members?.ChannelNumber}`);
+      outputArray.push(
+        `\tsurfaceElements.${name}${id}.${field}.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(${binding?.members?.ChannelNumber})`
+      );
+      break;
+
+    default:
+      break;
+  }
 };
