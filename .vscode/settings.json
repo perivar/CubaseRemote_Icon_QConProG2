@@ -14,18 +14,28 @@
         "editorHint.foreground": "#db6165"
     },
 
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+
     "editor.formatOnSave": true,
 
     "cSpell.diagnosticLevel": "Hint",
 
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "[javascript]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
     "files.associations": {
         "**/.api/**/*.*": "plaintext"
     },
     "[plaintext]": {
         "editor.formatOnSave": false
-    }
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": false
+    },
+    "files.autoSave": "onFocusChange",
+    "jest.autoRun": {}
 }
