@@ -340,6 +340,9 @@ function makePageMixer() {
         page.makeValueBinding(rec_buttonSurfaceValue, hostMixerBankChannel.mValue.mRecordEnable)
             .setTypeToggle()
             .setSubPage(subPageButtonDefaultSet)
+
+        // VU Meter
+        page.makeValueBinding(surfaceElements.channelControls[channelIndex].vuMeter, hostMixerBankChannel.mValue.mVUMeter)
     }
 
     return page
@@ -361,7 +364,7 @@ function clearChannelState(/** @type {MR_ActiveDevice} */ activeDevice) {
     activeDevice.setState(activePage + ' - Pan - ValueTitles', '')
     activeDevice.setState(activePage + ' - Pan - Values', '')
 
-    activeDevice.setState('displayType', 'Fader')
+    activeDevice.setState('displayType', 'Fader') // Pan or Fader
 }
 
 mixerPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
