@@ -2,7 +2,7 @@
 var midiremote_api = require('midiremote_api_v1')
 
 // 2. create the device driver main object
-var deviceDriver = midiremote_api.makeDeviceDriver('Icon', 'QCon Pro G2 Test', 'Nerseth')
+var deviceDriver = midiremote_api.makeDeviceDriver('Icon', 'QCon Pro G2 Json', 'Nerseth')
 
 // 3. create objects representing the hardware's MIDI ports
 var midiInput = deviceDriver.mPorts.makeMidiInput()
@@ -12,8 +12,8 @@ var midiOutput = deviceDriver.mPorts.makeMidiOutput()
 deviceDriver
     .makeDetectionUnit()
     .detectPortPair(midiInput, midiOutput)
-    .expectInputNameContains('iCON QCON Pro G2')
-    .expectOutputNameContains('iCON QCON Pro G2')
+    .expectInputNameContains('iCON QCON Pro G2 V1.13')
+    .expectOutputNameContains('iCON QCON Pro G2 V1.13')
 
 var surface = deviceDriver.mSurface
 

@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
 // To run
-// yarn build && node ./bin/index.js convert --all
+// yarn build && node ./bin/index.js convert -i '../icon/QCon Pro G2 Json/Icon_QCon Pro G2 Json.json' -o '../icon/qcon_pro_g2/converted.js'
+// or
+// yarn build && node ./bin/index.js convert -i './test/Akai_LPD8.json' -o '../icon/qcon_pro_g2/converted.js'
 
 import yargs from 'yargs';
 
