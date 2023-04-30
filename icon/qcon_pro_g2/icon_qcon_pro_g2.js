@@ -107,8 +107,8 @@ var surfaceElements = makeSurfaceElements()
 function makeSubPage(subPageArea, name) {
     var subPage = subPageArea.makeSubPage(name)
 
-    subPage.mOnActivate = function (/** @type {MR_ActiveDevice} **/ activeDevice) {
-        console.log('sub page ' + this.name + ' activated')
+    subPage.mOnActivate = function (activeDevice) {
+        console.log('sub page ' + name + ' activated')
 
         activeDevice.setState('activeSubPage', name)
 
@@ -205,7 +205,7 @@ function makeSubPage(subPageArea, name) {
         }
 
         Helper_updateDisplay('Row1', 'Row2', 'AltRow1', 'AltRow2', activeDevice, midiOutput)
-    }.bind({ subPage, name })
+    }
 
     return subPage
 }
@@ -354,7 +354,7 @@ var mixerPage = makePageMixer()
 // the OnDisplayChange callback is not called if the Channel doesn't have an updated
 // Title. So switching to QC would leave the old Mixer Page "Volume" title kicking around
 // in the state. By clearing state on the page activation it will update all that are changing.
-function clearChannelState(/** @type {MR_ActiveDevice} */ activeDevice) {
+function clearChannelState(activeDevice) {
     var activePage = activeDevice.getState('activePage')
 
     activeDevice.setState(activePage + ' - Fader - Title', '')
@@ -367,9 +367,9 @@ function clearChannelState(/** @type {MR_ActiveDevice} */ activeDevice) {
     activeDevice.setState('displayType', 'Fader') // Pan or Fader
 }
 
-mixerPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+mixerPage.mOnActivate = function (activeDevice) {
     console.log('from script: Icon QCon Pro G2 page "Mixer" activated')
     activeDevice.setState('activePage', 'Mixer')
     clearAllLeds(activeDevice, midiOutput)
     clearChannelState(activeDevice)
-}.bind({ midiOutput })
+}

@@ -115,6 +115,7 @@ function makeSubPage(subPageArea, name) {
 
     subPage.mOnActivate = function (/** @type {MR_ActiveDevice} **/ activeDevice) {
         console.log(msgText)
+
         activeDevice.setState('activeSubPage', name)
 
         switch (name) {
@@ -210,7 +211,7 @@ function makeSubPage(subPageArea, name) {
         }
 
         Helper_updateDisplay('Row1', 'Row2', 'AltRow1', 'AltRow2', activeDevice, midiOutput)
-    }.bind({ subPage, name })
+    }
 
     return subPage
 }
@@ -624,12 +625,14 @@ function makePageControlRoom() {
 function makePageMidi() {
     var page = makePageWithDefaults('Midi')
 
-    function makeMidiCCBinding(
-        /** @type {MR_FactoryMappingPage} */ page,
-        /** @type {string} */ displayName,
-        /** @type {number} */ cc,
-        /** @type {number} */ fader
-    ) {
+    /**
+     *
+     * @param {MR_FactoryMappingPage} page
+     * @param {string} displayName
+     * @param {number} cc
+     * @param {number} fader
+     */
+    function makeMidiCCBinding(page, displayName, cc, fader) {
         // ? I have no idea what page.mCustom.makeHostValueVariable actually does- all I know is I can make a value binding this way. I can't seem to be able to look it up
         // ? or access it all once made.
         page
@@ -715,7 +718,7 @@ var midiPage = makePageMidi()
 // the OnDisplayChange callback is not called if the Channel doesn't have an updated
 // Title. So switching to QC would leave the old Mixer Page "Volume" title kicking around
 // in the state. By clearing state on the page activation it will update all that are changing.
-function clearChannelState(/** @type {MR_ActiveDevice} */ activeDevice) {
+function clearChannelState(activeDevice) {
     var activePage = activeDevice.getState('activePage')
 
     activeDevice.setState(activePage + ' - Fader - Title', '')
@@ -728,14 +731,14 @@ function clearChannelState(/** @type {MR_ActiveDevice} */ activeDevice) {
     activeDevice.setState('displayType', 'Fader')
 }
 
-mixerPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+mixerPage.mOnActivate = function (activeDevice) {
     console.log('from script: Icon Platform M+ page "Mixer" activated')
     activeDevice.setState('activePage', 'Mixer')
     clearAllLeds(activeDevice, midiOutput)
     clearChannelState(activeDevice)
-}.bind({ midiOutput })
+}
 
-selectedTrackPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+selectedTrackPage.mOnActivate = function (activeDevice) {
     console.log('from script: Icon Platform M+ page "Selected Track" activated')
     activeDevice.setState('activePage', 'SelectedTrack')
     clearAllLeds(activeDevice, midiOutput)
@@ -747,9 +750,9 @@ selectedTrackPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeD
     midiOutput.sendMidi(activeDevice, [0x90, 1, 0])
     midiOutput.sendMidi(activeDevice, [0x90, 2, 0])
     midiOutput.sendMidi(activeDevice, [0x90, 3, 0])
-}.bind({ midiOutput })
+}
 
-channelStripPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+channelStripPage.mOnActivate = function (activeDevice) {
     console.log('from script: Icon Platform M+ page "Channel Strip" activated')
     activeDevice.setState('activePage', 'ChannelStrip')
     clearAllLeds(activeDevice, midiOutput)
@@ -760,16 +763,16 @@ channelStripPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDe
     midiOutput.sendMidi(activeDevice, [0x90, 26, 0])
     midiOutput.sendMidi(activeDevice, [0x90, 27, 0])
     midiOutput.sendMidi(activeDevice, [0x90, 28, 0])
-}.bind({ midiOutput })
+}
 
-controlRoomPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+controlRoomPage.mOnActivate = function (activeDevice) {
     console.log('from script: Icon Platform M+ page "ControlRoom" activated')
     activeDevice.setState('activePage', 'ControlRoom')
     clearAllLeds(activeDevice, midiOutput)
     clearChannelState(activeDevice)
-}.bind({ midiOutput })
+}
 
-midiPage.mOnActivate = function (/** @type {MR_ActiveDevice} */ activeDevice) {
+midiPage.mOnActivate = function (activeDevice) {
     console.log('from script: Icon Platform M+ page "Midi" activated')
     var activePage = 'Midi'
     activeDevice.setState('activePage', activePage)

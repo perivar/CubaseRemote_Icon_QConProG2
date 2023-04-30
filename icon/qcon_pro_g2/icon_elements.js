@@ -136,31 +136,33 @@ function Helper_updateDisplay(idRow1, idRow2, idAltRow1, idAltRow2, activeDevice
  */
 function makeLedButton(surface, midiInput, midiOutput, note, x, y, w, h, circle) {
     var button = surface.makeButton(x, y, w, h)
+
     button.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToNote(0, note)
+
     if (circle) {
         button.setShapeCircle()
     }
 
-    // button.mSurfaceValue.mOnProcessValueChange = function (/** @type {MR_ActiveDevice} */ activeDevice) {
-    //     // console.log("LedButton ProcessValue Change:"+button.mSurfaceValue.getProcessValue(activeDevice))
+    // button.mSurfaceValue.mOnProcessValueChange = function (activeDevice) {
+    //     // console.log("LedButton ProcessValue Change:" + button.mSurfaceValue.getProcessValue(activeDevice))
     //     if (button.mSurfaceValue.getProcessValue(activeDevice) > 0) {
-    //         this.midiOutput.sendMidi(activeDevice, [0x90, note, 127])
+    //         midiOutput.sendMidi(activeDevice, [0x90, note, 127])
     //     } else {
-    //         this.midiOutput.sendMidi(activeDevice, [0x90, note, 0])
+    //         midiOutput.sendMidi(activeDevice, [0x90, note, 0])
     //     }
-    // }.bind({ midiOutput })
+    // }
 
     // when registering a callback function, best thing is to use the “bind”-method to bind members to the “this” object within the callback function.
     // If you get used to it, you’ll see you don’t even need the activeDevice.getState/setState any more.
     button.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value) {
         if (value) {
-            this.midiOutput.sendMidi(activeDevice, [0x90, this.note, 127])
+            midiOutput.sendMidi(activeDevice, [0x90, this.note, 127])
             console.log('NOTE_ON =>' + this.note)
         } else {
-            this.midiOutput.sendMidi(activeDevice, [0x90, this.note, 0])
+            midiOutput.sendMidi(activeDevice, [0x90, this.note, 0])
             console.log('NOTE_OFF =>' + this.note)
         }
-    }.bind({ midiOutput, note })
+    }.bind({ note })
 
     return button
 }
@@ -371,7 +373,7 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, instance, surf
                     activePage + ' - Pan - ValueTitles',
                     activePage + ' - Pan - Values',
                     activeDevice,
-                    this.midiOutput
+                    midiOutput
                 )
                 break
             case 'ChannelStrip':
@@ -386,7 +388,7 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, instance, surf
                     activePage + ' - Pan - ValueTitles',
                     activePage + ' - Pan - Values',
                     activeDevice,
-                    this.midiOutput
+                    midiOutput
                 )
                 break
             default:
@@ -404,11 +406,11 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, instance, surf
                     activePage + ' - Pan - Title',
                     activePage + ' - Pan - Values',
                     activeDevice,
-                    this.midiOutput
+                    midiOutput
                 )
                 break
         }
-    }.bind({ midiOutput })
+    }
 
     channelControl.fader.mSurfaceValue.mOnDisplayValueChange = function (activeDevice, value, units) {
         var activePage = activeDevice.getState('activePage')
@@ -424,22 +426,19 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, instance, surf
                 case 'Midi':
                     break
                 default:
-                    activeDevice.setState(
-                        activePage + ' - Fader - Values',
-                        setTextOfColumn(this.channelIndex, makeLabel(value, 6), faderValues)
-                    )
+                    activeDevice.setState(activePage + ' - Fader - Values', setTextOfColumn(channelIndex, makeLabel(value, 6), faderValues))
                     Helper_updateDisplay(
                         activeDevice.getState('Display - idRow1'),
                         activePage + ' - Fader - Values',
                         activeDevice.getState('Display - idAltRow1'),
                         activeDevice.getState('Display - idAltRow2'),
                         activeDevice,
-                        this.midiOutput
+                        midiOutput
                     )
                     break
             }
         }
-    }.bind({ midiOutput, channelIndex })
+    }
 
     channelControl.pushEncoder.mEncoderValue.mOnTitleChange = function (activeDevice, objectTitle, valueTitle) {
         // console.log("Pan Title Changed:" + objectTitle + ":" + valueTitle)
@@ -459,7 +458,7 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, instance, surf
                     activePage + ' - Pan - ValueTitles',
                     activePage + ' - Pan - Values',
                     activeDevice,
-                    this.midiOutput
+                    midiOutput
                 )
                 break
             case 'SelectedTrack':
@@ -471,7 +470,7 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, instance, surf
                         }
                         activeDevice.setState(
                             activePage + ' - Pan - ValueTitles',
-                            setTextOfColumn(this.channelIndex, makeLabel(title, 6), panValueTitles)
+                            setTextOfColumn(channelIndex, makeLabel(title, 6), panValueTitles)
                         )
                         Helper_updateDisplay(
                             activePage + ' - Fader - ValueTitles',
@@ -479,7 +478,7 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, instance, surf
                             activePage + ' - Pan - ValueTitles',
                             activePage + ' - Pan - Values',
                             activeDevice,
-                            this.midiOutput
+                            midiOutput
                         )
                         break
                     default:
@@ -489,7 +488,7 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, instance, surf
                         }
                         activeDevice.setState(
                             activePage + ' - Pan - ValueTitles',
-                            setTextOfColumn(this.channelIndex, makeLabel(title, 6), panValueTitles)
+                            setTextOfColumn(channelIndex, makeLabel(title, 6), panValueTitles)
                         )
                         Helper_updateDisplay(
                             activePage + ' - Fader - ValueTitles',
@@ -497,7 +496,7 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, instance, surf
                             activePage + ' - Pan - ValueTitles',
                             activePage + ' - Pan - Values',
                             activeDevice,
-                            this.midiOutput
+                            midiOutput
                         )
                         break
                 }
@@ -506,7 +505,7 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, instance, surf
                 activeDevice.setState(activePage + ' - Pan - Title', setTextOfColumn(channelIndex, makeLabel(objectTitle, 6), panTitles))
                 activeDevice.setState(
                     activePage + ' - Pan - ValueTitles',
-                    setTextOfColumn(this.channelIndex, makeLabel(valueTitle, 6), panValueTitles)
+                    setTextOfColumn(channelIndex, makeLabel(valueTitle, 6), panValueTitles)
                 )
                 Helper_updateDisplay(
                     activePage + ' - Fader - Title',
@@ -514,27 +513,27 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, instance, surf
                     activePage + ' - Pan - Title',
                     activePage + ' - Pan - Values',
                     activeDevice,
-                    this.midiOutput
+                    midiOutput
                 )
                 break
         }
-    }.bind({ midiOutput, channelIndex })
+    }
 
     channelControl.pushEncoder.mEncoderValue.mOnDisplayValueChange = function (activeDevice, value, units) {
         // console.log("Pan Value Change: " + value + ":" + units)
         var activePage = activeDevice.getState('activePage')
         var panValues = activeDevice.getState(activePage + ' - Pan - Values')
 
-        activeDevice.setState(activePage + ' - Pan - Values', setTextOfColumn(this.channelIndex, makeLabel(value, 6), panValues))
+        activeDevice.setState(activePage + ' - Pan - Values', setTextOfColumn(channelIndex, makeLabel(value, 6), panValues))
         Helper_updateDisplay(
             activeDevice.getState('Display - idRow1'),
             activeDevice.getState('Display - idRow2'),
             activeDevice.getState('Display - idAltRow1'),
             activePage + ' - Pan - Values',
             activeDevice,
-            this.midiOutput
+            midiOutput
         )
-    }.bind({ midiOutput, channelIndex })
+    }
 
     return channelControl
 }
@@ -589,10 +588,10 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, instance, surfa
                 'MasterFader - Title',
                 'MasterFader - Values',
                 activeDevice,
-                this.midiOutput
+                midiOutput
             )
         }
-    }.bind({ midiOutput })
+    }
 
     masterControl.fader_touch.mSurfaceValue.mOnProcessValueChange = function (activeDevice, touched, value2) {
         // console.log("masterFader Touch Change: " + touched + ":" + value2)
@@ -606,7 +605,7 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, instance, surfa
                 activeDevice.getState('MasterFader - stashAltRow1'),
                 activeDevice.getState('MasterFader - stashAltRow2'),
                 activeDevice,
-                this.midiOutput
+                midiOutput
             )
         } else {
             // Stash previous display state
@@ -621,10 +620,10 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, instance, surfa
                 'MasterFader - Title',
                 'MasterFader - Values',
                 activeDevice,
-                this.midiOutput
+                midiOutput
             )
         }
-    }.bind({ midiOutput })
+    }
 
     // Channel Buttons
     masterControl.mixer_button = makeLedButton(surface, midiInput, midiOutput, 84, fader_x + 3, fader_y + 6, 3, 3, false)
