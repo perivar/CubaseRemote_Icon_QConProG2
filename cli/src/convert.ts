@@ -2,6 +2,8 @@ import chalk from 'chalk';
 import * as fs from 'fs';
 import { Arguments, Argv } from 'yargs';
 
+import { Mackie_Map_CC, Mackie_Map_Midi, Mackie_Map_PitchBend } from './mackie_map';
+
 const errorStyle = chalk.bold.red;
 const warningStyle = chalk.keyword('orange').bold;
 const successStyle = chalk.bold.green;
@@ -21,6 +23,11 @@ interface ObjectElement {
   id: number;
   type: string;
   members?: any;
+}
+
+interface MackieVariable {
+  name: string;
+  description: string;
 }
 
 export const command = 'convert [options]';
@@ -173,47 +180,124 @@ export const handler = async (argv: Arguments<Args>): Promise<void> => {
               const memberEncoderValue = surfaceElement.members?.EncoderValue;
               const memberPushValue = surfaceElement.members?.PushValue;
 
+              // prefix to use for the element name
+              let elementName: string | undefined = undefined;
               switch (type) {
                 case 'PushEncoder':
-                  console.log(successStyle(`[${id}] ${type}: ${JSON.stringify(memberPos)} ${memberEncoderValue} ${memberPushValue}`));
-                  outputArray.push(
-                    `\tsurfaceElements.pushEncoder${id} = surface.makePushEncoder(${memberPos.X}, ${memberPos.Y}, ${memberPos.W}, ${memberPos.H})`
-                  );
+                  elementName = 'enc';
 
                   // lookup bindings
                   const encoderBinding = lookupBinding(objects, memberEncoderValue);
-                  addBindingToOutput(outputArray, 'pushEncoder', id, 'mEncoderValue', encoderBinding);
+                  // Note! a push encoder has two bindings and therefore two mackie variable names
+                  // Here we choose to use the encoder name as the root variable name
+                  const mackieEncoderVar = getMackieVariableFromBinding(encoderBinding);
 
+                  // if there is a mackie binding for the encoder, use this as the variable name
+                  const encoderNameId = mackieEncoderVar?.name ? mackieEncoderVar.name : id;
+
+                  console.log(
+                    successStyle(`[${encoderNameId}] ${type}: ${JSON.stringify(memberPos)} ${memberEncoderValue} ${memberPushValue}`)
+                  );
+
+                  // add description if it exists
+                  if (mackieEncoderVar?.description) {
+                    outputArray.push(`\t// ${mackieEncoderVar.description}`);
+                  }
+
+                  // create the push encoder
+                  outputArray.push(
+                    `\tsurfaceElements.${elementName}${encoderNameId} = surface.makePushEncoder(${memberPos.X}, ${memberPos.Y}, ${memberPos.W}, ${memberPos.H})`
+                  );
+
+                  // add encoder binding
+                  addBindingToOutput(outputArray, elementName, encoderNameId, 'mEncoderValue', encoderBinding);
+
+                  // add push binding
                   const pushBinding = lookupBinding(objects, memberPushValue);
-                  addBindingToOutput(outputArray, 'pushEncoder', id, 'mPushValue', pushBinding);
+                  addBindingToOutput(outputArray, elementName, encoderNameId, 'mPushValue', pushBinding);
                   break;
 
                 case 'Button':
+                  elementName = 'btn';
+
+                  // lookup bindings
+                  const buttonBinding = lookupBinding(objects, memberSurfaceValue);
+                  const mackieButtonVar = getMackieVariableFromBinding(buttonBinding);
+
+                  // if there is a mackie binding for the button, use this as the variable name
+                  const buttonNameId = mackieButtonVar?.name ? mackieButtonVar.name : id;
+
                   console.log(
-                    successStyle(`[${id}] ${type}: ${JSON.stringify(memberPos)} ${memberSurfaceValue} ${memberType} ${memberShape}`)
-                  );
-                  outputArray.push(
-                    `\tsurfaceElements.button${id} = surface.makeButton(${memberPos.X}, ${memberPos.Y}, ${memberPos.W}, ${memberPos.H})${
-                      memberShape === 'Circle' ? '.setShapeCircle()' : ''
-                    }`
+                    successStyle(
+                      `[${buttonNameId}] ${type}: ${JSON.stringify(memberPos)} ${memberSurfaceValue} ${memberType} ${memberShape}`
+                    )
                   );
 
-                  // lookup binding
-                  const buttonBinding = lookupBinding(objects, memberSurfaceValue);
-                  addBindingToOutput(outputArray, 'button', id, 'mSurfaceValue', buttonBinding);
+                  // add description if it exists
+                  if (mackieButtonVar?.description) {
+                    outputArray.push(`\t// ${mackieButtonVar.description}`);
+                  }
+
+                  // create the button
+                  outputArray.push(
+                    `\tsurfaceElements.${elementName}${buttonNameId} = surface.makeButton(${memberPos.X}, ${memberPos.Y}, ${memberPos.W}, ${
+                      memberPos.H
+                    })${memberShape === 'Circle' ? '.setShapeCircle()' : ''}`
+                  );
+
+                  addBindingToOutput(outputArray, elementName, buttonNameId, 'mSurfaceValue', buttonBinding);
                   break;
 
                 case 'Fader':
-                  console.log(successStyle(`[${id}] ${type}: ${JSON.stringify(memberPos)} ${memberSurfaceValue} ${memberType}`));
-                  outputArray.push(
-                    `\tsurfaceElements.fader${id} = surface.makeFader(${memberPos.X}, ${memberPos.Y}, ${memberPos.W}, ${memberPos.H})${
-                      memberType === 'Vertical' ? '.setTypeVertical()' : ''
-                    }`
-                  );
+                  elementName = 'fdr';
 
                   // lookup binding
                   const faderBinding = lookupBinding(objects, memberSurfaceValue);
-                  addBindingToOutput(outputArray, 'fader', id, 'mSurfaceValue', faderBinding);
+                  const mackieFaderVar = getMackieVariableFromBinding(faderBinding);
+
+                  // if there is a mackie binding for the fader, use this as the variable name
+                  const faderNameId = mackieFaderVar?.name ? mackieFaderVar.name : id;
+
+                  console.log(successStyle(`[${faderNameId}] ${type}: ${JSON.stringify(memberPos)} ${memberSurfaceValue} ${memberType}`));
+
+                  // add description if it exists
+                  if (mackieFaderVar?.description) {
+                    outputArray.push(`\t// ${mackieFaderVar.description}`);
+                  }
+
+                  // create the fader
+                  outputArray.push(
+                    `\tsurfaceElements.${elementName}${faderNameId} = surface.makeFader(${memberPos.X}, ${memberPos.Y}, ${memberPos.W}, ${
+                      memberPos.H
+                    })${memberType === 'Vertical' ? '.setTypeVertical()' : ''}`
+                  );
+
+                  addBindingToOutput(outputArray, elementName, faderNameId, 'mSurfaceValue', faderBinding);
+                  break;
+
+                case 'Knob':
+                  elementName = 'knob';
+
+                  // lookup binding
+                  const knobBinding = lookupBinding(objects, memberSurfaceValue);
+                  const mackieKnobVar = getMackieVariableFromBinding(knobBinding);
+
+                  // if there is a mackie binding for the knob, use this as the variable name
+                  const knobNameId = mackieKnobVar?.name ? mackieKnobVar.name : id;
+
+                  console.log(successStyle(`[${knobNameId}] ${type}: ${JSON.stringify(memberPos)} ${memberSurfaceValue}`));
+
+                  // add description if it exists
+                  if (mackieKnobVar?.description) {
+                    outputArray.push(`\t// ${mackieKnobVar.description}`);
+                  }
+
+                  // create the knob
+                  outputArray.push(
+                    `\tsurfaceElements.${elementName}${knobNameId} = surface.makeKnob(${memberPos.X}, ${memberPos.Y}, ${memberPos.W}, ${memberPos.H})`
+                  );
+
+                  addBindingToOutput(outputArray, elementName, knobNameId, 'mSurfaceValue', knobBinding);
                   break;
 
                 case 'BlindPanel':
@@ -221,17 +305,6 @@ export const handler = async (argv: Arguments<Args>): Promise<void> => {
                   outputArray.push(
                     `\tsurfaceElements.blindPanel${id} = surface.makeBlindPanel(${memberPos.X}, ${memberPos.Y}, ${memberPos.W}, ${memberPos.H})`
                   );
-                  break;
-
-                case 'Knob':
-                  console.log(successStyle(`[${id}] ${type}: ${JSON.stringify(memberPos)} ${memberSurfaceValue}`));
-                  outputArray.push(
-                    `\tsurfaceElements.knob${id} = surface.makeKnob(${memberPos.X}, ${memberPos.Y}, ${memberPos.W}, ${memberPos.H})`
-                  );
-
-                  // lookup binding
-                  const knobBinding = lookupBinding(objects, memberSurfaceValue);
-                  addBindingToOutput(outputArray, 'knob', id, 'mSurfaceValue', knobBinding);
                   break;
 
                 default:
@@ -287,17 +360,17 @@ const lookupBinding = (objects: ObjectElement[], id: number) => {
   return midiBinding;
 };
 
-const addBindingToOutput = (outputArray: any[], name: string, id: string, field: string, binding: any) => {
+const addBindingToOutput = (outputArray: any[], elementName: string, id: string, field: string, binding?: ObjectElement) => {
   switch (binding?.type) {
     case 'MidiBindingToNote':
       outputArray.push(
-        `\tsurfaceElements.${name}${id}.${field}.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(${binding?.members?.ChannelNumber}, ${binding?.members?.Pitch})`
+        `\tsurfaceElements.${elementName}${id}.${field}.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(${binding?.members?.ChannelNumber}, ${binding?.members?.Pitch})`
       );
       break;
 
     case 'MidiBindingToControlChange':
       outputArray.push(
-        `\tsurfaceElements.${name}${id}.${field}.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToControlChange(${
+        `\tsurfaceElements.${elementName}${id}.${field}.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToControlChange(${
           binding?.members?.ChannelNumber
         }, ${binding?.members?.ControlChangeNumber})${binding?.members?.Type ? '.setType' + binding.members.Type + '()' : ''}`
       );
@@ -305,13 +378,29 @@ const addBindingToOutput = (outputArray: any[], name: string, id: string, field:
 
     case 'MidiBindingToPitchBend':
       outputArray.push(
-        `\tsurfaceElements.${name}${id}.${field}.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(${binding?.members?.ChannelNumber})`
+        `\tsurfaceElements.${elementName}${id}.${field}.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(${binding?.members?.ChannelNumber})`
       );
       break;
 
     default:
       outputArray.push(`\t// unknown type: ${binding?.type}`);
       break;
+  }
+};
+
+const getMackieVariableFromBinding = (binding?: ObjectElement): MackieVariable | undefined => {
+  switch (binding?.type) {
+    case 'MidiBindingToNote':
+      return Mackie_Map_Midi.get(binding?.members?.Pitch);
+
+    case 'MidiBindingToControlChange':
+      return Mackie_Map_CC.get(binding?.members?.ControlChangeNumber);
+
+    case 'MidiBindingToPitchBend':
+      return Mackie_Map_PitchBend.get(binding?.members?.ChannelNumber);
+
+    default:
+      return undefined;
   }
 };
 

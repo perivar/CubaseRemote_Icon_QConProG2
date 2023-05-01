@@ -207,21 +207,22 @@ function clearAllLeds(activeDevice, midiOutput) {
  * Make a Touch Fader
  * @param {MR_DeviceSurface} surface
  * @param {MR_DeviceMidiInput} midiInput
- * @param {number} channel     - instance of the push encoder.
- * @param {number} x           - x location of the push encoder in the gui
- * @param {number} y           - y location of the push encoder in the gui
- * @param {number} w           - width of the push encoder.
- * @param {number} h           - height of the push encoder.
+ * @param {MR_DeviceMidiOutput} midiOutput
+ * @param {number} channelIndex - channelIndex of the fader.
+ * @param {number} x            - x location of the fader in the gui
+ * @param {number} y            - y location of the fader in the gui
+ * @param {number} w            - width of the fader.
+ * @param {number} h            - height of the fader.
  */
-function makeTouchFader(surface, midiInput, midiOutput, channel, x, y, w, h) {
-    // Fader + Fader Touch
-    var fader = surface.makeFader(x, y, w, h).setTypeVertical()
-    fader.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(channel)
+function makeTouchFader(surface, midiInput, midiOutput, channelIndex, x, y, w, h) {
+    // Fader Touch + Fader
+    var fader_touch = surface.makeButton(x, y, w, 1)
+    fader_touch.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToNote(0, 104 + channelIndex)
 
-    var fader_touch = surface.makeButton(x + 1, y - 1, 1, 1)
-    fader_touch.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToNote(0, 104 + channel)
+    var fader = surface.makeFader(x, y + 1, w, h).setTypeVertical()
+    fader.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(channelIndex)
 
-    return [fader, fader_touch]
+    return [fader_touch, fader]
 }
 
 /**
@@ -260,31 +261,62 @@ function bindCommandKnob(pushEncoder, commandIncrease, commandDecrease) {
  * @param {MR_DeviceSurface} surface
  * @param {MR_DeviceMidiInput} midiInput
  * @param {MR_DeviceMidiOutput} midiOutput
- * @param {number} x           - x location of the push encoder in the gui
- * @param {number} y           - y location of the push encoder in the gui
- * @param {number} instance    - instance of the push encoder.
- * @param {Object} surfaceElements
+ * @param {number} x            - x location of the push encoder in the gui
+ * @param {number} y            - y location of the push encoder in the gui
+ * @param {number} channelIndex - channel index of the push encoder
  * @returns {Object}
  */
-function makeChannelControl(surface, midiInput, midiOutput, x, y, instance, surfaceElements) {
+function makeChannelControl(surface, midiInput, midiOutput, x, y, channelIndex) {
     var channelControl = {}
     channelControl.surface = surface
     channelControl.midiInput = midiInput
     channelControl.midiOutput = midiOutput
-    channelControl.x = x + 7 * instance
+    channelControl.x = x + 2 * channelIndex
     channelControl.y = y
-    channelControl.instance = instance // Channel number, 1-8
+    channelControl.channelIndex = channelIndex // 0-7 = Channel number 1-8
 
     // V-Pot Variables
-    channelControl.vPotLedMode = 1 //  SingleDot = 0, BoostOrCut = 1, Wrap = 2, Spread = 3
+    var VPOT_MODE_SINGLE_DOT = 0
+    var VPOT_MODE_BOOST_OR_CUT = 1
+    var VPOT_MODE_WRAP = 2
+    var VPOT_MODE_SPREAD = 3
+    channelControl.vPotLedMode = VPOT_MODE_BOOST_OR_CUT //  SingleDot = 0, BoostOrCut = 1, Wrap = 2, Spread = 3
+
+    // V-Pot Encoder with LED ring
+    channelControl.pushEncoder = channelControl.surface.makePushEncoder(channelControl.x, channelControl.y, 2, 2)
+
+    channelControl.pushEncoder.mEncoderValue.mMidiBinding
+        .setInputPort(midiInput)
+        .setOutputPort(midiOutput)
+        .bindToControlChange(0, 16 + channelIndex)
+        .setTypeRelativeSignedBit()
+
+    channelControl.pushEncoder.mPushValue.mMidiBinding
+        .setInputPort(midiInput)
+        .setOutputPort(midiOutput)
+        .bindToNote(0, 32 + channelIndex)
+
+    channelControl.pushEncoder.mEncoderValue.mOnProcessValueChange = function (activeDevice, newValue) {
+        const displayMode = channelControl.vPotLedMode
+        const isCenterLedOn = newValue === (displayMode === VPOT_MODE_SPREAD ? 0 : 0.5)
+        const position = 1 + Math.round(newValue * (displayMode === VPOT_MODE_SPREAD ? 5 : 10))
+
+        midiOutput.sendMidi(activeDevice, [0xb0, 0x30 + channelIndex, (+isCenterLedOn << 6) + (displayMode << 4) + position])
+    }
+
+    channelControl.pushEncoder.mEncoderValue.mOnTitleChange = function (activeDevice, title1, title2) {
+        // Reset encoder LED ring when channel becomes unassigned
+        if (title1 === '') {
+            midiOutput.sendMidi(activeDevice, [0xb0, 0x30 + channelIndex, 0])
+        }
+    }
 
     // VU Meter custom variable
     channelControl.vuMeter = channelControl.surface.makeCustomValueVariable('vuMeter')
 
     // VU Meter Update
     var lastMeterUpdateTime = 0
-
-    channelControl.vuMeter.mOnProcessValueChange = function (context, newValue) {
+    channelControl.vuMeter.mOnProcessValueChange = function (activeDevice, newValue) {
         var now = performance.now() // ms
 
         if (now - lastMeterUpdateTime > 125) {
@@ -292,69 +324,62 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, instance, surf
             newValue = 1 + Math.log10(0.1 + 0.9 * (1 + Math.log10(0.1 + 0.9 * newValue)))
             lastMeterUpdateTime = now
 
-            midiOutput.sendMidi(context, [0xd0, (channelIndex << 4) + Math.ceil(newValue * 14 - 0.25)])
+            midiOutput.sendMidi(activeDevice, [0xd0, (channelIndex << 4) + Math.ceil(newValue * 14 - 0.25)])
         }
     }
-
-    // V-Pot Encoder with LED ring
-    channelControl.pushEncoder = channelControl.surface.makePushEncoder(channelControl.x, y + 2, 4, 4)
-
-    channelControl.pushEncoder.mEncoderValue.mMidiBinding
-        .setInputPort(midiInput)
-        .bindToControlChange(0, 16 + channelControl.instance)
-        .setTypeRelativeSignedBit()
-
-    channelControl.pushEncoder.mPushValue.mMidiBinding.setInputPort(midiInput).bindToNote(0, 32 + channelControl.instance)
-
-    channelControl.pushEncoder.mEncoderValue.mOnProcessValueChange = function (context, newValue) {
-        const displayMode = channelControl.vPotLedMode
-        const isCenterLedOn = newValue === (displayMode === 3 ? 0 : 0.5)
-        const position = 1 + Math.round(newValue * (displayMode === 3 ? 5 : 10))
-
-        midiOutput.sendMidi(context, [0xb0, 0x30 + channelIndex, (+isCenterLedOn << 6) + (displayMode << 4) + position])
-    }
-
-    channelControl.pushEncoder.mEncoderValue.mOnTitleChange = function (context, title1, title2) {
-        // Reset encoder LED ring when channel becomes unassigned
-        if (title1 === '') {
-            midiOutput.sendMidi(context, [0xb0, 0x30 + channelIndex, 0])
-        }
-    }
-
-    // Fader + Fader Touch
-    var fader_x = channelControl.x + 0.5
-    var fader_y = y + 20
-    var tf = makeTouchFader(surface, midiInput, channelControl.midiOutput, instance, fader_x, fader_y, 3, 18)
-    channelControl.fader = tf[0]
-    channelControl.fader_touch = tf[1]
 
     // Channel Buttons
-    channelControl.rec_button = makeLedButton(surface, midiInput, midiOutput, 0 + channelControl.instance, fader_x + 0, y + 6, 3, 3, false)
-    channelControl.solo_button = makeLedButton(surface, midiInput, midiOutput, 8 + channelControl.instance, fader_x + 0, y + 9, 3, 3, false)
+    channelControl.rec_button = makeLedButton(
+        surface,
+        midiInput,
+        midiOutput,
+        0 + channelIndex,
+        channelControl.x,
+        channelControl.y + 2,
+        2,
+        2,
+        false
+    )
+    channelControl.solo_button = makeLedButton(
+        surface,
+        midiInput,
+        midiOutput,
+        8 + channelIndex,
+        channelControl.x,
+        channelControl.y + 4,
+        2,
+        2,
+        false
+    )
     channelControl.mute_button = makeLedButton(
         surface,
         midiInput,
         midiOutput,
-        16 + channelControl.instance,
-        fader_x + 0,
-        y + 12,
-        3,
-        3,
+        16 + channelIndex,
+        channelControl.x,
+        channelControl.y + 6,
+        2,
+        2,
         false
     )
     channelControl.sel_button = makeLedButton(
         surface,
         midiInput,
         midiOutput,
-        24 + channelControl.instance,
-        fader_x + 0,
-        y + 15,
-        3,
-        3,
+        24 + channelIndex,
+        channelControl.x,
+        channelControl.y + 8,
+        2,
+        2,
         false
     )
 
-    var channelIndex = channelControl.instance
+    // Fader + Fader Touch
+    var fader_x = channelControl.x
+    var fader_y = channelControl.y + 11
+    var tf = makeTouchFader(surface, midiInput, midiOutput, channelIndex, fader_x, fader_y, 2, 10)
+    channelControl.fader_touch = tf[0]
+    channelControl.fader = tf[1]
 
     channelControl.fader.mSurfaceValue.mOnTitleChange = function (activeDevice, objectTitle, valueTitle) {
         // console.log("Fader Title Change: " + channelIndex + "::" + objectTitle + ":" + valueTitle)
@@ -545,10 +570,9 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, instance, surf
  * @param {number} x           - x location of the push encoder in the gui
  * @param {number} y           - y location of the push encoder in the gui
  * @param {number} instance    - instance of the push encoder.
- * @param {Object} surfaceElements
  * @returns {Object}
  */
-function makeMasterControl(surface, midiInput, midiOutput, x, y, instance, surfaceElements) {
+function makeMasterControl(surface, midiInput, midiOutput, x, y, instance) {
     var masterControl = {}
     masterControl.surface = surface
     masterControl.midiInput = midiInput
@@ -594,7 +618,7 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, instance, surfa
     }
 
     masterControl.fader_touch.mSurfaceValue.mOnProcessValueChange = function (activeDevice, touched, value2) {
-        // console.log("masterFader Touch Change: " + touched + ":" + value2)
+        console.log('masterFader Touch Change: ' + touched + ':' + value2)
 
         // value===-1 means touch released
         if (value2 == -1) {
@@ -668,10 +692,9 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, instance, surfa
  * @param {MR_DeviceMidiOutput} midiOutput
  * @param {number} x           - x location of the push encoder in the gui
  * @param {number} y           - y location of the push encoder in the gui
- * @param {Object} surfaceElements
  * @returns {Object}
  */
-function makeTransport(surface, midiInput, midiOutput, x, y, surfaceElements) {
+function makeTransport(surface, midiInput, midiOutput, x, y) {
     var transport = {}
     transport.surface = surface
     transport.midiInput = midiInput
@@ -684,6 +707,16 @@ function makeTransport(surface, midiInput, midiOutput, x, y, surfaceElements) {
 
     transport.ident = function () {
         return 'Class Transport'
+    }
+
+    /**
+     * Bind button to Midi Control Change Utility Function
+     * @param {MR_Button} button
+     * @param {number} chn
+     * @param {number} num
+     */
+    function bindMidiCC(button, chn, num) {
+        button.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToControlChange(chn, num)
     }
 
     /**

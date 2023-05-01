@@ -20,405 +20,523 @@ var surface = deviceDriver.mSurface
 function makeSurfaceElements() {
     var surfaceElements = {}
 
-    surfaceElements.pushEncoder22 = surface.makePushEncoder(0, 3, 2, 2)
-    surfaceElements.pushEncoder22.mEncoderValue.mMidiBinding
+    // V-Pot Ch. 1
+    surfaceElements.encVPot1 = surface.makePushEncoder(0, 3, 2, 2)
+    surfaceElements.encVPot1.mEncoderValue.mMidiBinding
         .setInputPort(midiInput)
         .setOutputPort(midiOutput)
         .bindToControlChange(0, 16)
         .setTypeRelativeSignedBit()
-    surfaceElements.pushEncoder22.mPushValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 32)
+    surfaceElements.encVPot1.mPushValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 32)
 
-    surfaceElements.pushEncoder27 = surface.makePushEncoder(2, 3, 2, 2)
-    surfaceElements.pushEncoder27.mEncoderValue.mMidiBinding
+    // V-Pot Ch. 2
+    surfaceElements.encVPot2 = surface.makePushEncoder(2, 3, 2, 2)
+    surfaceElements.encVPot2.mEncoderValue.mMidiBinding
         .setInputPort(midiInput)
         .setOutputPort(midiOutput)
         .bindToControlChange(0, 17)
         .setTypeRelativeSignedBit()
-    surfaceElements.pushEncoder27.mPushValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 33)
+    surfaceElements.encVPot2.mPushValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 33)
 
-    surfaceElements.pushEncoder32 = surface.makePushEncoder(4, 3, 2, 2)
-    surfaceElements.pushEncoder32.mEncoderValue.mMidiBinding
+    // V-Pot Ch. 3
+    surfaceElements.encVPot3 = surface.makePushEncoder(4, 3, 2, 2)
+    surfaceElements.encVPot3.mEncoderValue.mMidiBinding
         .setInputPort(midiInput)
         .setOutputPort(midiOutput)
         .bindToControlChange(0, 18)
         .setTypeRelativeSignedBit()
-    surfaceElements.pushEncoder32.mPushValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 34)
+    surfaceElements.encVPot3.mPushValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 34)
 
-    surfaceElements.pushEncoder37 = surface.makePushEncoder(6, 3, 2, 2)
-    surfaceElements.pushEncoder37.mEncoderValue.mMidiBinding
+    // V-Pot Ch. 4
+    surfaceElements.encVPot4 = surface.makePushEncoder(6, 3, 2, 2)
+    surfaceElements.encVPot4.mEncoderValue.mMidiBinding
         .setInputPort(midiInput)
         .setOutputPort(midiOutput)
         .bindToControlChange(0, 19)
         .setTypeRelativeSignedBit()
-    surfaceElements.pushEncoder37.mPushValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 35)
+    surfaceElements.encVPot4.mPushValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 35)
 
-    surfaceElements.pushEncoder42 = surface.makePushEncoder(8, 3, 2, 2)
-    surfaceElements.pushEncoder42.mEncoderValue.mMidiBinding
+    // V-Pot Ch. 5
+    surfaceElements.encVPot5 = surface.makePushEncoder(8, 3, 2, 2)
+    surfaceElements.encVPot5.mEncoderValue.mMidiBinding
         .setInputPort(midiInput)
         .setOutputPort(midiOutput)
         .bindToControlChange(0, 20)
         .setTypeRelativeSignedBit()
-    surfaceElements.pushEncoder42.mPushValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 36)
+    surfaceElements.encVPot5.mPushValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 36)
 
-    surfaceElements.pushEncoder47 = surface.makePushEncoder(10, 3, 2, 2)
-    surfaceElements.pushEncoder47.mEncoderValue.mMidiBinding
+    // V-Pot Ch. 6
+    surfaceElements.encVPot6 = surface.makePushEncoder(10, 3, 2, 2)
+    surfaceElements.encVPot6.mEncoderValue.mMidiBinding
         .setInputPort(midiInput)
         .setOutputPort(midiOutput)
         .bindToControlChange(0, 21)
         .setTypeRelativeSignedBit()
-    surfaceElements.pushEncoder47.mPushValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 37)
+    surfaceElements.encVPot6.mPushValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 37)
 
-    surfaceElements.pushEncoder52 = surface.makePushEncoder(12, 3, 2, 2)
-    surfaceElements.pushEncoder52.mEncoderValue.mMidiBinding
+    // V-Pot Ch. 7
+    surfaceElements.encVPot7 = surface.makePushEncoder(12, 3, 2, 2)
+    surfaceElements.encVPot7.mEncoderValue.mMidiBinding
         .setInputPort(midiInput)
         .setOutputPort(midiOutput)
         .bindToControlChange(0, 22)
         .setTypeRelativeSignedBit()
-    surfaceElements.pushEncoder52.mPushValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 38)
+    surfaceElements.encVPot7.mPushValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 38)
 
-    surfaceElements.pushEncoder57 = surface.makePushEncoder(14, 3, 2, 2)
-    surfaceElements.pushEncoder57.mEncoderValue.mMidiBinding
+    // V-Pot Ch. 8
+    surfaceElements.encVPot8 = surface.makePushEncoder(14, 3, 2, 2)
+    surfaceElements.encVPot8.mEncoderValue.mMidiBinding
         .setInputPort(midiInput)
         .setOutputPort(midiOutput)
         .bindToControlChange(0, 23)
         .setTypeRelativeSignedBit()
-    surfaceElements.pushEncoder57.mPushValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 39)
+    surfaceElements.encVPot8.mPushValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 39)
 
-    surfaceElements.button62 = surface.makeButton(0, 5, 2, 2)
-    surfaceElements.button62.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 0)
+    // Record Ready Ch 1
+    surfaceElements.btnRecRdy1 = surface.makeButton(0, 5, 2, 2)
+    surfaceElements.btnRecRdy1.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 0)
 
-    surfaceElements.button66 = surface.makeButton(2, 5, 2, 2)
-    surfaceElements.button66.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 1)
+    // Record Ready Ch 2
+    surfaceElements.btnRecRdy2 = surface.makeButton(2, 5, 2, 2)
+    surfaceElements.btnRecRdy2.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 1)
 
-    surfaceElements.button70 = surface.makeButton(4, 5, 2, 2)
-    surfaceElements.button70.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 2)
+    // Record Ready Ch 3
+    surfaceElements.btnRecRdy3 = surface.makeButton(4, 5, 2, 2)
+    surfaceElements.btnRecRdy3.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 2)
 
-    surfaceElements.button74 = surface.makeButton(6, 5, 2, 2)
-    surfaceElements.button74.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 3)
+    // Record Ready Ch 4
+    surfaceElements.btnRecRdy4 = surface.makeButton(6, 5, 2, 2)
+    surfaceElements.btnRecRdy4.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 3)
 
-    surfaceElements.button78 = surface.makeButton(8, 5, 2, 2)
-    surfaceElements.button78.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 4)
+    // Record Ready Ch 5
+    surfaceElements.btnRecRdy5 = surface.makeButton(8, 5, 2, 2)
+    surfaceElements.btnRecRdy5.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 4)
 
-    surfaceElements.button82 = surface.makeButton(10, 5, 2, 2)
-    surfaceElements.button82.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 5)
+    // Record Ready Ch 6
+    surfaceElements.btnRecRdy6 = surface.makeButton(10, 5, 2, 2)
+    surfaceElements.btnRecRdy6.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 5)
 
-    surfaceElements.button86 = surface.makeButton(12, 5, 2, 2)
-    surfaceElements.button86.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 6)
+    // Record Ready Ch 7
+    surfaceElements.btnRecRdy7 = surface.makeButton(12, 5, 2, 2)
+    surfaceElements.btnRecRdy7.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 6)
 
-    surfaceElements.button90 = surface.makeButton(14, 5, 2, 2)
-    surfaceElements.button90.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 7)
+    // Record Ready Ch 8
+    surfaceElements.btnRecRdy8 = surface.makeButton(14, 5, 2, 2)
+    surfaceElements.btnRecRdy8.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 7)
 
-    surfaceElements.button94 = surface.makeButton(0, 7, 2, 2)
-    surfaceElements.button94.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 8)
+    // Solo Ch 1
+    surfaceElements.btnSolo1 = surface.makeButton(0, 7, 2, 2)
+    surfaceElements.btnSolo1.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 8)
 
-    surfaceElements.button98 = surface.makeButton(2, 7, 2, 2)
-    surfaceElements.button98.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 9)
+    // Solo Ch 2
+    surfaceElements.btnSolo2 = surface.makeButton(2, 7, 2, 2)
+    surfaceElements.btnSolo2.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 9)
 
-    surfaceElements.button102 = surface.makeButton(4, 7, 2, 2)
-    surfaceElements.button102.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 10)
+    // Solo Ch 3
+    surfaceElements.btnSolo3 = surface.makeButton(4, 7, 2, 2)
+    surfaceElements.btnSolo3.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 10)
 
-    surfaceElements.button106 = surface.makeButton(6, 7, 2, 2)
-    surfaceElements.button106.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 11)
+    // Solo Ch 4
+    surfaceElements.btnSolo4 = surface.makeButton(6, 7, 2, 2)
+    surfaceElements.btnSolo4.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 11)
 
-    surfaceElements.button110 = surface.makeButton(8, 7, 2, 2)
-    surfaceElements.button110.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 12)
+    // Solo Ch 5
+    surfaceElements.btnSolo5 = surface.makeButton(8, 7, 2, 2)
+    surfaceElements.btnSolo5.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 12)
 
-    surfaceElements.button114 = surface.makeButton(10, 7, 2, 2)
-    surfaceElements.button114.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 13)
+    // Solo Ch 6
+    surfaceElements.btnSolo6 = surface.makeButton(10, 7, 2, 2)
+    surfaceElements.btnSolo6.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 13)
 
-    surfaceElements.button118 = surface.makeButton(12, 7, 2, 2)
-    surfaceElements.button118.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 14)
+    // Solo Ch 7
+    surfaceElements.btnSolo7 = surface.makeButton(12, 7, 2, 2)
+    surfaceElements.btnSolo7.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 14)
 
-    surfaceElements.button122 = surface.makeButton(14, 7, 2, 2)
-    surfaceElements.button122.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 15)
+    // Solo Ch 8
+    surfaceElements.btnSolo8 = surface.makeButton(14, 7, 2, 2)
+    surfaceElements.btnSolo8.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 15)
 
-    surfaceElements.button126 = surface.makeButton(0, 9, 2, 2)
-    surfaceElements.button126.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 16)
+    // Mute Ch 1
+    surfaceElements.btnMute1 = surface.makeButton(0, 9, 2, 2)
+    surfaceElements.btnMute1.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 16)
 
-    surfaceElements.button130 = surface.makeButton(2, 9, 2, 2)
-    surfaceElements.button130.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 17)
+    // Mute Ch 2
+    surfaceElements.btnMute2 = surface.makeButton(2, 9, 2, 2)
+    surfaceElements.btnMute2.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 17)
 
-    surfaceElements.button134 = surface.makeButton(4, 9, 2, 2)
-    surfaceElements.button134.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 18)
+    // Mute Ch 3
+    surfaceElements.btnMute3 = surface.makeButton(4, 9, 2, 2)
+    surfaceElements.btnMute3.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 18)
 
-    surfaceElements.button138 = surface.makeButton(6, 9, 2, 2)
-    surfaceElements.button138.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 19)
+    // Mute Ch 4
+    surfaceElements.btnMute4 = surface.makeButton(6, 9, 2, 2)
+    surfaceElements.btnMute4.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 19)
 
-    surfaceElements.button142 = surface.makeButton(8, 9, 2, 2)
-    surfaceElements.button142.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 20)
+    // Mute Ch 5
+    surfaceElements.btnMute5 = surface.makeButton(8, 9, 2, 2)
+    surfaceElements.btnMute5.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 20)
 
-    surfaceElements.button146 = surface.makeButton(10, 9, 2, 2)
-    surfaceElements.button146.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 21)
+    // Mute Ch 6
+    surfaceElements.btnMute6 = surface.makeButton(10, 9, 2, 2)
+    surfaceElements.btnMute6.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 21)
 
-    surfaceElements.button150 = surface.makeButton(12, 9, 2, 2)
-    surfaceElements.button150.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 22)
+    // Mute Ch 7
+    surfaceElements.btnMute7 = surface.makeButton(12, 9, 2, 2)
+    surfaceElements.btnMute7.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 22)
 
-    surfaceElements.button154 = surface.makeButton(14, 9, 2, 2)
-    surfaceElements.button154.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 23)
+    // Mute Ch 8
+    surfaceElements.btnMute8 = surface.makeButton(14, 9, 2, 2)
+    surfaceElements.btnMute8.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 23)
 
-    surfaceElements.button158 = surface.makeButton(0, 11, 2, 2)
-    surfaceElements.button158.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 24)
+    // Select Ch 1
+    surfaceElements.btnSelect1 = surface.makeButton(0, 11, 2, 2)
+    surfaceElements.btnSelect1.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 24)
 
-    surfaceElements.button162 = surface.makeButton(2, 11, 2, 2)
-    surfaceElements.button162.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 25)
+    // Select Ch 2
+    surfaceElements.btnSelect2 = surface.makeButton(2, 11, 2, 2)
+    surfaceElements.btnSelect2.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 25)
 
-    surfaceElements.button166 = surface.makeButton(4, 11, 2, 2)
-    surfaceElements.button166.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 26)
+    // Select Ch 3
+    surfaceElements.btnSelect3 = surface.makeButton(4, 11, 2, 2)
+    surfaceElements.btnSelect3.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 26)
 
-    surfaceElements.button170 = surface.makeButton(6, 11, 2, 2)
-    surfaceElements.button170.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 27)
+    // Select Ch 4
+    surfaceElements.btnSelect4 = surface.makeButton(6, 11, 2, 2)
+    surfaceElements.btnSelect4.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 27)
 
-    surfaceElements.button174 = surface.makeButton(8, 11, 2, 2)
-    surfaceElements.button174.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 28)
+    // Select Ch 5
+    surfaceElements.btnSelect5 = surface.makeButton(8, 11, 2, 2)
+    surfaceElements.btnSelect5.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 28)
 
-    surfaceElements.button178 = surface.makeButton(10, 11, 2, 2)
-    surfaceElements.button178.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 29)
+    // Select Ch 6
+    surfaceElements.btnSelect6 = surface.makeButton(10, 11, 2, 2)
+    surfaceElements.btnSelect6.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 29)
 
-    surfaceElements.button182 = surface.makeButton(12, 11, 2, 2)
-    surfaceElements.button182.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 30)
+    // Select Ch 7
+    surfaceElements.btnSelect7 = surface.makeButton(12, 11, 2, 2)
+    surfaceElements.btnSelect7.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 30)
 
-    surfaceElements.button186 = surface.makeButton(14, 11, 2, 2)
-    surfaceElements.button186.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 31)
+    // Select Ch 8
+    surfaceElements.btnSelect8 = surface.makeButton(14, 11, 2, 2)
+    surfaceElements.btnSelect8.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 31)
 
-    surfaceElements.button190 = surface.makeButton(0, 14, 2, 1)
-    surfaceElements.button190.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 104)
+    // Fader Touch Ch 1
+    surfaceElements.btnFaderTouch1 = surface.makeButton(0, 14, 2, 1)
+    surfaceElements.btnFaderTouch1.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 104)
 
-    surfaceElements.button194 = surface.makeButton(4, 14, 2, 1)
-    surfaceElements.button194.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 106)
+    // Fader Touch Ch 3
+    surfaceElements.btnFaderTouch3 = surface.makeButton(4, 14, 2, 1)
+    surfaceElements.btnFaderTouch3.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 106)
 
-    surfaceElements.button198 = surface.makeButton(6, 14, 2, 1)
-    surfaceElements.button198.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 107)
+    // Fader Touch Ch 4
+    surfaceElements.btnFaderTouch4 = surface.makeButton(6, 14, 2, 1)
+    surfaceElements.btnFaderTouch4.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 107)
 
-    surfaceElements.button202 = surface.makeButton(8, 14, 2, 1)
-    surfaceElements.button202.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 108)
+    // Fader Touch Ch 5
+    surfaceElements.btnFaderTouch5 = surface.makeButton(8, 14, 2, 1)
+    surfaceElements.btnFaderTouch5.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 108)
 
-    surfaceElements.button206 = surface.makeButton(10, 14, 2, 1)
-    surfaceElements.button206.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 109)
+    // Fader Touch Ch 6
+    surfaceElements.btnFaderTouch6 = surface.makeButton(10, 14, 2, 1)
+    surfaceElements.btnFaderTouch6.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 109)
 
-    surfaceElements.button210 = surface.makeButton(12, 14, 2, 1)
-    surfaceElements.button210.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 110)
+    // Fader Touch Ch 7
+    surfaceElements.btnFaderTouch7 = surface.makeButton(12, 14, 2, 1)
+    surfaceElements.btnFaderTouch7.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 110)
 
-    surfaceElements.button214 = surface.makeButton(14, 14, 2, 1)
-    surfaceElements.button214.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 111)
+    // Fader Touch Ch 8
+    surfaceElements.btnFaderTouch8 = surface.makeButton(14, 14, 2, 1)
+    surfaceElements.btnFaderTouch8.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 111)
 
-    surfaceElements.button218 = surface.makeButton(16, 14, 2, 1)
-    surfaceElements.button218.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 112)
+    // Fader Touch Master
+    surfaceElements.btnFaderTouchMaster = surface.makeButton(16, 14, 2, 1)
+    surfaceElements.btnFaderTouchMaster.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 112)
 
-    surfaceElements.fader222 = surface.makeFader(0, 15, 2, 10).setTypeVertical()
-    surfaceElements.fader222.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(0)
+    // Fader Ch. 1
+    surfaceElements.fdrFader1 = surface.makeFader(0, 15, 2, 10).setTypeVertical()
+    surfaceElements.fdrFader1.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(0)
 
-    surfaceElements.fader225 = surface.makeFader(2, 15, 2, 10).setTypeVertical()
-    surfaceElements.fader225.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(1)
+    // Fader Ch. 2
+    surfaceElements.fdrFader2 = surface.makeFader(2, 15, 2, 10).setTypeVertical()
+    surfaceElements.fdrFader2.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(1)
 
-    surfaceElements.fader228 = surface.makeFader(4, 15, 2, 10).setTypeVertical()
-    surfaceElements.fader228.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(2)
+    // Fader Ch. 3
+    surfaceElements.fdrFader3 = surface.makeFader(4, 15, 2, 10).setTypeVertical()
+    surfaceElements.fdrFader3.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(2)
 
-    surfaceElements.fader231 = surface.makeFader(6, 15, 2, 10).setTypeVertical()
-    surfaceElements.fader231.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(3)
+    // Fader Ch. 4
+    surfaceElements.fdrFader4 = surface.makeFader(6, 15, 2, 10).setTypeVertical()
+    surfaceElements.fdrFader4.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(3)
 
-    surfaceElements.fader234 = surface.makeFader(8, 15, 2, 10).setTypeVertical()
-    surfaceElements.fader234.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(4)
+    // Fader Ch. 5
+    surfaceElements.fdrFader5 = surface.makeFader(8, 15, 2, 10).setTypeVertical()
+    surfaceElements.fdrFader5.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(4)
 
-    surfaceElements.fader237 = surface.makeFader(10, 15, 2, 10).setTypeVertical()
-    surfaceElements.fader237.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(5)
+    // Fader Ch. 6
+    surfaceElements.fdrFader6 = surface.makeFader(10, 15, 2, 10).setTypeVertical()
+    surfaceElements.fdrFader6.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(5)
 
-    surfaceElements.fader240 = surface.makeFader(12, 15, 2, 10).setTypeVertical()
-    surfaceElements.fader240.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(6)
+    // Fader Ch. 7
+    surfaceElements.fdrFader7 = surface.makeFader(12, 15, 2, 10).setTypeVertical()
+    surfaceElements.fdrFader7.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(6)
 
-    surfaceElements.fader243 = surface.makeFader(14, 15, 2, 10).setTypeVertical()
-    surfaceElements.fader243.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(7)
+    // Fader Ch. 8
+    surfaceElements.fdrFader8 = surface.makeFader(14, 15, 2, 10).setTypeVertical()
+    surfaceElements.fdrFader8.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(7)
 
-    surfaceElements.fader246 = surface.makeFader(16, 15, 2, 10).setTypeVertical()
-    surfaceElements.fader246.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(8)
+    // Fader Touch Master
+    surfaceElements.fdrFaderMaster = surface.makeFader(16, 15, 2, 10).setTypeVertical()
+    surfaceElements.fdrFaderMaster.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(8)
 
     surfaceElements.blindPanel249 = surface.makeBlindPanel(0, 0, 17, 3)
 
-    surfaceElements.button251 = surface.makeButton(16, 11, 2, 2)
-    surfaceElements.button251.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 47)
+    // Fader Banks: Bank Right
+    surfaceElements.btnBankRight = surface.makeButton(16, 11, 2, 2)
+    surfaceElements.btnBankRight.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 47)
 
-    surfaceElements.button255 = surface.makeButton(16, 9, 2, 2)
-    surfaceElements.button255.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 46)
+    // Fader Banks: Bank Left
+    surfaceElements.btnBankLeft = surface.makeButton(16, 9, 2, 2)
+    surfaceElements.btnBankLeft.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 46)
 
-    surfaceElements.button259 = surface.makeButton(16, 7, 2, 2)
-    surfaceElements.button259.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 49)
+    // Fader Banks: Channel Right
+    surfaceElements.btnChannelRight = surface.makeButton(16, 7, 2, 2)
+    surfaceElements.btnChannelRight.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 49)
 
-    surfaceElements.button263 = surface.makeButton(16, 5, 2, 2)
-    surfaceElements.button263.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 48)
+    // Fader Banks: Channel Left
+    surfaceElements.btnChannelLeft = surface.makeButton(16, 5, 2, 2)
+    surfaceElements.btnChannelLeft.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 48)
 
-    surfaceElements.button285 = surface.makeButton(16, 3, 2, 2)
-    surfaceElements.button285.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 50)
+    // Flip
+    surfaceElements.btnFlip = surface.makeButton(16, 3, 2, 2)
+    surfaceElements.btnFlip.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 50)
 
-    surfaceElements.button289 = surface.makeButton(20, 21, 2, 2)
-    surfaceElements.button289.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 98)
+    // Cursor Left
+    surfaceElements.btnLeft = surface.makeButton(20, 21, 2, 2)
+    surfaceElements.btnLeft.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 98)
 
-    surfaceElements.button293 = surface.makeButton(22, 21, 2, 2)
-    surfaceElements.button293.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 100)
+    // Zoom
+    surfaceElements.btnZoom = surface.makeButton(22, 21, 2, 2)
+    surfaceElements.btnZoom.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 100)
 
-    surfaceElements.button297 = surface.makeButton(24, 21, 2, 2)
-    surfaceElements.button297.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 99)
+    // Cursor Right
+    surfaceElements.btnRight = surface.makeButton(24, 21, 2, 2)
+    surfaceElements.btnRight.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 99)
 
-    surfaceElements.button301 = surface.makeButton(22, 19, 2, 2)
-    surfaceElements.button301.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 96)
+    // Cursor Up
+    surfaceElements.btnUp = surface.makeButton(22, 19, 2, 2)
+    surfaceElements.btnUp.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 96)
 
-    surfaceElements.button305 = surface.makeButton(22, 23, 2, 2)
-    surfaceElements.button305.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 97)
+    // Cursor Down
+    surfaceElements.btnDown = surface.makeButton(22, 23, 2, 2)
+    surfaceElements.btnDown.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 97)
 
-    surfaceElements.button309 = surface.makeButton(19, 11, 2, 2)
-    surfaceElements.button309.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 74)
+    // Automation: Read Off
+    surfaceElements.btnAutomationReadOff = surface.makeButton(19, 11, 2, 2)
+    surfaceElements.btnAutomationReadOff.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 74)
 
-    surfaceElements.button313 = surface.makeButton(21, 11, 2, 2)
-    surfaceElements.button313.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 75)
+    // Automation: Write
+    surfaceElements.btnAutomationWrite = surface.makeButton(21, 11, 2, 2)
+    surfaceElements.btnAutomationWrite.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 75)
 
-    surfaceElements.button317 = surface.makeButton(23, 11, 2, 2)
-    surfaceElements.button317.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 76)
+    // Automation: Trim
+    surfaceElements.btnAutomationTrim = surface.makeButton(23, 11, 2, 2)
+    surfaceElements.btnAutomationTrim.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 76)
 
-    surfaceElements.button321 = surface.makeButton(25, 11, 2, 2)
-    surfaceElements.button321.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 77)
+    // Automation: Touch
+    surfaceElements.btnAutomationTouch = surface.makeButton(25, 11, 2, 2)
+    surfaceElements.btnAutomationTouch.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 77)
 
-    surfaceElements.button325 = surface.makeButton(27, 11, 2, 2)
-    surfaceElements.button325.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 78)
+    // Automation: Latch
+    surfaceElements.btnAutomationLatch = surface.makeButton(27, 11, 2, 2)
+    surfaceElements.btnAutomationLatch.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 78)
 
-    surfaceElements.button329 = surface.makeButton(29, 11, 2, 2)
-    surfaceElements.button329.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 79)
+    // Group
+    surfaceElements.btnGroup = surface.makeButton(29, 11, 2, 2)
+    surfaceElements.btnGroup.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 79)
 
-    surfaceElements.button333 = surface.makeButton(19, 9, 2, 2)
-    surfaceElements.button333.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 40)
+    // Assignment: Track
+    surfaceElements.btnAssignTrack = surface.makeButton(19, 9, 2, 2)
+    surfaceElements.btnAssignTrack.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 40)
 
-    surfaceElements.button337 = surface.makeButton(21, 9, 2, 2)
-    surfaceElements.button337.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 41)
+    // Assignment: Send
+    surfaceElements.btnAssignSend = surface.makeButton(21, 9, 2, 2)
+    surfaceElements.btnAssignSend.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 41)
 
-    surfaceElements.button341 = surface.makeButton(23, 9, 2, 2)
-    surfaceElements.button341.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 42)
+    // Assignment: Pan/Surround
+    surfaceElements.btnAssignPan = surface.makeButton(23, 9, 2, 2)
+    surfaceElements.btnAssignPan.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 42)
 
-    surfaceElements.button345 = surface.makeButton(25, 9, 2, 2)
-    surfaceElements.button345.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 43)
+    // Assignment: Plug-In
+    surfaceElements.btnAssignPlugin = surface.makeButton(25, 9, 2, 2)
+    surfaceElements.btnAssignPlugin.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 43)
 
-    surfaceElements.button349 = surface.makeButton(27, 9, 2, 2)
-    surfaceElements.button349.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 44)
+    // Assignment: EQ
+    surfaceElements.btnAssignEq = surface.makeButton(27, 9, 2, 2)
+    surfaceElements.btnAssignEq.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 44)
 
-    surfaceElements.button353 = surface.makeButton(29, 9, 2, 2)
-    surfaceElements.button353.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 45)
+    // Assignment: Instrument
+    surfaceElements.btnAssignInstr = surface.makeButton(29, 9, 2, 2)
+    surfaceElements.btnAssignInstr.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 45)
 
-    surfaceElements.button357 = surface.makeButton(23, 5, 2, 1)
-    surfaceElements.button357.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 58)
+    // F5
+    surfaceElements.btnF5 = surface.makeButton(23, 5, 2, 1)
+    surfaceElements.btnF5.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 58)
 
-    surfaceElements.button361 = surface.makeButton(25, 5, 2, 1)
-    surfaceElements.button361.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 59)
+    // F6
+    surfaceElements.btnF6 = surface.makeButton(25, 5, 2, 1)
+    surfaceElements.btnF6.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 59)
 
-    surfaceElements.button365 = surface.makeButton(27, 5, 2, 1)
-    surfaceElements.button365.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 60)
+    // F7
+    surfaceElements.btnF7 = surface.makeButton(27, 5, 2, 1)
+    surfaceElements.btnF7.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 60)
 
-    surfaceElements.button369 = surface.makeButton(29, 5, 2, 1)
-    surfaceElements.button369.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 61)
+    // F8
+    surfaceElements.btnF8 = surface.makeButton(29, 5, 2, 1)
+    surfaceElements.btnF8.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 61)
 
-    surfaceElements.button373 = surface.makeButton(23, 4, 2, 1)
-    surfaceElements.button373.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 54)
+    // F1
+    surfaceElements.btnF1 = surface.makeButton(23, 4, 2, 1)
+    surfaceElements.btnF1.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 54)
 
-    surfaceElements.button377 = surface.makeButton(25, 4, 2, 1)
-    surfaceElements.button377.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 55)
+    // F2
+    surfaceElements.btnF2 = surface.makeButton(25, 4, 2, 1)
+    surfaceElements.btnF2.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 55)
 
-    surfaceElements.button381 = surface.makeButton(27, 4, 2, 1)
-    surfaceElements.button381.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 56)
+    // F3
+    surfaceElements.btnF3 = surface.makeButton(27, 4, 2, 1)
+    surfaceElements.btnF3.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 56)
 
-    surfaceElements.button385 = surface.makeButton(29, 4, 2, 1)
-    surfaceElements.button385.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 57)
+    // F4
+    surfaceElements.btnF4 = surface.makeButton(29, 4, 2, 1)
+    surfaceElements.btnF4.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 57)
 
-    surfaceElements.button389 = surface.makeButton(19, 14, 2, 2)
-    surfaceElements.button389.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 80)
+    // Utilities: Save
+    surfaceElements.btnSave = surface.makeButton(19, 14, 2, 2)
+    surfaceElements.btnSave.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 80)
 
-    surfaceElements.button393 = surface.makeButton(21, 14, 2, 2)
-    surfaceElements.button393.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 81)
+    // Utilities: Undo
+    surfaceElements.btnUndo = surface.makeButton(21, 14, 2, 2)
+    surfaceElements.btnUndo.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 81)
 
-    surfaceElements.button397 = surface.makeButton(23, 14, 2, 2)
-    surfaceElements.button397.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 83)
+    // Utilities: Enter
+    surfaceElements.btnEnter = surface.makeButton(23, 14, 2, 2)
+    surfaceElements.btnEnter.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 83)
 
-    surfaceElements.button401 = surface.makeButton(25, 14, 2, 2)
-    surfaceElements.button401.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 91)
+    // Rewind
+    surfaceElements.btnRewind = surface.makeButton(25, 14, 2, 2)
+    surfaceElements.btnRewind.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 91)
 
-    surfaceElements.button405 = surface.makeButton(27, 14, 2, 2)
-    surfaceElements.button405.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 86)
+    // Cycle
+    surfaceElements.btnCycle = surface.makeButton(27, 14, 2, 2)
+    surfaceElements.btnCycle.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 86)
 
-    surfaceElements.button409 = surface.makeButton(29, 14, 2, 2)
-    surfaceElements.button409.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 92)
+    // Fast Fwd
+    surfaceElements.btnFastFwd = surface.makeButton(29, 14, 2, 2)
+    surfaceElements.btnFastFwd.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 92)
 
-    surfaceElements.button413 = surface.makeButton(19, 16, 2, 1)
-    surfaceElements.button413.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 84)
+    // Marker
+    surfaceElements.btnMarker = surface.makeButton(19, 16, 2, 1)
+    surfaceElements.btnMarker.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 84)
 
-    surfaceElements.button417 = surface.makeButton(21, 16, 2, 1)
-    surfaceElements.button417.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 85)
+    // Nudge
+    surfaceElements.btnNudge = surface.makeButton(21, 16, 2, 1)
+    surfaceElements.btnNudge.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 85)
 
-    surfaceElements.button421 = surface.makeButton(23, 16, 2, 1)
-    surfaceElements.button421.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 82)
+    // Utilities: Cancel
+    surfaceElements.btnCancel = surface.makeButton(23, 16, 2, 1)
+    surfaceElements.btnCancel.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 82)
 
-    surfaceElements.button425 = surface.makeButton(25, 16, 2, 2)
-    surfaceElements.button425.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 95)
+    // Record
+    surfaceElements.btnRecord = surface.makeButton(25, 16, 2, 2)
+    surfaceElements.btnRecord.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 95)
 
-    surfaceElements.button429 = surface.makeButton(27, 16, 2, 2)
-    surfaceElements.button429.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 94)
+    // Play
+    surfaceElements.btnPlay = surface.makeButton(27, 16, 2, 2)
+    surfaceElements.btnPlay.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 94)
 
-    surfaceElements.button433 = surface.makeButton(29, 16, 2, 2)
-    surfaceElements.button433.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 93)
+    // Stop
+    surfaceElements.btnStop = surface.makeButton(29, 16, 2, 2)
+    surfaceElements.btnStop.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 93)
 
-    surfaceElements.button437 = surface.makeButton(2, 14, 2, 1)
-    surfaceElements.button437.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 105)
+    // Fader Touch Ch 2
+    surfaceElements.btnFaderTouch2 = surface.makeButton(2, 14, 2, 1)
+    surfaceElements.btnFaderTouch2.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 105)
 
-    surfaceElements.button441 = surface.makeButton(26, 19, 2, 2)
-    surfaceElements.button441.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 101)
+    // Scrub
+    surfaceElements.btnScrub = surface.makeButton(26, 19, 2, 2)
+    surfaceElements.btnScrub.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 101)
 
-    surfaceElements.button468 = surface.makeButton(21, 1, 2, 2)
-    surfaceElements.button468.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 52)
+    // Name/Value
+    surfaceElements.btnNameValue = surface.makeButton(21, 1, 2, 2)
+    surfaceElements.btnNameValue.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 52)
 
-    surfaceElements.button472 = surface.makeButton(23, 1, 2, 2)
-    surfaceElements.button472.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 53)
+    // SMPTE/Beats
+    surfaceElements.btnSmpteBeats = surface.makeButton(23, 1, 2, 2)
+    surfaceElements.btnSmpteBeats.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 53)
 
-    surfaceElements.button476 = surface.makeButton(25, 1, 2, 2)
-    surfaceElements.button476.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 70)
+    // Shift
+    surfaceElements.btnShift = surface.makeButton(25, 1, 2, 2)
+    surfaceElements.btnShift.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 70)
 
-    surfaceElements.button480 = surface.makeButton(27, 1, 2, 2)
-    surfaceElements.button480.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 71)
+    // Option
+    surfaceElements.btnOption = surface.makeButton(27, 1, 2, 2)
+    surfaceElements.btnOption.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 71)
 
-    surfaceElements.button484 = surface.makeButton(29, 1, 2, 2)
-    surfaceElements.button484.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 72)
+    // Control
+    surfaceElements.btnControl = surface.makeButton(29, 1, 2, 2)
+    surfaceElements.btnControl.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 72)
 
-    surfaceElements.knob488 = surface.makeKnob(27, 21, 4, 4)
-    surfaceElements.knob488.mSurfaceValue.mMidiBinding
+    // Jog Wheel
+    surfaceElements.knobJogWheel = surface.makeKnob(27, 21, 4, 4)
+    surfaceElements.knobJogWheel.mSurfaceValue.mMidiBinding
         .setInputPort(midiInput)
         .setOutputPort(midiOutput)
         .bindToControlChange(0, 60)
         .setTypeAbsolute()
 
-    surfaceElements.button493 = surface.makeButton(23, 6, 2, 1)
-    surfaceElements.button493.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 62)
+    // Global View: Midi Tracks
+    surfaceElements.btnViewMidi = surface.makeButton(23, 6, 2, 1)
+    surfaceElements.btnViewMidi.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 62)
 
-    surfaceElements.button497 = surface.makeButton(25, 6, 2, 1)
-    surfaceElements.button497.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 63)
+    // Global View: Inputs
+    surfaceElements.btnViewInputs = surface.makeButton(25, 6, 2, 1)
+    surfaceElements.btnViewInputs.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 63)
 
-    surfaceElements.button501 = surface.makeButton(27, 6, 2, 1)
-    surfaceElements.button501.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 64)
+    // Global View: Audio Tracks
+    surfaceElements.btnViewAudio = surface.makeButton(27, 6, 2, 1)
+    surfaceElements.btnViewAudio.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 64)
 
-    surfaceElements.button505 = surface.makeButton(29, 6, 2, 1)
-    surfaceElements.button505.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 65)
+    // Global View: Audio Instrument
+    surfaceElements.btnViewInstr = surface.makeButton(29, 6, 2, 1)
+    surfaceElements.btnViewInstr.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 65)
 
-    surfaceElements.button509 = surface.makeButton(23, 7, 2, 1)
-    surfaceElements.button509.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 66)
+    // Global View: Aux
+    surfaceElements.btnViewAux = surface.makeButton(23, 7, 2, 1)
+    surfaceElements.btnViewAux.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 66)
 
-    surfaceElements.button513 = surface.makeButton(25, 7, 2, 1)
-    surfaceElements.button513.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 67)
+    // Global View: Busses
+    surfaceElements.btnViewBusses = surface.makeButton(25, 7, 2, 1)
+    surfaceElements.btnViewBusses.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 67)
 
-    surfaceElements.button517 = surface.makeButton(27, 7, 2, 1)
-    surfaceElements.button517.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 68)
+    // Global View: Outputs
+    surfaceElements.btnViewOutputs = surface.makeButton(27, 7, 2, 1)
+    surfaceElements.btnViewOutputs.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 68)
 
-    surfaceElements.button521 = surface.makeButton(29, 7, 2, 1)
-    surfaceElements.button521.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 51)
+    // Global View
+    surfaceElements.btnGlobalView = surface.makeButton(29, 7, 2, 1)
+    surfaceElements.btnGlobalView.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 51)
 
-    surfaceElements.button525 = surface.makeButton(19, 17, 2, 1)
-    surfaceElements.button525.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 88)
+    // Replace
+    surfaceElements.btnReplace = surface.makeButton(19, 17, 2, 1)
+    surfaceElements.btnReplace.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 88)
 
-    surfaceElements.button529 = surface.makeButton(21, 17, 2, 1)
-    surfaceElements.button529.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 89)
+    // Click
+    surfaceElements.btnClick = surface.makeButton(21, 17, 2, 1)
+    surfaceElements.btnClick.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 89)
 
-    surfaceElements.button533 = surface.makeButton(23, 17, 2, 1)
-    surfaceElements.button533.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 90)
+    // Solo
+    surfaceElements.btnSolo = surface.makeButton(23, 17, 2, 1)
+    surfaceElements.btnSolo.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 90)
 
     return surfaceElements
 }

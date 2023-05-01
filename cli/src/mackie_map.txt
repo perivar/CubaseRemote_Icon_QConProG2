@@ -1,0 +1,140 @@
+// MIDI NOTES   
+REC_RDY_1           0x00    0       REC/RDY CH. 1
+REC_RDY_2           0x01    1       REC/RDY CH. 2
+REC_RDY_3           0x02    2       REC/RDY CH. 3
+REC_RDY_4           0x03    3       REC/RDY CH. 4
+REC_RDY_5           0x04    4       REC/RDY CH. 5
+REC_RDY_6           0x05    5       REC/RDY CH. 6
+REC_RDY_7           0x06    6       REC/RDY CH. 7
+REC_RDY_8           0x07    7       REC/RDY CH. 8
+SOLO_1              0x08    8       SOLO CH. 1  
+SOLO_2              0x09    9       SOLO CH. 2  
+SOLO_3              0x0A    10      SOLO CH. 3
+SOLO_4              0x0B    11      SOLO CH. 4
+SOLO_5              0x0C    12      SOLO CH. 5
+SOLO_6              0x0D    13      SOLO CH. 6
+SOLO_7              0x0E    14      SOLO CH. 7
+SOLO_8              0x0F    15      SOLO CH. 8
+MUTE_1              0x10    16      MUTE CH. 1
+MUTE_2              0x11    17      MUTE CH. 2
+MUTE_3              0x12    18      MUTE CH. 3
+MUTE_4              0x13    19      MUTE CH. 4
+MUTE_5              0x14    20      MUTE CH. 5
+MUTE_6              0x15    21      MUTE CH. 6
+MUTE_7              0x16    22      MUTE CH. 7
+MUTE_8              0x17    23      MUTE CH. 8
+SELECT_1            0x18    24      SELECT CH. 1
+SELECT_2            0x19    25      SELECT CH. 2
+SELECT_3            0x1A    26      SELECT CH. 3
+SELECT_4            0x1B    27      SELECT CH. 4
+SELECT_5            0x1C    28      SELECT CH. 5
+SELECT_6            0x1D    29      SELECT CH. 6
+SELECT_7            0x1E    30      SELECT CH. 7
+SELECT_8            0x1F    31      SELECT CH. 8
+V_POT_SELECT_1      0x20    32      V-POT SELECT CH. 1
+V_POT_SELECT_2      0x21    33      V-POT SELECT CH. 2
+V_POT_SELECT_3      0x22    34      V-POT SELECT CH. 3
+V_POT_SELECT_4      0x23    35      V-POT SELECT CH. 4
+V_POT_SELECT_5      0x24    36      V-POT SELECT CH. 5
+V_POT_SELECT_6      0x25    37      V-POT SELECT CH. 6
+V_POT_SELECT_7      0x26    38      V-POT SELECT CH. 7
+V_POT_SELECT_8      0x27    39      V-POT SELECT CH. 8
+ASSIGN_TRACK        0x28    40      ASSIGNMENT: TRACK
+ASSIGN_SEND         0x29    41      ASSIGNMENT: SEND
+ASSIGN_PAN          0x2A    42      ASSIGNMENT: PAN/SURROUND
+ASSIGN_PLUGIN       0x2B    43      ASSIGNMENT: PLUG-IN
+ASSIGN_EQ           0x2C    44      ASSIGNMENT: EQ
+ASSIGN_INSTR        0x2D    45      ASSIGNMENT: INSTRUMENT
+BANK_LEFT           0x2E    46      FADER BANKS: BANK LEFT
+BANK_RIGHT          0x2F    47      FADER BANKS: BANK RIGHT
+CHANNEL_LEFT        0x30    48      FADER BANKS: CHANNEL LEFT
+CHANNEL_RIGHT       0x31    49      FADER BANKS: CHANNEL RIGHT
+FLIP                0x32    50      FLIP
+GLOBAL_VIEW         0x33    51      GLOBAL VIEW
+NAME_VALUE          0x34    52      NAME/VALUE
+SMPTE_BEATS         0x35    53      SMPTE/BEATS
+F1                  0x36    54      F1
+F2                  0x37    55      F2
+F3                  0x38    56      F3
+F4                  0x39    57      F4
+F5                  0x3A    58      F5
+F6                  0x3B    59      F6
+F7                  0x3C    60      F7
+F8                  0x3D    61      F8
+VIEW_MIDI           0x3E    62      GLOBAL VIEW: MIDI TRACKS
+VIEW_INPUTS         0x3F    63      GLOBAL VIEW: INPUTS
+VIEW_AUDIO          0x40    64      GLOBAL VIEW: AUDIO TRACKS
+VIEW_INSTR          0x41    65      GLOBAL VIEW: AUDIO INSTRUMENT
+VIEW_AUX            0x42    66      GLOBAL VIEW: AUX
+VIEW_BUSSES         0x43    67      GLOBAL VIEW: BUSSES
+VIEW_OUTPUTS        0x44    68      GLOBAL VIEW: OUTPUTS
+VIEW_USER           0x45    69      GLOBAL VIEW: USER
+SHIFT               0x46    70      SHIFT
+OPTION              0x47    71      OPTION
+CONTROL             0x48    72      CONTROL
+CMD_ALT             0x49    73      CMD/ALT
+AUTOMATION_READ_OF  0x4A    74      AUTOMATION: READ/OFF
+AUTOMATION_WRITE    0x4B    75      AUTOMATION: WRITE
+AUTOMATION_TRIM     0x4C    76      AUTOMATION: TRIM
+AUTOMATION_TOUCH    0x4D    77      AUTOMATION: TOUCH
+AUTOMATION_LATCH    0x4E    78      AUTOMATION: LATCH
+GROUP               0x4F    79      GROUP
+SAVE                0x50    80      UTILITIES: SAVE
+UNDO                0x51    81      UTILITIES: UNDO
+CANCEL              0x52    82      UTILITIES: CANCEL
+ENTER               0x53    83      UTILITIES: ENTER
+MARKER              0x54    84      MARKER
+NUDGE               0x55    85      NUDGE
+CYCLE               0x56    86      CYCLE
+DROP                0x57    87      DROP
+REPLACE             0x58    88      REPLACE
+CLICK               0x59    89      CLICK
+SOLO                0x5A    90      SOLO
+REWIND              0x5B    91      REWIND
+FAST_FWD            0x5C    92      FAST FWD
+STOP                0x5D    93      STOP
+PLAY                0x5E    94      PLAY
+RECORD              0x5F    95      RECORD
+UP                  0x60    96      CURSOR UP
+DOWN                0x61    97      CURSOR DOWN
+LEFT                0x62    98      CURSOR LEFT
+RIGHT               0x63    99      CURSOR RIGHT
+ZOOM                0x64    100     ZOOM
+SCRUB               0x65    101     SCRUB
+USER_SWITCH_A       0x66    102     USER SWITCH A
+USER_SWITCH_B       0x67    103     USER SWITCH B
+FADER_TOUCH_1       0x68    104     FADER TOUCH CH. 1
+FADER_TOUCH_2       0x69    105     FADER TOUCH CH. 2
+FADER_TOUCH_3       0x6A    106     FADER TOUCH CH. 3
+FADER_TOUCH_4       0x6B    107     FADER TOUCH CH. 4
+FADER_TOUCH_5       0x6C    108     FADER TOUCH CH. 5
+FADER_TOUCH_6       0x6D    109     FADER TOUCH CH. 6
+FADER_TOUCH_7       0x6E    110     FADER TOUCH CH. 7
+FADER_TOUCH_8       0x6F    111     FADER TOUCH CH. 8
+FADER_TOUCH_MASTER  0x70    112     FADER TOUCH MASTER
+SMPTE               0x71    113     SMPTE LED
+BEATS               0x72    114     BEATS LED
+RUDE_SOLO           0x73    115     RUDE SOLO LIGHT
+RELAY               0x76    118     RELAY CLICK
+
+// CONTROL CHANGE
+V_POT_1             0x10    16      V-POT CH. 1
+V_POT_2             0x11    17      V-POT CH. 2
+V_POT_3             0x12    18      V-POT CH. 3
+V_POT_4             0x13    19      V-POT CH. 4
+V_POT_5             0x14    20      V-POT CH. 5
+V_POT_6             0x15    21      V-POT CH. 6
+V_POT_7             0x16    22      V-POT CH. 7
+V_POT_8             0x17    23      V-POT CH. 8
+JOG_WHEEL           0x3C    60      JOG WHEEL
+
+// PITCH BEND
+FADER_1             0x0     0       FADER CH. 1
+FADER_2             0x1     1       FADER CH. 2
+FADER_3             0x2     2       FADER CH. 3
+FADER_4             0x3     3       FADER CH. 4
+FADER_5             0x4     4       FADER CH. 5
+FADER_6             0x5     5       FADER CH. 6
+FADER_7             0x6     6       FADER CH. 7
+FADER_8             0x7     7       FADER CH. 8
+FADER_MASTER        0x8     8       FADER MASTER

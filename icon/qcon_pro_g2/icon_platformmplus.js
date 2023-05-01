@@ -72,7 +72,7 @@ function makeSurfaceElements() {
     var yKnobStrip = 5
 
     for (var i = 0; i < surfaceElements.numStrips; ++i) {
-        surfaceElements.channelControls[i] = makeChannelControl(surface, midiInput, midiOutput, xKnobStrip, yKnobStrip, i, surfaceElements)
+        surfaceElements.channelControls[i] = makeChannelControl(surface, midiInput, midiOutput, xKnobStrip, yKnobStrip, i)
     }
 
     surfaceElements.faderMaster = makeMasterControl(
@@ -81,10 +81,9 @@ function makeSurfaceElements() {
         midiOutput,
         xKnobStrip + 1,
         yKnobStrip + 4,
-        surfaceElements.numStrips,
-        surfaceElements
+        surfaceElements.numStrips
     )
-    surfaceElements.transport = makeTransport(surface, midiInput, midiOutput, xKnobStrip + 63, yKnobStrip + 4, surfaceElements)
+    surfaceElements.transport = makeTransport(surface, midiInput, midiOutput, xKnobStrip + 63, yKnobStrip + 4)
 
     // Track the selected track name
     surfaceElements.selectedTrack = surface.makeCustomValueVariable('selectedTrack')
