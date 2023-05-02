@@ -48,34 +48,7 @@ function makeSurfaceElements() {
         surfaceElements.channelControls[i] = makeChannelControl(surface, midiInput, midiOutput, xKnobStrip, yKnobStrip, i)
     }
 
-    // Fader Touch Master
-    surfaceElements.btnFaderTouchMaster = surface.makeButton(16, 14, 2, 1)
-    surfaceElements.btnFaderTouchMaster.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 112)
-
-    // Fader Master
-    surfaceElements.fdrFaderMaster = surface.makeFader(16, 15, 2, 10).setTypeVertical()
-    surfaceElements.fdrFaderMaster.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(8)
-
-    // Buttons above Fader Master
-    // Track/Fader Control: Flip
-    surfaceElements.btnFlip = surface.makeButton(16, 3, 2, 2)
-    surfaceElements.btnFlip.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 50)
-
-    // Track/Fader Control: Channel Left
-    surfaceElements.btnChannelLeft = surface.makeButton(16, 5, 2, 2)
-    surfaceElements.btnChannelLeft.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 48)
-
-    // Track/Fader Control: Channel Right
-    surfaceElements.btnChannelRight = surface.makeButton(16, 7, 2, 2)
-    surfaceElements.btnChannelRight.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 49)
-
-    // Track/Fader Control: Bank Left
-    surfaceElements.btnBankLeft = surface.makeButton(16, 9, 2, 2)
-    surfaceElements.btnBankLeft.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 46)
-
-    // Track/Fader Control: Bank Right
-    surfaceElements.btnBankRight = surface.makeButton(16, 11, 2, 2)
-    surfaceElements.btnBankRight.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 47)
+    surfaceElements.faderMaster = makeMasterControl(surface, midiInput, midiOutput, xKnobStrip, yKnobStrip, surfaceElements.numStrips)
 
     // Navigation Section
     // Cursor Left
@@ -277,8 +250,8 @@ function makeSurfaceElements() {
 
     // Row 16 Upper
     // Left
-    surfaceElements.btnLeft = surface.makeButton(19, 16, 2, 1)
-    surfaceElements.btnLeft.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 84)
+    // surfaceElements.btnLeft = surface.makeButton(19, 16, 2, 1)
+    // surfaceElements.btnLeft.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 84)
 
     // Right
     surfaceElements.btnRight = surface.makeButton(21, 16, 2, 1)

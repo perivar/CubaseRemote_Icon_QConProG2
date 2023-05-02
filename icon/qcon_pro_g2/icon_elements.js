@@ -135,12 +135,12 @@ function Helper_updateDisplay(idRow1, idRow2, idAltRow1, idAltRow2, activeDevice
  * @param {boolean} circle
  */
 function makeLedButton(surface, midiInput, midiOutput, note, x, y, w, h, circle) {
-    var button = surface.makeButton(x, y, w, h)
+    var btn = surface.makeButton(x, y, w, h)
 
-    button.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToNote(0, note)
+    btn.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToNote(0, note)
 
     if (circle) {
-        button.setShapeCircle()
+        btn.setShapeCircle()
     }
 
     // button.mSurfaceValue.mOnProcessValueChange = function (activeDevice) {
@@ -154,7 +154,7 @@ function makeLedButton(surface, midiInput, midiOutput, note, x, y, w, h, circle)
 
     // when registering a callback function, best thing is to use the “bind”-method to bind members to the “this” object within the callback function.
     // If you get used to it, you’ll see you don’t even need the activeDevice.getState/setState any more.
-    button.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value) {
+    btn.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value) {
         if (value) {
             midiOutput.sendMidi(activeDevice, [0x90, this.note, 127])
             console.log('NOTE_ON =>' + this.note)
@@ -164,7 +164,7 @@ function makeLedButton(surface, midiInput, midiOutput, note, x, y, w, h, circle)
         }
     }.bind({ note })
 
-    return button
+    return btn
 }
 
 /**
@@ -217,12 +217,15 @@ function clearAllLeds(activeDevice, midiOutput) {
 function makeTouchFader(surface, midiInput, midiOutput, channelIndex, x, y, w, h) {
     // Fader Touch + Fader
     var btnFaderTouch = surface.makeButton(x, y, w, 1)
-    btnFaderTouch.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToNote(0, 104 + channelIndex)
+    btnFaderTouch.mSurfaceValue.mMidiBinding
+        .setInputPort(midiInput)
+        .setOutputPort(midiOutput)
+        .bindToNote(0, 104 + channelIndex)
 
     var fdrFader = surface.makeFader(x, y + 1, w, h).setTypeVertical()
     fdrFader.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(channelIndex)
 
-    return [btnFaderTouch, fdrFader]
+    return { btnFaderTouch, fdrFader }
 }
 
 /**
@@ -274,6 +277,10 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, channelIndex) 
     channelControl.x = x + 2 * channelIndex
     channelControl.y = y
     channelControl.channelIndex = channelIndex // 0-7 = Channel number 1-8
+
+    channelControl.ident = function () {
+        return 'Class ChannelControl'
+    }
 
     // V-Pot Variables
     var VPOT_MODE_SINGLE_DOT = 0
@@ -378,8 +385,8 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, channelIndex) 
     var fader_x = channelControl.x
     var fader_y = channelControl.y + 11
     var tf = makeTouchFader(surface, midiInput, midiOutput, channelIndex, fader_x, fader_y, 2, 10)
-    channelControl.btnFaderTouch = tf[0]
-    channelControl.fdrFader = tf[1]
+    channelControl.btnFaderTouch = tf.btnFaderTouch
+    channelControl.fdrFader = tf.fdrFader
 
     channelControl.fdrFader.mSurfaceValue.mOnTitleChange = function (activeDevice, objectTitle, valueTitle) {
         // console.log("Fader Title Change: " + channelIndex + "::" + objectTitle + ":" + valueTitle)
@@ -567,30 +574,48 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, channelIndex) 
  * @param {MR_DeviceSurface} surface
  * @param {MR_DeviceMidiInput} midiInput
  * @param {MR_DeviceMidiOutput} midiOutput
- * @param {number} x           - x location of the push encoder in the gui
- * @param {number} y           - y location of the push encoder in the gui
- * @param {number} instance    - instance of the push encoder.
+ * @param {number} x           - x location of the fader in the gui
+ * @param {number} y           - y location of the fader in the gui
+ * @param {number} channelIndex - channel index of the fader
  * @returns {Object}
  */
-function makeMasterControl(surface, midiInput, midiOutput, x, y, instance) {
+function makeMasterControl(surface, midiInput, midiOutput, x, y, channelIndex) {
     var masterControl = {}
     masterControl.surface = surface
     masterControl.midiInput = midiInput
     masterControl.midiOutput = midiOutput
-    masterControl.x = x + 7 * instance
+    masterControl.x = x + 2 * channelIndex
     masterControl.y = y
-    masterControl.instance = instance // 9 - Master
+    masterControl.channelIndex = channelIndex // 9 - Master
 
     masterControl.ident = function () {
-        return 'Class masterControl'
+        return 'Class MasterControl'
     }
 
+    var start_x = masterControl.x
+    var start_y = y
+
+    // Buttons above Fader Master
+    // Track/Fader Control: Flip
+    masterControl.btnFlip = makeLedButton(surface, midiInput, midiOutput, 50, start_x, start_y, 2, 2, false)
+
+    // Channel Buttons
+    // Track/Fader Control: Channel Left
+    masterControl.btnChannelLeft = makeLedButton(surface, midiInput, midiOutput, 48, start_x, start_y + 2, 2, 2, false)
+
+    // Track/Fader Control: Channel Right
+    masterControl.btnChannelRight = makeLedButton(surface, midiInput, midiOutput, 49, start_x, start_y + 4, 2, 2, false)
+
+    // Track/Fader Control: Bank Left
+    masterControl.btnBankLeft = makeLedButton(surface, midiInput, midiOutput, 46, start_x, start_y + 6, 2, 2, false)
+
+    // Track/Fader Control: Bank Right
+    masterControl.btnBankRight = makeLedButton(surface, midiInput, midiOutput, 47, start_x, start_y + 8, 2, 2, false)
+
     // Fader + Fader Touch
-    var fader_x = masterControl.x
-    var fader_y = y + 3
-    var tf = makeTouchFader(surface, midiInput, midiOutput, instance, fader_x, fader_y, 3, 18)
-    masterControl.fdrFader = tf[0]
-    masterControl.btnFaderTouch = tf[1]
+    var tf = makeTouchFader(surface, midiInput, midiOutput, channelIndex, start_x, start_y + 11, 2, 10)
+    masterControl.btnFaderTouch = tf.btnFaderTouch
+    masterControl.fdrFader = tf.fdrFader
 
     masterControl.fdrFader.mSurfaceValue.mOnTitleChange = function (activeDevice, objectTitle, valueTitle) {
         // console.log("Fader Title Change: " + channelIndex + "::" + objectTitle + ":" + valueTitle)
@@ -649,13 +674,10 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, instance) {
         }
     }
 
-    // Channel Buttons
-    masterControl.mixer_button = makeLedButton(surface, midiInput, midiOutput, 84, fader_x + 3, fader_y + 6, 3, 3, false)
-    masterControl.read_button = makeLedButton(surface, midiInput, midiOutput, 74, fader_x + 3, fader_y + 9, 3, 3, false)
-    masterControl.write_button = makeLedButton(surface, midiInput, midiOutput, 75, fader_x + 3, fader_y + 12, 3, 3, false)
-
-    masterControl.mixer_button.mSurfaceValue.mOnProcessValueChange = function (activeDevice) {
-        var value = masterControl.mixer_button.mSurfaceValue.getProcessValue(activeDevice)
+    // Switch Mode Button
+    masterControl.btnLeft = makeLedButton(surface, midiInput, midiOutput, 84, 19, 16, 2, 1, false)
+    masterControl.btnLeft.mSurfaceValue.mOnProcessValueChange = function (activeDevice) {
+        var value = masterControl.btnLeft.mSurfaceValue.getProcessValue(activeDevice)
 
         if (value == 1) {
             var displayType = activeDevice.getState('displayType')
@@ -702,12 +724,12 @@ function makeTransport(surface, midiInput, midiOutput, x, y) {
     transport.x = x
     transport.y = y
 
-    var w = 3
-    var h = 3
-
     transport.ident = function () {
         return 'Class Transport'
     }
+
+    var w = 3
+    var h = 3
 
     /**
      * Bind button to Midi Control Change Utility Function

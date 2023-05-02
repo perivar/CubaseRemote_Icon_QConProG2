@@ -67,7 +67,7 @@ function makeSurfaceElements() {
         surfaceElements.channelControls[i] = makeChannelControl(surface, midiInput, midiOutput, xKnobStrip, yKnobStrip, i)
     }
 
-    surfaceElements.fdrFaderMaster = makeMasterControl(
+    surfaceElements.faderMaster = makeMasterControl(
         surface,
         midiInput,
         midiOutput,
@@ -273,7 +273,7 @@ function makePageWithDefaults(name) {
     var MasterFaderSubPageArea = page.makeSubPageArea('MasterFader')
     var subPageMasterFaderValue = makeSubPage(MasterFaderSubPageArea, 'MF_ValueUnderCursor')
 
-    page.makeValueBinding(surfaceElements.fdrFaderMaster.fdrFader.mSurfaceValue, page.mHostAccess.mMouseCursor.mValueUnderMouse)
+    page.makeValueBinding(surfaceElements.faderMaster.fdrFader.mSurfaceValue, page.mHostAccess.mMouseCursor.mValueUnderMouse)
         .setValueTakeOverModeJump()
         .setSubPage(subPageMasterFaderValue)
 
@@ -281,15 +281,9 @@ function makePageWithDefaults(name) {
     var selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
 
     // Automation for selected tracks
-    page.makeValueBinding(
-        surfaceElements.fdrFaderMaster.read_button.mSurfaceValue,
-        selectedTrackChannel.mValue.mAutomationRead
-    ).setTypeToggle()
+    page.makeValueBinding(surfaceElements.faderMaster.btnRead.mSurfaceValue, selectedTrackChannel.mValue.mAutomationRead).setTypeToggle()
 
-    page.makeValueBinding(
-        surfaceElements.fdrFaderMaster.write_button.mSurfaceValue,
-        selectedTrackChannel.mValue.mAutomationWrite
-    ).setTypeToggle()
+    page.makeValueBinding(surfaceElements.faderMaster.btnWrite.mSurfaceValue, selectedTrackChannel.mValue.mAutomationWrite).setTypeToggle()
 
     return page
 }
