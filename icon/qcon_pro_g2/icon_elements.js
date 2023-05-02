@@ -215,17 +215,31 @@ function clearAllLeds(activeDevice, midiOutput) {
  * @param {number} h            - height of the fader.
  */
 function makeTouchFader(surface, midiInput, midiOutput, channelIndex, x, y, w, h) {
+    var touchFader = {}
+    touchFader.surface = surface
+    touchFader.midiInput = midiInput
+    touchFader.midiOutput = midiOutput
+    touchFader.x = x
+    touchFader.y = y
+    touchFader.w = w
+    touchFader.h = h
+    touchFader.channelIndex = channelIndex
+
+    touchFader.ident = function () {
+        return 'Class TouchFader'
+    }
+
     // Fader Touch + Fader
-    var btnFaderTouch = surface.makeButton(x, y, w, 1)
-    btnFaderTouch.mSurfaceValue.mMidiBinding
+    touchFader.btnFaderTouch = touchFader.surface.makeButton(touchFader.x, touchFader.y, touchFader.w, 1)
+    touchFader.btnFaderTouch.mSurfaceValue.mMidiBinding
         .setInputPort(midiInput)
         .setOutputPort(midiOutput)
         .bindToNote(0, 104 + channelIndex)
 
-    var fdrFader = surface.makeFader(x, y + 1, w, h).setTypeVertical()
-    fdrFader.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(channelIndex)
+    touchFader.fdrFader = touchFader.surface.makeFader(touchFader.x, touchFader.y + 1, touchFader.w, touchFader.h).setTypeVertical()
+    touchFader.fdrFader.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(channelIndex)
 
-    return { btnFaderTouch, fdrFader }
+    return touchFader
 }
 
 /**
@@ -393,12 +407,16 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, channelIndex) 
     // Fader + Fader Touch
     var fader_x = channelControl.x
     var fader_y = channelControl.y + 11
-    var tf = makeTouchFader(surface, midiInput, midiOutput, channelIndex, fader_x, fader_y, 2, 10)
-    channelControl.btnFaderTouch = tf.btnFaderTouch
-    channelControl.fdrFader = tf.fdrFader
+    var touchFader = makeTouchFader(surface, midiInput, midiOutput, channelIndex, fader_x, fader_y, 2, 10)
+    channelControl.btnFaderTouch = touchFader.btnFaderTouch
+    channelControl.fdrFader = touchFader.fdrFader
 
     channelControl.btnFaderTouch.mSurfaceValue.mOnProcessValueChange = function (activeDevice, touched, value2) {
-        console.log('Fader Touch Change: ' + touched + ':' + value2)
+        console.log('Fader Touch Change: ' + channelIndex + '::' + touched + ':' + value2)
+    }
+
+    channelControl.fdrFader.mSurfaceValue.mOnProcessValueChange = function (activeDevice, newValue, oldValue) {
+        console.log('Fader Change: ' + channelIndex + '::' + newValue + ':' + oldValue)
     }
 
     channelControl.fdrFader.mSurfaceValue.mOnTitleChange = function (activeDevice, objectTitle, valueTitle) {
@@ -629,9 +647,9 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, channelIndex) {
     masterControl.btnBankRight = makeLedButton(surface, midiInput, midiOutput, 47, start_x, start_y + 8, 2, 2, false)
 
     // Fader + Fader Touch
-    var tf = makeTouchFader(surface, midiInput, midiOutput, channelIndex, start_x, start_y + 11, 2, 10)
-    masterControl.btnFaderTouch = tf.btnFaderTouch
-    masterControl.fdrFader = tf.fdrFader
+    var touchFader = makeTouchFader(surface, midiInput, midiOutput, channelIndex, start_x, start_y + 11, 2, 10)
+    masterControl.btnFaderTouch = touchFader.btnFaderTouch
+    masterControl.fdrFader = touchFader.fdrFader
 
     masterControl.fdrFader.mSurfaceValue.mOnTitleChange = function (activeDevice, objectTitle, valueTitle) {
         console.log('Fader Title Change: ' + channelIndex + '::' + objectTitle + ':' + valueTitle)
@@ -659,8 +677,12 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, channelIndex) {
         }
     }
 
+    masterControl.fdrFader.mSurfaceValue.mOnProcessValueChange = function (activeDevice, newValue, oldValue) {
+        console.log('MasterFader Change: ' + channelIndex + '::' + newValue + ':' + oldValue)
+    }
+
     masterControl.btnFaderTouch.mSurfaceValue.mOnProcessValueChange = function (activeDevice, touched, value2) {
-        console.log('MasterFader Touch Change: ' + touched + ':' + value2)
+        console.log('MasterFader Touch Change: ' + channelIndex + '::' + touched + ':' + value2)
 
         // value===-1 means touch released
         if (value2 == -1) {
