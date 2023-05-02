@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import * as fs from 'fs';
 import { Arguments, Argv } from 'yargs';
 
+import { Cubase_Map_CC, Cubase_Map_Midi, Cubase_Map_PitchBend } from './cubase_map';
 import { Mackie_Map_CC, Mackie_Map_Midi, Mackie_Map_PitchBend } from './mackie_map';
 
 const errorStyle = chalk.bold.red;
@@ -50,8 +51,13 @@ export const builder = (yargs: Argv): Argv<Args> => {
       description: 'Run with verbose logging',
       type: 'boolean',
     })
+    .option('mackie', {
+      alias: 'm',
+      description: 'Use Mackie Mapping (and not Cubase which is the default)',
+      type: 'boolean',
+    })
     .example('$0 convert -i in.json -o out.js', 'Convert midi remote json file')
-    .example('$0 list --help', 'Show help')
+    .example('$0 convert --help', 'Show help')
     .check((argv: Arguments<Args>) => {
       if (!argv.input || !argv.output) {
         throw new Error('You must supply both input and output');
@@ -64,11 +70,17 @@ export const builder = (yargs: Argv): Argv<Args> => {
 export const handler = async (argv: Arguments<Args>): Promise<void> => {
   // process arguments using yarg
   let isVerbose = false;
+  let isMackie = false; // use mackie default mapping and not Cubase
   const doConvert = true;
 
   if (argv.verbose) {
     console.info(warningStyle('Verbose mode on.'));
     isVerbose = true;
+  }
+
+  if (argv.mackie) {
+    console.info(warningStyle('Using Mackie Mapping and not Cubase (default).'));
+    isMackie = true;
   }
 
   if (doConvert) {
@@ -190,7 +202,7 @@ export const handler = async (argv: Arguments<Args>): Promise<void> => {
                   const encoderBinding = lookupBinding(objects, memberEncoderValue);
                   // Note! a push encoder has two bindings and therefore two mackie variable names
                   // Here we choose to use the encoder name as the root variable name
-                  const mackieEncoderVar = getMackieVariableFromBinding(encoderBinding);
+                  const mackieEncoderVar = getMackieVariableFromBinding(isMackie, encoderBinding);
 
                   // if there is a mackie binding for the encoder, use this as the variable name
                   const encoderNameId = mackieEncoderVar?.name ? mackieEncoderVar.name : id;
@@ -222,7 +234,7 @@ export const handler = async (argv: Arguments<Args>): Promise<void> => {
 
                   // lookup bindings
                   const buttonBinding = lookupBinding(objects, memberSurfaceValue);
-                  const mackieButtonVar = getMackieVariableFromBinding(buttonBinding);
+                  const mackieButtonVar = getMackieVariableFromBinding(isMackie, buttonBinding);
 
                   // if there is a mackie binding for the button, use this as the variable name
                   const buttonNameId = mackieButtonVar?.name ? mackieButtonVar.name : id;
@@ -253,7 +265,7 @@ export const handler = async (argv: Arguments<Args>): Promise<void> => {
 
                   // lookup binding
                   const faderBinding = lookupBinding(objects, memberSurfaceValue);
-                  const mackieFaderVar = getMackieVariableFromBinding(faderBinding);
+                  const mackieFaderVar = getMackieVariableFromBinding(isMackie, faderBinding);
 
                   // if there is a mackie binding for the fader, use this as the variable name
                   const faderNameId = mackieFaderVar?.name ? mackieFaderVar.name : id;
@@ -280,7 +292,7 @@ export const handler = async (argv: Arguments<Args>): Promise<void> => {
 
                   // lookup binding
                   const knobBinding = lookupBinding(objects, memberSurfaceValue);
-                  const mackieKnobVar = getMackieVariableFromBinding(knobBinding);
+                  const mackieKnobVar = getMackieVariableFromBinding(isMackie, knobBinding);
 
                   // if there is a mackie binding for the knob, use this as the variable name
                   const knobNameId = mackieKnobVar?.name ? mackieKnobVar.name : id;
@@ -388,16 +400,28 @@ const addBindingToOutput = (outputArray: any[], elementName: string, id: string,
   }
 };
 
-const getMackieVariableFromBinding = (binding?: ObjectElement): MackieVariable | undefined => {
+const getMackieVariableFromBinding = (isMackie: boolean, binding?: ObjectElement): MackieVariable | undefined => {
   switch (binding?.type) {
     case 'MidiBindingToNote':
-      return Mackie_Map_Midi.get(binding?.members?.Pitch);
+      if (isMackie) {
+        return Mackie_Map_Midi.get(binding?.members?.Pitch);
+      } else {
+        return Cubase_Map_Midi.get(binding?.members?.Pitch);
+      }
 
     case 'MidiBindingToControlChange':
-      return Mackie_Map_CC.get(binding?.members?.ControlChangeNumber);
+      if (isMackie) {
+        return Mackie_Map_CC.get(binding?.members?.ControlChangeNumber);
+      } else {
+        return Cubase_Map_CC.get(binding?.members?.ControlChangeNumber);
+      }
 
     case 'MidiBindingToPitchBend':
-      return Mackie_Map_PitchBend.get(binding?.members?.ChannelNumber);
+      if (isMackie) {
+        return Mackie_Map_PitchBend.get(binding?.members?.ChannelNumber);
+      } else {
+        return Cubase_Map_PitchBend.get(binding?.members?.ChannelNumber);
+      }
 
     default:
       return undefined;

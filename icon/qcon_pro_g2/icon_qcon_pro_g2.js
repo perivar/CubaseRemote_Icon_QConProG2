@@ -56,6 +56,7 @@ function makeSurfaceElements() {
     surfaceElements.fdrFaderMaster = surface.makeFader(16, 15, 2, 10).setTypeVertical()
     surfaceElements.fdrFaderMaster.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(8)
 
+    // Buttons above Fader Master
     // Flip
     surfaceElements.btnFlip = surface.makeButton(16, 3, 2, 2)
     surfaceElements.btnFlip.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 50)
@@ -81,10 +82,6 @@ function makeSurfaceElements() {
     surfaceElements.btnLeft = surface.makeButton(20, 21, 2, 2)
     surfaceElements.btnLeft.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 98)
 
-    // Zoom
-    surfaceElements.btnZoom = surface.makeButton(22, 21, 2, 2)
-    surfaceElements.btnZoom.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 100)
-
     // Cursor Right
     surfaceElements.btnRight = surface.makeButton(24, 21, 2, 2)
     surfaceElements.btnRight.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 99)
@@ -96,6 +93,10 @@ function makeSurfaceElements() {
     // Cursor Down
     surfaceElements.btnDown = surface.makeButton(22, 23, 2, 2)
     surfaceElements.btnDown.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 97)
+
+    // Zoom
+    surfaceElements.btnZoom = surface.makeButton(22, 21, 2, 2)
+    surfaceElements.btnZoom.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 100)
 
     // Scrub and Jog Wheel
     // Scrub
@@ -109,6 +110,95 @@ function makeSurfaceElements() {
         .setOutputPort(midiOutput)
         .bindToControlChange(0, 60)
         .setTypeAbsolute()
+
+    // Upper Button Row
+    // Name/Value
+    surfaceElements.btnNameValue = surface.makeButton(21, 1, 2, 2)
+    surfaceElements.btnNameValue.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 52)
+
+    // SMPTE/Beats
+    surfaceElements.btnSmpteBeats = surface.makeButton(23, 1, 2, 2)
+    surfaceElements.btnSmpteBeats.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 53)
+
+    // Shift (Undo)
+    surfaceElements.btnShift = surface.makeButton(25, 1, 2, 2)
+    surfaceElements.btnShift.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 70)
+
+    // Option (Redo)
+    surfaceElements.btnOption = surface.makeButton(27, 1, 2, 2)
+    surfaceElements.btnOption.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 71)
+
+    // Control (Save)
+    surfaceElements.btnControl = surface.makeButton(29, 1, 2, 2)
+    surfaceElements.btnControl.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 72)
+
+    // Function Buttons - Upper Row
+    // F1
+    surfaceElements.btnF1 = surface.makeButton(23, 4, 2, 1)
+    surfaceElements.btnF1.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 54)
+
+    // F2
+    surfaceElements.btnF2 = surface.makeButton(25, 4, 2, 1)
+    surfaceElements.btnF2.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 55)
+
+    // F3
+    surfaceElements.btnF3 = surface.makeButton(27, 4, 2, 1)
+    surfaceElements.btnF3.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 56)
+
+    // F4
+    surfaceElements.btnF4 = surface.makeButton(29, 4, 2, 1)
+    surfaceElements.btnF4.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 57)
+
+    // Function Buttons - Second Row
+    // F5
+    surfaceElements.btnF5 = surface.makeButton(23, 5, 2, 1)
+    surfaceElements.btnF5.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 58)
+
+    // F6
+    surfaceElements.btnF6 = surface.makeButton(25, 5, 2, 1)
+    surfaceElements.btnF6.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 59)
+
+    // F7
+    surfaceElements.btnF7 = surface.makeButton(27, 5, 2, 1)
+    surfaceElements.btnF7.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 60)
+
+    // F8
+    surfaceElements.btnF8 = surface.makeButton(29, 5, 2, 1)
+    surfaceElements.btnF8.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 61)
+
+    // Row 6
+    // Global View: Midi Tracks
+    surfaceElements.btnViewMidi = surface.makeButton(23, 6, 2, 1)
+    surfaceElements.btnViewMidi.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 62)
+
+    // Global View: Inputs
+    surfaceElements.btnViewInputs = surface.makeButton(25, 6, 2, 1)
+    surfaceElements.btnViewInputs.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 63)
+
+    // Global View: Audio Tracks
+    surfaceElements.btnViewAudio = surface.makeButton(27, 6, 2, 1)
+    surfaceElements.btnViewAudio.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 64)
+
+    // Global View: Audio Instrument
+    surfaceElements.btnViewInstr = surface.makeButton(29, 6, 2, 1)
+    surfaceElements.btnViewInstr.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 65)
+
+    // Row 7
+    // Global View: Aux
+    surfaceElements.btnViewAux = surface.makeButton(23, 7, 2, 1)
+    surfaceElements.btnViewAux.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 66)
+
+    // Global View: Busses
+    surfaceElements.btnViewBusses = surface.makeButton(25, 7, 2, 1)
+    surfaceElements.btnViewBusses.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 67)
+
+    // Global View: Outputs
+    surfaceElements.btnViewOutputs = surface.makeButton(27, 7, 2, 1)
+    surfaceElements.btnViewOutputs.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 68)
+
+    // Edit
+    surfaceElements.btnEdit = surface.makeButton(29, 7, 2, 1)
+    surfaceElements.btnEdit.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 51)
 
     // Row 9
     // Assignment: Track
@@ -223,96 +313,6 @@ function makeSurfaceElements() {
     // Stop
     surfaceElements.btnStop = surface.makeButton(29, 16, 2, 2)
     surfaceElements.btnStop.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 93)
-
-    // Row 1
-    // Name/Value
-    surfaceElements.btnNameValue = surface.makeButton(21, 1, 2, 2)
-    surfaceElements.btnNameValue.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 52)
-
-    // SMPTE/Beats
-    surfaceElements.btnSmpteBeats = surface.makeButton(23, 1, 2, 2)
-    surfaceElements.btnSmpteBeats.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 53)
-
-    // Shift
-    surfaceElements.btnShift = surface.makeButton(25, 1, 2, 2)
-    surfaceElements.btnShift.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 70)
-
-    // Option
-    surfaceElements.btnOption = surface.makeButton(27, 1, 2, 2)
-    surfaceElements.btnOption.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 71)
-
-    // Control
-    surfaceElements.btnControl = surface.makeButton(29, 1, 2, 2)
-    surfaceElements.btnControl.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 72)
-
-    // Row 4
-    // F1
-    surfaceElements.btnF1 = surface.makeButton(23, 4, 2, 1)
-    surfaceElements.btnF1.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 54)
-
-    // F2
-    surfaceElements.btnF2 = surface.makeButton(25, 4, 2, 1)
-    surfaceElements.btnF2.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 55)
-
-    // F3
-    surfaceElements.btnF3 = surface.makeButton(27, 4, 2, 1)
-    surfaceElements.btnF3.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 56)
-
-    // F4
-    surfaceElements.btnF4 = surface.makeButton(29, 4, 2, 1)
-    surfaceElements.btnF4.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 57)
-
-    // Row 5
-    // F5
-    surfaceElements.btnF5 = surface.makeButton(23, 5, 2, 1)
-    surfaceElements.btnF5.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 58)
-
-    // F6
-    surfaceElements.btnF6 = surface.makeButton(25, 5, 2, 1)
-    surfaceElements.btnF6.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 59)
-
-    // F7
-    surfaceElements.btnF7 = surface.makeButton(27, 5, 2, 1)
-    surfaceElements.btnF7.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 60)
-
-    // F8
-    surfaceElements.btnF8 = surface.makeButton(29, 5, 2, 1)
-    surfaceElements.btnF8.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 61)
-
-    // Row 6
-    // Global View: Midi Tracks
-    surfaceElements.btnViewMidi = surface.makeButton(23, 6, 2, 1)
-    surfaceElements.btnViewMidi.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 62)
-
-    // Global View: Inputs
-    surfaceElements.btnViewInputs = surface.makeButton(25, 6, 2, 1)
-    surfaceElements.btnViewInputs.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 63)
-
-    // Global View: Audio Tracks
-    surfaceElements.btnViewAudio = surface.makeButton(27, 6, 2, 1)
-    surfaceElements.btnViewAudio.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 64)
-
-    // Global View: Audio Instrument
-    surfaceElements.btnViewInstr = surface.makeButton(29, 6, 2, 1)
-    surfaceElements.btnViewInstr.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 65)
-
-    // Row 7
-    // Global View: Aux
-    surfaceElements.btnViewAux = surface.makeButton(23, 7, 2, 1)
-    surfaceElements.btnViewAux.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 66)
-
-    // Global View: Busses
-    surfaceElements.btnViewBusses = surface.makeButton(25, 7, 2, 1)
-    surfaceElements.btnViewBusses.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 67)
-
-    // Global View: Outputs
-    surfaceElements.btnViewOutputs = surface.makeButton(27, 7, 2, 1)
-    surfaceElements.btnViewOutputs.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 68)
-
-    // Row 7
-    // Global View
-    surfaceElements.btnGlobalView = surface.makeButton(29, 7, 2, 1)
-    surfaceElements.btnGlobalView.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 51)
 
     return surfaceElements
 }

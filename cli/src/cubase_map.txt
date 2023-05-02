@@ -1,12 +1,12 @@
-// MIDI NOTES   
-REC_RDY_1           0x00    0      C -1    REC/RDY CH. 1
-REC_RDY_2           0x01    1      C#-1    REC/RDY CH. 2
-REC_RDY_3           0x02    2      D -1    REC/RDY CH. 3
-REC_RDY_4           0x03    3      D#-1    REC/RDY CH. 4
-REC_RDY_5           0x04    4      E -1    REC/RDY CH. 5
-REC_RDY_6           0x05    5      F -1    REC/RDY CH. 6
-REC_RDY_7           0x06    6      F#-1    REC/RDY CH. 7
-REC_RDY_8           0x07    7      G -1    REC/RDY CH. 8
+// MIDI NOTES
+RECORD_1            0x00    0      C -1    RECORD CH. 1
+RECORD_2            0x01    1      C#-1    RECORD CH. 2
+RECORD_3            0x02    2      D -1    RECORD CH. 3
+RECORD_4            0x03    3      D#-1    RECORD CH. 4
+RECORD_5            0x04    4      E -1    RECORD CH. 5
+RECORD_6            0x05    5      F -1    RECORD CH. 6
+RECORD_7            0x06    6      F#-1    RECORD CH. 7
+RECORD_8            0x07    7      G -1    RECORD CH. 8
 SOLO_1              0x08    8      G#-1    SOLO CH. 1  
 SOLO_2              0x09    9      A -1    SOLO CH. 2  
 SOLO_3              0x0A    10     A#-1    SOLO CH. 3
@@ -39,18 +39,18 @@ V_POT_SELECT_5      0x24    36     C  2    V-POT SELECT CH. 5
 V_POT_SELECT_6      0x25    37     C# 2    V-POT SELECT CH. 6
 V_POT_SELECT_7      0x26    38     D  2    V-POT SELECT CH. 7
 V_POT_SELECT_8      0x27    39     D# 2    V-POT SELECT CH. 8
-ASSIGN_TRACK        0x28    40     E  2    ASSIGNMENT: TRACK
-ASSIGN_SEND         0x29    41     F  2    ASSIGNMENT: SEND
-ASSIGN_PAN          0x2A    42     F# 2    ASSIGNMENT: PAN/SURROUND
-ASSIGN_PLUGIN       0x2B    43     G  2    ASSIGNMENT: PLUG-IN
-ASSIGN_EQ           0x2C    44     G# 2    ASSIGNMENT: EQ
-ASSIGN_INSTR        0x2D    45     A  2    ASSIGNMENT: INSTRUMENT
-BANK_LEFT           0x2E    46     A# 2    FADER BANKS: BANK LEFT
-BANK_RIGHT          0x2F    47     B  2    FADER BANKS: BANK RIGHT
-CHANNEL_LEFT        0x30    48     C  3    FADER BANKS: CHANNEL LEFT
-CHANNEL_RIGHT       0x31    49     C# 3    FADER BANKS: CHANNEL RIGHT
-FLIP                0x32    50     D  3    FLIP
-GLOBAL_VIEW         0x33    51     D# 3    GLOBAL VIEW
+PAGE_UP             0x28    40     E  2    ASSIGNMENT: PAGE UP
+PAGE_DOWN           0x29    41     F  2    ASSIGNMENT: PAGE DOWN
+PAN                 0x2A    42     F# 2    ASSIGNMENT: PAN
+INSERTS             0x2B    43     G  2    ASSIGNMENT: INSERTS
+EQ                  0x2C    44     G# 2    ASSIGNMENT: EQ
+FX_SEND             0x2D    45     A  2    ASSIGNMENT: FX SEND
+BANK_LEFT           0x2E    46     A# 2    TRACK/FADER CONTROL: BANK LEFT
+BANK_RIGHT          0x2F    47     B  2    TRACK/FADER CONTROL: BANK RIGHT
+CHANNEL_LEFT        0x30    48     C  3    TRACK/FADER CONTROL: CHANNEL LEFT
+CHANNEL_RIGHT       0x31    49     C# 3    TRACK/FADER CONTROL: CHANNEL RIGHT
+FLIP                0x32    50     D  3    TRACK/FADER CONTROL: FLIP
+EDIT                0x33    51     D# 3    EDIT
 NAME_VALUE          0x34    52     E  3    NAME/VALUE
 SMPTE_BEATS         0x35    53     F  3    SMPTE/BEATS
 F1                  0x36    54     F# 3    F1
@@ -61,44 +61,44 @@ F5                  0x3A    58     A# 3    F5
 F6                  0x3B    59     B  3    F6
 F7                  0x3C    60     C  4    F7
 F8                  0x3D    61     C# 4    F8
-VIEW_MIDI           0x3E    62     D  4    GLOBAL VIEW: MIDI TRACKS
-VIEW_INPUTS         0x3F    63     D# 4    GLOBAL VIEW: INPUTS
-VIEW_AUDIO          0x40    64     E  4    GLOBAL VIEW: AUDIO TRACKS
-VIEW_INSTR          0x41    65     F  4    GLOBAL VIEW: AUDIO INSTRUMENT
-VIEW_AUX            0x42    66     F# 4    GLOBAL VIEW: AUX
-VIEW_BUSSES         0x43    67     G  4    GLOBAL VIEW: BUSSES
-VIEW_OUTPUTS        0x44    68     G# 4    GLOBAL VIEW: OUTPUTS
-VIEW_USER           0x45    69     A  4    GLOBAL VIEW: USER
-SHIFT               0x46    70     A# 4    SHIFT
-OPTION              0x47    71     B  4    OPTION
-CONTROL             0x48    72     C  5    CONTROL
-CMD_ALT             0x49    73     C# 5    CMD/ALT
-AUTOMATION_READ_OFF 0x4A    74     D  5    AUTOMATION: READ/OFF
-AUTOMATION_WRITE    0x4B    75     D# 5    AUTOMATION: WRITE
-AUTOMATION_TRIM     0x4C    76     E  5    AUTOMATION: TRIM
-AUTOMATION_TOUCH    0x4D    77     F  5    AUTOMATION: TOUCH
-AUTOMATION_LATCH    0x4E    78     F# 5    AUTOMATION: LATCH
-GROUP               0x4F    79     G  5    GROUP
-SAVE                0x50    80     G# 5    UTILITIES: SAVE
-UNDO                0x51    81     A  5    UTILITIES: UNDO
-CANCEL              0x52    82     A# 5    UTILITIES: CANCEL
-ENTER               0x53    83     B  5    UTILITIES: ENTER
-MARKER              0x54    84     C  6    MARKER
-NUDGE               0x55    85     C# 6    NUDGE
+LAYER2_F1           0x3E    62     D  4    LAYER2: F1
+LAYER2_F2           0x3F    63     D# 4    LAYER2: F2
+LAYER2_F3           0x40    64     E  4    LAYER2: F3
+LAYER2_F4           0x41    65     F  4    LAYER2: F4
+LAYER2_F5           0x42    66     F# 4    LAYER2: F5
+LAYER2_F6           0x43    67     G  4    LAYER2: F6
+LAYER2_F7           0x44    68     G# 4    LAYER2: F7
+LAYER2_F8           0x45    69     A  4    LAYER2: F8
+UNDO                0x46    70     A# 4    UNDO
+REDO                0x47    71     B  4    REDO
+SAVE                0x48    72     C  5    SAVE
+REVERT              0x49    73     C# 5    REVERT
+READ                0x4A    74     D  5    AUTOMATION: READ
+WRITE               0x4B    75     D# 5    AUTOMATION: WRITE
+SENDS               0x4C    76     E  5    SENDS
+PROJECT             0x4D    77     F  5    PROJECT
+MIXER               0x4E    78     F# 5    MIXER
+MOTORS              0x4F    79     G  5    MOTORS
+VST                 0x50    80     G# 5    VST
+MASTER              0x51    81     A  5    MASTER
+SOLO_DEFEAT         0x52    82     A# 5    SOLO DEFEAT
+SHIFT               0x53    83     B  5    SHIFT
+LEFT                0x54    84     C  6    LEFT
+RIGHT               0x55    85     C# 6    RIGHT
 CYCLE               0x56    86     D  6    CYCLE
-DROP                0x57    87     D# 6    DROP
-REPLACE             0x58    88     E  6    REPLACE
-CLICK               0x59    89     F  6    CLICK
-SOLO                0x5A    90     F# 6    SOLO
+PUNCH               0x57    87     D# 6    PUNCH
+PREVIOUS            0x58    88     E  6    PREVIOUS
+ADD                 0x59    89     F  6    ADD
+NEXT                0x5A    90     F# 6    NEXT
 REWIND              0x5B    91     G  6    REWIND
 FAST_FWD            0x5C    92     G# 6    FAST FWD
 STOP                0x5D    93     A  6    STOP
 PLAY                0x5E    94     A# 6    PLAY
 RECORD              0x5F    95     B  6    RECORD
-UP                  0x60    96     C  7    CURSOR UP
-DOWN                0x61    97     C# 7    CURSOR DOWN
-LEFT                0x62    98     D  7    CURSOR LEFT
-RIGHT               0x63    99     D# 7    CURSOR RIGHT
+CURSOR_UP           0x60    96     C  7    CURSOR UP
+CURSOR_DOWN         0x61    97     C# 7    CURSOR DOWN
+CURSOR_LEFT         0x62    98     D  7    CURSOR LEFT
+CURSOR_RIGHT        0x63    99     D# 7    CURSOR RIGHT
 ZOOM                0x64    100    E  7    ZOOM
 SCRUB               0x65    101    F  7    SCRUB
 USER_SWITCH_A       0x66    102    F# 7    USER SWITCH A
