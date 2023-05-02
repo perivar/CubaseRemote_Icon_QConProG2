@@ -284,10 +284,10 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, channelIndex) 
 
     // V-Pot Variables
     var VPOT_MODE_SINGLE_DOT = 0
-    var VPOT_MODE_BOOST_OR_CUT = 1
+    var VPOT_MODE_BOOST_OR_CUT = 1 // seems to work fine for pan
     var VPOT_MODE_WRAP = 2
     var VPOT_MODE_SPREAD = 3
-    channelControl.vPotLedMode = VPOT_MODE_BOOST_OR_CUT //  SingleDot = 0, BoostOrCut = 1, Wrap = 2, Spread = 3
+    channelControl.vPotLedMode = VPOT_MODE_SINGLE_DOT //  SingleDot = 0, BoostOrCut = 1, Wrap = 2, Spread = 3
 
     // V-Pot Encoder with LED ring
     channelControl.pushEncoder = channelControl.surface.makePushEncoder(channelControl.x, channelControl.y, 2, 2)
@@ -304,9 +304,18 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, channelIndex) 
         .bindToNote(0, 32 + channelIndex)
 
     channelControl.pushEncoder.mEncoderValue.mOnProcessValueChange = function (activeDevice, newValue) {
+        console.log('Encoder Change: ' + channelIndex + '::' + newValue)
+
+        var val = newValue
+
+        // center on if val is "very close" to 0.50
+        // if (val > 0.48 && val < 0.58) {
+        //     val = 0.5
+        // }
+
         const displayMode = channelControl.vPotLedMode
-        const isCenterLedOn = newValue === (displayMode === VPOT_MODE_SPREAD ? 0 : 0.5)
-        const position = 1 + Math.round(newValue * (displayMode === VPOT_MODE_SPREAD ? 5 : 10))
+        const isCenterLedOn = val === (displayMode === VPOT_MODE_SPREAD ? 0 : 0.5)
+        const position = 1 + Math.round(val * (displayMode === VPOT_MODE_SPREAD ? 5 : 10))
 
         midiOutput.sendMidi(activeDevice, [0xb0, 0x30 + channelIndex, (+isCenterLedOn << 6) + (displayMode << 4) + position])
     }
@@ -388,8 +397,13 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, channelIndex) 
     channelControl.btnFaderTouch = tf.btnFaderTouch
     channelControl.fdrFader = tf.fdrFader
 
+    channelControl.btnFaderTouch.mSurfaceValue.mOnProcessValueChange = function (activeDevice, touched, value2) {
+        console.log('Fader Touch Change: ' + touched + ':' + value2)
+    }
+
     channelControl.fdrFader.mSurfaceValue.mOnTitleChange = function (activeDevice, objectTitle, valueTitle) {
-        // console.log("Fader Title Change: " + channelIndex + "::" + objectTitle + ":" + valueTitle)
+        console.log('Fader Title Change: ' + channelIndex + '::' + objectTitle + ':' + valueTitle)
+
         var activePage = activeDevice.getState('activePage')
         var faderTitles = activeDevice.getState(activePage + ' - Fader - Title')
         var faderValueTitles = activeDevice.getState(activePage + ' - Fader - ValueTitles')
@@ -448,7 +462,7 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, channelIndex) 
         var activePage = activeDevice.getState('activePage')
         var faderValues = activeDevice.getState(activePage + ' - Fader - Values')
 
-        // console.log("Fader Display Value Change: " + value + ":" + activePage)
+        console.log('Fader Display Value Change: ' + value + ':' + activePage)
 
         // ? When adjusting the AI fader in Mixer mode there is no update to the other fader even if you adjust that fader with the AI control
         // ? When adjusting the AI fader in SelectedChannel mode there IS an update to the other fader, so...
@@ -473,7 +487,8 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, channelIndex) 
     }
 
     channelControl.pushEncoder.mEncoderValue.mOnTitleChange = function (activeDevice, objectTitle, valueTitle) {
-        // console.log("Pan Title Changed:" + objectTitle + ":" + valueTitle)
+        console.log('Pan Title Changed:' + objectTitle + ':' + valueTitle)
+
         var activePage = activeDevice.getState('activePage')
         var activeSubPage = activeDevice.getState('activeSubPage')
         var panTitles = activeDevice.getState(activePage + ' - Pan - Title')
@@ -552,7 +567,8 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, channelIndex) 
     }
 
     channelControl.pushEncoder.mEncoderValue.mOnDisplayValueChange = function (activeDevice, value, units) {
-        // console.log("Pan Value Change: " + value + ":" + units)
+        console.log('Pan Value Change: ' + value + ':' + units)
+
         var activePage = activeDevice.getState('activePage')
         var panValues = activeDevice.getState(activePage + ' - Pan - Values')
 
@@ -618,7 +634,8 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, channelIndex) {
     masterControl.fdrFader = tf.fdrFader
 
     masterControl.fdrFader.mSurfaceValue.mOnTitleChange = function (activeDevice, objectTitle, valueTitle) {
-        // console.log("Fader Title Change: " + channelIndex + "::" + objectTitle + ":" + valueTitle)
+        console.log('Fader Title Change: ' + channelIndex + '::' + objectTitle + ':' + valueTitle)
+
         var title = objectTitle ? objectTitle + ':' + valueTitle : 'No AI Parameter under mouse'
         activeDevice.setState('MasterFader - Title', title)
     }
@@ -626,7 +643,7 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, channelIndex) {
     masterControl.fdrFader.mSurfaceValue.mOnDisplayValueChange = function (activeDevice, value, units) {
         activeDevice.setState('MasterFader - Values', value + units)
 
-        // console.log("MasterFader Display Value Change: " + value + ":" + units)
+        console.log('MasterFader Display Value Change: ' + value + ':' + units)
 
         // Check to see if we are in the correct display mode - otherwise don't display
         // ! This isn't done via the touch value as the touch onProcessValueChange may be processed after the mOnDisplayValueChange
@@ -643,7 +660,7 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, channelIndex) {
     }
 
     masterControl.btnFaderTouch.mSurfaceValue.mOnProcessValueChange = function (activeDevice, touched, value2) {
-        console.log('masterFader Touch Change: ' + touched + ':' + value2)
+        console.log('MasterFader Touch Change: ' + touched + ':' + value2)
 
         // value===-1 means touch released
         if (value2 == -1) {
@@ -678,6 +695,8 @@ function makeMasterControl(surface, midiInput, midiOutput, x, y, channelIndex) {
     masterControl.btnLeft = makeLedButton(surface, midiInput, midiOutput, 84, 19, 16, 2, 1, false)
     masterControl.btnLeft.mSurfaceValue.mOnProcessValueChange = function (activeDevice) {
         var value = masterControl.btnLeft.mSurfaceValue.getProcessValue(activeDevice)
+
+        console.log('Button Left Display Value Change: ' + value)
 
         if (value == 1) {
             var displayType = activeDevice.getState('displayType')
