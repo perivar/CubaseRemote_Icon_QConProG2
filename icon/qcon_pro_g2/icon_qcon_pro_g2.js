@@ -44,45 +44,16 @@ function makeSurfaceElements() {
     var xKnobStrip = 0
     var yKnobStrip = 3
 
+    // add the main channels
     for (var i = 0; i < surfaceElements.numStrips; ++i) {
         surfaceElements.channelControls[i] = makeChannelControl(surface, midiInput, midiOutput, xKnobStrip, yKnobStrip, i)
     }
 
+    // add master fader after the main channels
     surfaceElements.faderMaster = makeMasterControl(surface, midiInput, midiOutput, xKnobStrip, yKnobStrip, surfaceElements.numStrips)
 
     // Navigation Section
-    // Cursor Left
-    surfaceElements.btnCursorLeft = surface.makeButton(20, 21, 2, 2)
-    surfaceElements.btnCursorLeft.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 98)
-
-    // Cursor Right
-    surfaceElements.btnCursorRight = surface.makeButton(24, 21, 2, 2)
-    surfaceElements.btnCursorRight.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 99)
-
-    // Cursor Up
-    surfaceElements.btnCursorUp = surface.makeButton(22, 19, 2, 2)
-    surfaceElements.btnCursorUp.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 96)
-
-    // Cursor Down
-    surfaceElements.btnCursorDown = surface.makeButton(22, 23, 2, 2)
-    surfaceElements.btnCursorDown.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 97)
-
-    // Zoom
-    surfaceElements.btnZoom = surface.makeButton(22, 21, 2, 2)
-    surfaceElements.btnZoom.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 100)
-
-    // Scrub and Jog Wheel
-    // Scrub
-    surfaceElements.btnScrub = surface.makeButton(26, 19, 2, 2)
-    surfaceElements.btnScrub.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 101)
-
-    // Jog Wheel
-    surfaceElements.knobJogWheel = surface.makeKnob(27, 21, 4, 4)
-    surfaceElements.knobJogWheel.mSurfaceValue.mMidiBinding
-        .setInputPort(midiInput)
-        .setOutputPort(midiOutput)
-        .bindToControlChange(0, 60)
-        .setTypeAbsolute()
+    surfaceElements.transport = makeTransport(surface, midiInput, midiOutput, xKnobStrip, yKnobStrip)
 
     // Upper Button Row
     // Name/Value
@@ -236,18 +207,6 @@ function makeSurfaceElements() {
     surfaceElements.btnShift = surface.makeButton(23, 14, 2, 2)
     surfaceElements.btnShift.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 83)
 
-    // Rewind
-    surfaceElements.btnRewind = surface.makeButton(25, 14, 2, 2)
-    surfaceElements.btnRewind.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 91)
-
-    // Cycle
-    surfaceElements.btnCycle = surface.makeButton(27, 14, 2, 2)
-    surfaceElements.btnCycle.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 86)
-
-    // Fast Fwd
-    surfaceElements.btnFastFwd = surface.makeButton(29, 14, 2, 2)
-    surfaceElements.btnFastFwd.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 92)
-
     // Row 16 Upper
     // Left
     // surfaceElements.btnLeft = surface.makeButton(19, 16, 2, 1)
@@ -274,20 +233,283 @@ function makeSurfaceElements() {
     surfaceElements.btnNext = surface.makeButton(23, 17, 2, 1)
     surfaceElements.btnNext.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 90)
 
-    // Row 16
-    // Record
-    surfaceElements.btnRecord = surface.makeButton(25, 16, 2, 2)
-    surfaceElements.btnRecord.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 95)
-
-    // Play
-    surfaceElements.btnPlay = surface.makeButton(27, 16, 2, 2)
-    surfaceElements.btnPlay.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 94)
-
-    // Stop
-    surfaceElements.btnStop = surface.makeButton(29, 16, 2, 2)
-    surfaceElements.btnStop.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 93)
-
     return surfaceElements
 }
 
 var surfaceElements = makeSurfaceElements()
+
+//-----------------------------------------------------------------------------
+// 3. HOST MAPPING - create mapping pages and host bindings
+//-----------------------------------------------------------------------------
+
+// Helper functions
+
+/**
+ * Make a Sub Page
+ * @param {MR_SubPageArea} subPageArea
+ * @param {string} name
+ * @returns sub page
+ */
+function makeSubPage(subPageArea, name) {
+    var subPage = subPageArea.makeSubPage(name)
+
+    subPage.mOnActivate = function (activeDevice) {
+        console.log('sub page ' + name + ' activated')
+
+        activeDevice.setState('activeSubPage', name)
+
+        switch (name) {
+            case 'Scrub':
+                activeDevice.setState('indicator2', 'S')
+                break
+            case 'Nudge':
+                activeDevice.setState('indicator2', 'N')
+                break
+            case 'Nav':
+                activeDevice.setState('indicator1', 'N')
+                break
+            case 'Zoom':
+                activeDevice.setState('indicator1', 'Z')
+                break
+            case 'SendsQC':
+                // An action binding cannot be set to ta Toggle type button so manually adjust the rec button lights
+                // based on the subpage selection.
+                midiOutput.sendMidi(activeDevice, [0x90, 0, 127])
+                midiOutput.sendMidi(activeDevice, [0x90, 1, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 2, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 3, 0])
+                break
+            case 'EQ':
+                // An action binding cannot be set to ta Toggle type button so manually adjust the rec button lights
+                // based on the subpage selection.
+                midiOutput.sendMidi(activeDevice, [0x90, 0, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 1, 127])
+                midiOutput.sendMidi(activeDevice, [0x90, 2, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 3, 0])
+                break
+            case 'PreFilter':
+                // An action binding cannot be set to ta Toggle type button so manually adjust the rec button lights
+                // based on the subpage selection.
+                midiOutput.sendMidi(activeDevice, [0x90, 0, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 1, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 2, 127])
+                midiOutput.sendMidi(activeDevice, [0x90, 3, 0])
+                break
+            case 'CueSends':
+                // An action binding cannot be set to ta Toggle type button so manually adjust the rec button lights
+                // based on the subpage selection.
+                midiOutput.sendMidi(activeDevice, [0x90, 0, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 1, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 2, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 3, 127])
+                break
+            case 'Gate':
+                // An action binding cannot be set to ta Toggle type button so manually adjust the sel button lights
+                // based on the subpage selection.
+                midiOutput.sendMidi(activeDevice, [0x90, 24, 127])
+                midiOutput.sendMidi(activeDevice, [0x90, 25, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 26, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 27, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 28, 0])
+                break
+            case 'Compressor':
+                // An action binding cannot be set to ta Toggle type button so manually adjust the sel button lights
+                // based on the subpage selection.
+                midiOutput.sendMidi(activeDevice, [0x90, 24, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 25, 127])
+                midiOutput.sendMidi(activeDevice, [0x90, 26, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 27, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 28, 0])
+                break
+            case 'Tools':
+                // An action binding cannot be set to ta Toggle type button so manually adjust the sel button lights
+                // based on the subpage selection.
+                midiOutput.sendMidi(activeDevice, [0x90, 24, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 25, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 26, 127])
+                midiOutput.sendMidi(activeDevice, [0x90, 27, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 28, 0])
+                break
+            case 'Saturator':
+                // An action binding cannot be set to ta Toggle type button so manually adjust the sel button lights
+                // based on the subpage selection.
+                midiOutput.sendMidi(activeDevice, [0x90, 24, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 25, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 26, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 27, 127])
+                midiOutput.sendMidi(activeDevice, [0x90, 28, 0])
+                break
+            case 'Limiter':
+                // An action binding cannot be set to ta Toggle type button so manually adjust the sel button lights
+                // based on the subpage selection.
+                midiOutput.sendMidi(activeDevice, [0x90, 24, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 25, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 26, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 27, 0])
+                midiOutput.sendMidi(activeDevice, [0x90, 28, 127])
+                break
+        }
+
+        Helper_updateDisplay('Row1', 'Row2', 'AltRow1', 'AltRow2', activeDevice, midiOutput)
+    }
+
+    return subPage
+}
+
+/**
+ * Mappings for the default areas - transport, zoom, knob
+ * @param {string} name
+ */
+function makePageWithDefaults(name) {
+    var page = deviceDriver.mMapping.makePage(name)
+    var jogSubPageArea = page.makeSubPageArea('Jog')
+    var subPageJogNudge = makeSubPage(jogSubPageArea, 'Nudge')
+    var subPageJogScrub = makeSubPage(jogSubPageArea, 'Scrub')
+
+    var zoomSubPageArea = page.makeSubPageArea('Zoom')
+    var subPageJogZoom = makeSubPage(zoomSubPageArea, 'Zoom')
+    var subPageJobNav = makeSubPage(zoomSubPageArea, 'Nav')
+
+    // Transport controls
+    page.makeActionBinding(surfaceElements.transport.btnChannelLeft.mSurfaceValue, deviceDriver.mAction.mPrevPage)
+    page.makeActionBinding(surfaceElements.transport.btnChannelRight.mSurfaceValue, deviceDriver.mAction.mNextPage)
+    page.makeCommandBinding(surfaceElements.transport.btnBankLeft.mSurfaceValue, 'Transport', 'Locate Previous Marker')
+    page.makeCommandBinding(surfaceElements.transport.btnBankRight.mSurfaceValue, 'Transport', 'Locate Next Marker')
+    page.makeValueBinding(surfaceElements.transport.btnFastFwd.mSurfaceValue, page.mHostAccess.mTransport.mValue.mForward)
+    page.makeValueBinding(surfaceElements.transport.btnRewind.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRewind)
+    page.makeValueBinding(surfaceElements.transport.btnPlay.mSurfaceValue, page.mHostAccess.mTransport.mValue.mStart).setTypeToggle()
+    page.makeValueBinding(surfaceElements.transport.btnStop.mSurfaceValue, page.mHostAccess.mTransport.mValue.mStop).setTypeToggle()
+    page.makeValueBinding(surfaceElements.transport.btnRecord.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRecord).setTypeToggle()
+    page.makeValueBinding(surfaceElements.transport.btnCycle.mSurfaceValue, page.mHostAccess.mTransport.mValue.mCycleActive).setTypeToggle()
+
+    // Zoom Pages - when Zoom light is on
+    page.makeCommandBinding(surfaceElements.transport.btnCursorDown.mSurfaceValue, 'Zoom', 'Zoom In Vertically').setSubPage(subPageJogZoom)
+    page.makeCommandBinding(surfaceElements.transport.btnCursorUp.mSurfaceValue, 'Zoom', 'Zoom Out Vertically').setSubPage(subPageJogZoom)
+    page.makeCommandBinding(surfaceElements.transport.btnCursorRight.mSurfaceValue, 'Zoom', 'Zoom In').setSubPage(subPageJogZoom)
+    page.makeCommandBinding(surfaceElements.transport.btnCursorLeft.mSurfaceValue, 'Zoom', 'Zoom Out').setSubPage(subPageJogZoom)
+
+    // Nav Pages
+    page.makeActionBinding(
+        surfaceElements.transport.btnCursorDown.mSurfaceValue,
+        page.mHostAccess.mTrackSelection.mAction.mNextTrack
+    ).setSubPage(subPageJobNav)
+
+    page.makeActionBinding(
+        surfaceElements.transport.btnCursorUp.mSurfaceValue,
+        page.mHostAccess.mTrackSelection.mAction.mPrevTrack
+    ).setSubPage(subPageJobNav)
+
+    page.makeCommandBinding(surfaceElements.transport.btnCursorRight.mSurfaceValue, 'Transport', 'Locate Next Event').setSubPage(
+        subPageJobNav
+    )
+    page.makeCommandBinding(surfaceElements.transport.btnCursorLeft.mSurfaceValue, 'Transport', 'Locate Previous Event').setSubPage(
+        subPageJobNav
+    )
+
+    // Switch Zoom and Nav via Zoom button
+    page.makeActionBinding(surfaceElements.transport.btnZoom.mSurfaceValue, zoomSubPageArea.mAction.mNext)
+
+    // Jog Pages - when Zoom lights are off
+    // Nudge
+    page.makeCommandBinding(surfaceElements.transport.jogLeftVariable, 'Transport', 'Nudge Cursor Left').setSubPage(subPageJogNudge)
+    page.makeCommandBinding(surfaceElements.transport.jogRightVariable, 'Transport', 'Nudge Cursor Right').setSubPage(subPageJogNudge)
+
+    // Scrub (Jog in Cubase)
+    page.makeCommandBinding(surfaceElements.transport.jogLeftVariable, 'Transport', 'Jog Left').setSubPage(subPageJogScrub)
+    page.makeCommandBinding(surfaceElements.transport.jogRightVariable, 'Transport', 'Jog Right').setSubPage(subPageJogScrub)
+
+    // Switch between Nudge and Scrub using Scrub button
+    // page.makeActionBinding(surfaceElements.transport.knobJogWheel.mPushValue, jogSubPageArea.mAction.mNext)
+    page.makeActionBinding(surfaceElements.transport.btnScrub.mSurfaceValue, jogSubPageArea.mAction.mNext)
+
+    var MasterFaderSubPageArea = page.makeSubPageArea('MasterFader')
+    var subPageMasterFaderValue = makeSubPage(MasterFaderSubPageArea, 'MF_ValueUnderCursor')
+
+    page.makeValueBinding(surfaceElements.faderMaster.fdrFader.mSurfaceValue, page.mHostAccess.mMouseCursor.mValueUnderMouse)
+        .setValueTakeOverModeJump()
+        .setSubPage(subPageMasterFaderValue)
+
+    // Get selected tracks
+    var selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
+
+    // Automation for selected tracks
+    page.makeValueBinding(surfaceElements.btnRead.mSurfaceValue, selectedTrackChannel.mValue.mAutomationRead).setTypeToggle()
+    page.makeValueBinding(surfaceElements.btnWrite.mSurfaceValue, selectedTrackChannel.mValue.mAutomationWrite).setTypeToggle()
+
+    return page
+}
+
+function makePageMixer() {
+    var page = makePageWithDefaults('Mixer')
+
+    var FaderSubPageArea = page.makeSubPageArea('FadersKnobs')
+    var subPageFaderVolume = makeSubPage(FaderSubPageArea, 'Volume')
+
+    var ButtonSubPageArea = page.makeSubPageArea('Buttons')
+    var subPageButtonDefaultSet = makeSubPage(ButtonSubPageArea, 'DefaultSet')
+
+    var hostMixerBankZone = page.mHostAccess.mMixConsole
+        .makeMixerBankZone('AudioInstrBanks')
+        .includeAudioChannels()
+        .includeInstrumentChannels()
+        .setFollowVisibility(true)
+
+    for (var channelIndex = 0; channelIndex < surfaceElements.numStrips; ++channelIndex) {
+        var hostMixerBankChannel = hostMixerBankZone.makeMixerBankChannel()
+
+        var knobSurfaceValue = surfaceElements.channelControls[channelIndex].pushEncoder.mEncoderValue
+        var knobPushValue = surfaceElements.channelControls[channelIndex].pushEncoder.mPushValue
+        var faderSurfaceValue = surfaceElements.channelControls[channelIndex].fdrFader.mSurfaceValue
+        var faderTouchSurfaceValue = surfaceElements.channelControls[channelIndex].btnFaderTouch.mSurfaceValue
+        var btnSelectSurfaceValue = surfaceElements.channelControls[channelIndex].btnSelect.mSurfaceValue
+        var btnMuteSurfaceValue = surfaceElements.channelControls[channelIndex].btnMute.mSurfaceValue
+        var btnSoloSurfaceValue = surfaceElements.channelControls[channelIndex].btnSolo.mSurfaceValue
+        var btnRecordSurfaceValue = surfaceElements.channelControls[channelIndex].btnRecord.mSurfaceValue
+
+        // FaderKnobs - Volume, Pan, Editor Open
+        page.makeValueBinding(knobSurfaceValue, hostMixerBankChannel.mValue.mPan).setSubPage(subPageFaderVolume)
+        page.makeValueBinding(knobPushValue, hostMixerBankChannel.mValue.mEditorOpen).setTypeToggle().setSubPage(subPageFaderVolume)
+        page.makeValueBinding(faderSurfaceValue, hostMixerBankChannel.mValue.mVolume)
+            .setValueTakeOverModeJump()
+            .setSubPage(subPageFaderVolume)
+        page.makeValueBinding(btnSelectSurfaceValue, hostMixerBankChannel.mValue.mSelected)
+            .setTypeToggle()
+            .setSubPage(subPageButtonDefaultSet)
+        page.makeValueBinding(btnMuteSurfaceValue, hostMixerBankChannel.mValue.mMute).setTypeToggle().setSubPage(subPageButtonDefaultSet)
+        page.makeValueBinding(btnSoloSurfaceValue, hostMixerBankChannel.mValue.mSolo).setTypeToggle().setSubPage(subPageButtonDefaultSet)
+        page.makeValueBinding(btnRecordSurfaceValue, hostMixerBankChannel.mValue.mRecordEnable)
+            .setTypeToggle()
+            .setSubPage(subPageButtonDefaultSet)
+
+        // VU Meter
+        page.makeValueBinding(surfaceElements.channelControls[channelIndex].vuMeter, hostMixerBankChannel.mValue.mVUMeter)
+    }
+
+    return page
+}
+
+var mixerPage = makePageMixer()
+
+// Function to clear out the Channel State for the display titles/values
+// the OnDisplayChange callback is not called if the Channel doesn't have an updated
+// Title. So switching to QC would leave the old Mixer Page "Volume" title kicking around
+// in the state. By clearing state on the page activation it will update all that are changing.
+function clearChannelState(activeDevice) {
+    var activePage = activeDevice.getState('activePage')
+
+    activeDevice.setState(activePage + ' - Fader - Title', '')
+    activeDevice.setState(activePage + ' - Fader - ValueTitles', '')
+    activeDevice.setState(activePage + ' - Fader - Values', '')
+    activeDevice.setState(activePage + ' - Pan - Title', '')
+    activeDevice.setState(activePage + ' - Pan - ValueTitles', '')
+    activeDevice.setState(activePage + ' - Pan - Values', '')
+
+    activeDevice.setState('displayType', 'Fader') // Pan or Fader
+}
+
+mixerPage.mOnActivate = function (activeDevice) {
+    console.log('Icon QCon Pro G2 page "Mixer" activated')
+    activeDevice.setState('activePage', 'Mixer')
+    clearAllLeds(activeDevice, midiOutput)
+    clearChannelState(activeDevice)
+}
