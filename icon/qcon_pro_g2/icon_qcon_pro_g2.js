@@ -780,8 +780,9 @@ function makePageMidi() {
      * @param {number} fader
      */
     function makeMidiCCBinding(page, displayName, cc, fader) {
-        // ? I have no idea what page.mCustom.makeHostValueVariable actually does- all I know is I can make a value binding this way. I can't seem to be able to look it up
-        // ? or access it all once made.
+        // TODO: I have no idea what page.mCustom.makeHostValueVariable actually does
+        // all I know is I can make a value binding this way.
+        // I can't seem to be able to look it up or access it all once made.
         page
             .makeValueBinding(
                 surfaceElements.channelControls[fader].fdrFader.mSurfaceValue,

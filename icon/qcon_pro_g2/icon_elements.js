@@ -304,7 +304,8 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, channelIndex) 
     channelControl.vPotLedMode = VPOT_MODE_BOOST_OR_CUT //  SingleDot = 0, BoostOrCut = 1, Wrap = 2, Spread = 3
 
     // V-Pot Encoder with LED ring
-    channelControl.pushEncoder = channelControl.surface.makePushEncoder(channelControl.x, channelControl.y, 2, 2)
+    channelControl.pushEncoder = surface.makePushEncoder(channelControl.x, channelControl.y, 2, 2)
+    channelControl.mDisplayModeValue = surface.makeCustomValueVariable('encoderDisplayMode')
 
     channelControl.pushEncoder.mEncoderValue.mMidiBinding
         .setInputPort(midiInput)
@@ -320,17 +321,9 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, channelIndex) 
     channelControl.pushEncoder.mEncoderValue.mOnProcessValueChange = function (activeDevice, value, diff) {
         // console.log('Encoder Change: ' + channelIndex + '::' + value + ':' + diff)
 
-        var val = value
-
-        // center on if val is "very close" to 0.50
-        // if (val > 0.48 && val < 0.58) {
-        //     val = 0.5
-        // }
-
-        const displayMode = channelControl.vPotLedMode
-        const isCenterLedOn = val === (displayMode === VPOT_MODE_SPREAD ? 0 : 0.5)
-        const position = 1 + Math.round(val * (displayMode === VPOT_MODE_SPREAD ? 5 : 10))
-
+        var displayMode = channelControl.mDisplayModeValue.getProcessValue(activeDevice)
+        var isCenterLedOn = value === (displayMode === VPOT_MODE_SPREAD /* Spread */ ? 0 : 0.5)
+        var position = 1 + Math.round(value * (displayMode === VPOT_MODE_SPREAD /* Spread */ ? 5 : 10))
         midiOutput.sendMidi(activeDevice, [0xb0, 0x30 + channelIndex, (+isCenterLedOn << 6) + (displayMode << 4) + position])
     }
 
@@ -342,7 +335,7 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, channelIndex) 
     }
 
     // VU Meter custom variable
-    channelControl.vuMeter = channelControl.surface.makeCustomValueVariable('vuMeter')
+    channelControl.vuMeter = surface.makeCustomValueVariable('vuMeter')
 
     // VU Meter Update
     var lastMeterUpdateTime = 0
@@ -839,7 +832,7 @@ function makeTransport(surface, midiInput, midiOutput, x, y) {
     // Scrub button
     transport.btnScrub = makeLedButton(surface, midiInput, midiOutput, 101, 26, 19, 2, 2, false)
 
-    // ? This is still passing midi events through. It's unclear how to stop the midi CC messages passing through other then removing the MIDI port from All In
+    // Custom jogging variables
     transport.jogLeftVariable = surface.makeCustomValueVariable('jogLeft')
     transport.jogRightVariable = surface.makeCustomValueVariable('jogRight')
 
