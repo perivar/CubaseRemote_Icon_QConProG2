@@ -31,15 +31,17 @@ var CONFIGURATION = {
 }
 
 // src/index.ts
-var import_midiremote_api_v12 = require('midiremote_api_v1')
+// 1. get the api's entry point
+var midiremote_api = require('midiremote_api_v1')
 
 // src/decorators/page.ts
-function decoratePage(page2, surface2) {
-    var enhancedPage = page2
+function decoratePage(page, surface) {
+    var enhancedPage = page
     enhancedPage.mCustom.makeHostValueVariable = function (name) {
-        var hostValue = page2.mCustom.makeHostValueVariable(name)
-        var surfaceValue = surface2.makeCustomValueVariable(''.concat(name, 'SurfaceValue'))
-        page2.makeValueBinding(surfaceValue, hostValue)
+        var hostValue = page.mCustom.makeHostValueVariable(name)
+        var surfaceValue = surface.makeCustomValueVariable(''.concat(name, 'SurfaceValue'))
+        page.makeValueBinding(surfaceValue, hostValue)
+
         hostValue.setProcessValue = function (activeDevice, value) {
             return surfaceValue.setProcessValue(activeDevice, value)
         }
@@ -69,11 +71,11 @@ function makeCallbackCollection(object, callbackName) {
 var isTimerTicking = false
 var timeouts = {}
 
-function makeTimerUtils(page2, surface2) {
-    var timerPage = page2.makeSubPageArea('Timer').makeSubPage('Timer Page')
-    var triggerVariable = surface2.makeCustomValueVariable('timerTrigger')
+function makeTimerUtils(page, surface) {
+    var timerPage = page.makeSubPageArea('Timer').makeSubPage('Timer Page')
+    var triggerVariable = surface.makeCustomValueVariable('timerTrigger')
 
-    page2.makeActionBinding(triggerVariable, timerPage.mAction.mActivate).makeRepeating(1, 1)
+    page.makeActionBinding(triggerVariable, timerPage.mAction.mActivate).makeRepeating(1, 1)
 
     var setTimeout = function (context, timeoutId, callback, timeout) {
         if (!isTimerTicking) {
@@ -92,31 +94,31 @@ function makeTimerUtils(page2, surface2) {
     }
 }
 
-GlobalBooleanVariable.nextVariableId = 0
+// GlobalBooleanVariable.nextVariableId = 0
 
 // src/decorators/surface.ts
-function decorateSurface(surface2) {
-    var decoratedSurface = surface2
+function decorateSurface(surface) {
+    var decoratedSurface = surface
 
     decoratedSurface.makeLedButton = function () {
         for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
             args[_key] = arguments[_key]
         }
         var _surface2
-        var button = (_surface2 = surface2).makeButton.apply(_surface2, args)
+        var button = (_surface2 = surface).makeButton.apply(_surface2, args)
         button.onSurfaceValueChange = makeCallbackCollection(button.mSurfaceValue, 'mOnProcessValueChange')
-        button.mLedValue = surface2.makeCustomValueVariable('LedButtonLed')
-        var shadowValue = surface2.makeCustomValueVariable('LedButtonProxy')
+        button.mLedValue = surface.makeCustomValueVariable('LedButtonLed')
+        var shadowValue = surface.makeCustomValueVariable('LedButtonProxy')
 
         button.bindToNote = function (ports, note) {
             var isChannelButton = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false
-            var currentSurfaceValue = 0
+            var currentSurfaceValue = new Map()
             button.mSurfaceValue.mMidiBinding.setInputPort(ports.input).bindToNote(0, note)
             button.onSurfaceValueChange.addCallback(function (context, newValue) {
                 currentSurfaceValue.set(context, newValue)
                 ports.output.sendNoteOn(context, note, newValue || currentLedValue.get(context))
             })
-            var currentLedValue = 0
+            var currentLedValue = new Map()
             button.mLedValue.mOnProcessValueChange = function (context, newValue) {
                 currentLedValue.set(context, newValue)
                 ports.output.sendNoteOn(context, note, newValue)
@@ -141,8 +143,8 @@ function decorateSurface(surface2) {
             args[_key] = arguments[_key]
         }
         var _surface2
-        var encoder = (_surface2 = surface2).makePushEncoder.apply(_surface2, args)
-        encoder.mDisplayModeValue = surface2.makeCustomValueVariable('encoderDisplayMode')
+        var encoder = (_surface2 = surface).makePushEncoder.apply(_surface2, args)
+        encoder.mDisplayModeValue = surface.makeCustomValueVariable('encoderDisplayMode')
         return encoder
     }
 
@@ -151,9 +153,9 @@ function decorateSurface(surface2) {
             args[_key] = arguments[_key]
         }
         var _surface2
-        var fader = (_surface2 = surface2).makeFader.apply(_surface2, args)
-        fader.mTouchedValue = surface2.makeCustomValueVariable('faderTouched')
-        fader.mTouchedValueInternal = surface2.makeCustomValueVariable('faderTouchedInternal')
+        var fader = (_surface2 = surface).makeFader.apply(_surface2, args)
+        fader.mTouchedValue = surface.makeCustomValueVariable('faderTouched')
+        fader.mTouchedValueInternal = surface.makeCustomValueVariable('faderTouchedInternal')
         return fader
     }
 
@@ -162,11 +164,11 @@ function decorateSurface(surface2) {
             args[_key] = arguments[_key]
         }
         var _surface2
-        var jogWheel = (_surface2 = surface2).makeKnob.apply(_surface2, args)
-        var mProxyValue = surface2.makeCustomValueVariable('jogWheelProxy')
-        jogWheel.mKnobModeEnabledValue = surface2.makeCustomValueVariable('jogWheelKnobModeEnabled')
-        jogWheel.mJogRightValue = surface2.makeCustomValueVariable('jogWheelJogRight')
-        jogWheel.mJogLeftValue = surface2.makeCustomValueVariable('jogWheelJogLeft')
+        var jogWheel = (_surface2 = surface).makeKnob.apply(_surface2, args)
+        var mProxyValue = surface.makeCustomValueVariable('jogWheelProxy')
+        jogWheel.mKnobModeEnabledValue = surface.makeCustomValueVariable('jogWheelKnobModeEnabled')
+        jogWheel.mJogRightValue = surface.makeCustomValueVariable('jogWheelJogRight')
+        jogWheel.mJogLeftValue = surface.makeCustomValueVariable('jogWheelJogLeft')
         jogWheel.bindToControlChange = function (input, controlChangeNumber) {
             mProxyValue.mMidiBinding.setInputPort(input).bindToControlChange(0, controlChangeNumber).setTypeRelativeSignedBit()
             mProxyValue.mOnProcessValueChange = function (context, value, difference) {
@@ -296,7 +298,9 @@ var scribbleStripColorsRGB = [
     },
 ]
 
-var ColorManager = /*#__PURE__*/ (function () {})()
+var ColorManager = /*#__PURE__*/ (function () {
+    return ColorManager
+})()
 
 // src/midi/managers/LcdManager.ts
 var LcdManager = /*#__PURE__*/ (function () {
@@ -366,8 +370,8 @@ var nextPortPairIndex = 1
 function makePortPair(driver2, isExtender) {
     var name = isExtender ? 'Extender' : 'Main'
     var portPairIndex = nextPortPairIndex++
-    var input = driver2.mPorts.makeMidiInput('Input '.concat(portPairIndex, ' - ').concat(name))
-    var output = driver2.mPorts.makeMidiOutput('Output '.concat(portPairIndex, ' - ').concat(name))
+    var input = driver2.mPorts.makeMidiInput('Input '.concat(portPairIndex.toString(), ' - ').concat(name))
+    var output = driver2.mPorts.makeMidiOutput('Output '.concat(portPairIndex.toString(), ' - ').concat(name))
 
     output.sendSysex = function (context, messageBody) {
         output.sendMidi(context, [0xf0, 0x0, 0x0, 0x66, 0x14 + +isExtender].concat(messageBody, [0xf7]))
@@ -389,37 +393,37 @@ var channelElementsWidth = 8 * channelWidth
 var controlSectionElementsWidth = 25.5
 var surfaceHeight = 40
 
-function makeSquareButton(surface2, x, y) {
-    return surface2.makeLedButton(x + 0.25, y, 1.5, 1.5)
+function makeSquareButton(surface, x, y) {
+    return surface.makeLedButton(x + 0.25, y, 1.5, 1.5)
 }
 
-function createChannelSurfaceElements(surface2, x) {
+function createChannelSurfaceElements(surface, x) {
     return createElements(8, function (index) {
         var currentChannelXPosition = x + index * channelWidth
-        var encoder = surface2.makeLedPushEncoder(currentChannelXPosition + 1, 3, 4, 4)
+        var encoder = surface.makeLedPushEncoder(currentChannelXPosition + 1, 3, 4, 4)
         return {
             index: index,
             encoder: encoder,
             scribbleStrip: {
-                encoderLabel: surface2.makeLabelField(currentChannelXPosition + 1, 7, 4, 2).relateTo(encoder),
-                trackTitle: surface2.makeCustomValueVariable('scribbleStripTrackTitle'),
+                encoderLabel: surface.makeLabelField(currentChannelXPosition + 1, 7, 4, 2).relateTo(encoder),
+                trackTitle: surface.makeCustomValueVariable('scribbleStripTrackTitle'),
             },
-            vuMeter: surface2.makeCustomValueVariable('vuMeter'),
+            vuMeter: surface.makeCustomValueVariable('vuMeter'),
             buttons: {
-                record: makeSquareButton(surface2, 2 + currentChannelXPosition, 10),
-                solo: makeSquareButton(surface2, 2 + currentChannelXPosition, 12),
-                mute: makeSquareButton(surface2, 2 + currentChannelXPosition, 14),
-                select: surface2.makeLedButton(2 + currentChannelXPosition, 16, 2, 1.5),
+                record: makeSquareButton(surface, 2 + currentChannelXPosition, 10),
+                solo: makeSquareButton(surface, 2 + currentChannelXPosition, 12),
+                mute: makeSquareButton(surface, 2 + currentChannelXPosition, 14),
+                select: surface.makeLedButton(2 + currentChannelXPosition, 16, 2, 1.5),
             },
-            fader: surface2.makeTouchSensitiveFader(2 + currentChannelXPosition, 20, 2, 16),
+            fader: surface.makeTouchSensitiveFader(2 + currentChannelXPosition, 20, 2, 16),
         }
     })
 }
 
-function createControlSectionSurfaceElements(surface2, x) {
-    surface2.makeBlindPanel(x + 1, 6, 23.25, 4)
+function createControlSectionSurfaceElements(surface, x) {
+    surface.makeBlindPanel(x + 1, 6, 23.25, 4)
     var miscControlButtons = createElements(21, function (index) {
-        return makeSquareButton(surface2, x + 6 + (index % 7) * 2.625, 17 + Math.floor(index / 7) * 2.5 + (index < 14 ? 0 : 0.5))
+        return makeSquareButton(surface, x + 6 + (index % 7) * 2.625, 17 + Math.floor(index / 7) * 2.5 + (index < 14 ? 0 : 0.5))
     })
     var getMiscControlButtons = function (indices) {
         return indices.map(function (index) {
@@ -427,59 +431,58 @@ function createControlSectionSurfaceElements(surface2, x) {
         })
     }
     return {
-        mainFader: surface2.makeTouchSensitiveFader(x + 2, 20, 2, 16),
-        jogWheel: surface2.makeJogWheel(x + 13, 29.25, 8.5, 8.5),
+        mainFader: surface.makeTouchSensitiveFader(x + 2, 20, 2, 16),
+        jogWheel: surface.makeJogWheel(x + 13, 29.25, 8.5, 8.5),
         buttons: {
-            display: makeSquareButton(surface2, x + 2, 7.25),
-            timeMode: makeSquareButton(surface2, x + 21.75, 7.25),
-            edit: surface2.makeLedButton(x + 2, 10.5, 2, 1.5),
-            flip: surface2.makeLedButton(x + 2, 16, 2, 1.5),
-            scrub: makeSquareButton(surface2, x + 21.75, 28),
+            display: makeSquareButton(surface, x + 2, 7.25),
+            timeMode: makeSquareButton(surface, x + 21.75, 7.25),
+            edit: surface.makeLedButton(x + 2, 10.5, 2, 1.5),
+            flip: surface.makeLedButton(x + 2, 16, 2, 1.5),
+            scrub: makeSquareButton(surface, x + 21.75, 28),
             encoderAssign: createElements(6, function (index) {
-                return makeSquareButton(surface2, x + 2 + index * 2.25, 3.5)
+                return makeSquareButton(surface, x + 2 + index * 2.25, 3.5)
             }),
             number: createElements(8, function (index) {
-                return makeSquareButton(surface2, x + 6 + index * 2.25, 10.5)
+                return makeSquareButton(surface, x + 6 + index * 2.25, 10.5)
             }),
             function: createElements(8, function (index) {
-                return makeSquareButton(surface2, x + 6 + index * 2.25, 14)
+                return makeSquareButton(surface, x + 6 + index * 2.25, 14)
             }),
             modify: getMiscControlButtons([0, 1, 7, 8]),
             automation: getMiscControlButtons([2, 3, 4, 9, 10, 11]),
             utility: getMiscControlButtons([5, 6, 12, 13]),
+
             transport: miscControlButtons.slice(14).concat(
-                _toConsumableArray(
-                    createElements(5, function (index) {
-                        return surface2.makeLedButton(x + 6.25 + index * 3.56, 25, 3, 2)
-                    })
-                )
+                createElements(5, function (index) {
+                    return surface.makeLedButton(x + 6.25 + index * 3.56, 25, 3, 2)
+                })
             ),
             navigation: {
                 bank: {
-                    left: makeSquareButton(surface2, x + 6.75, 28),
-                    right: makeSquareButton(surface2, x + 9.25, 28),
+                    left: makeSquareButton(surface, x + 6.75, 28),
+                    right: makeSquareButton(surface, x + 9.25, 28),
                 },
                 channel: {
-                    left: makeSquareButton(surface2, x + 6.75, 30),
-                    right: makeSquareButton(surface2, x + 9.25, 30),
+                    left: makeSquareButton(surface, x + 6.75, 30),
+                    right: makeSquareButton(surface, x + 9.25, 30),
                 },
                 directions: {
-                    left: makeSquareButton(surface2, x + 6.25, 34),
-                    right: makeSquareButton(surface2, x + 9.75, 34),
-                    up: makeSquareButton(surface2, x + 8, 32.25),
-                    center: makeSquareButton(surface2, x + 8, 34),
-                    down: makeSquareButton(surface2, x + 8, 35.75),
+                    left: makeSquareButton(surface, x + 6.25, 34),
+                    right: makeSquareButton(surface, x + 9.75, 34),
+                    up: makeSquareButton(surface, x + 8, 32.25),
+                    center: makeSquareButton(surface, x + 8, 34),
+                    down: makeSquareButton(surface, x + 8, 35.75),
                 },
             },
         },
         displayLeds: {
-            smpte: surface2.makeDecoratedLamp(x + 21.25, 6.5, 0.75, 0.5),
-            beats: surface2.makeDecoratedLamp(x + 21.25, 9, 0.75, 0.5),
-            solo: surface2.makeDecoratedLamp(x + 7.75, 7.75, 0.75, 0.5),
+            smpte: surface.makeDecoratedLamp(x + 21.25, 6.5, 0.75, 0.5),
+            beats: surface.makeDecoratedLamp(x + 21.25, 9, 0.75, 0.5),
+            solo: surface.makeDecoratedLamp(x + 7.75, 7.75, 0.75, 0.5),
         },
-        expressionPedal: surface2.makeKnob(x + 18, 3.5, 1.5, 1.9),
+        expressionPedal: surface.makeKnob(x + 18, 3.5, 1.5, 1.9),
         footSwitches: createElements(2, function (index) {
-            return surface2.makeButton(x + 20 + index * 2, 3.5, 1.5, 1.5).setShapeCircle()
+            return surface.makeButton(x + 20 + index * 2, 3.5, 1.5, 1.5).setShapeCircle()
         }),
     }
 }
@@ -488,21 +491,21 @@ function createControlSectionSurfaceElements(surface2, x) {
 var Device = function Device(param, isExtender, panelWidth) {
     var driver2 = param.driver,
         firstChannelIndex = param.firstChannelIndex,
-        surface2 = param.surface,
+        surface = param.surface,
         surfaceXPosition = param.surfaceXPosition
 
     this.firstChannelIndex = firstChannelIndex
     this.ports = makePortPair(driver2, isExtender)
     this.colorManager = new ColorManager(this)
     this.lcdManager = new LcdManager(this)
-    surface2.makeBlindPanel(surfaceXPosition, 0, panelWidth, surfaceHeight)
-    this.channelElements = createChannelSurfaceElements(surface2, surfaceXPosition)
+    surface.makeBlindPanel(surfaceXPosition, 0, panelWidth, surfaceHeight)
+    this.channelElements = createChannelSurfaceElements(surface, surfaceXPosition)
 }
 
 MainDevice.surfaceWidth = channelElementsWidth + controlSectionElementsWidth
 ExtenderDevice.surfaceWidth = channelElementsWidth + 1
 var Devices = /*#__PURE__*/ (function () {
-    function Devices(driver2, surface2) {
+    function Devices(driver2, surface) {
         if (this.devices.length === 1) {
             driver2
                 .makeDetectionUnit()
@@ -530,7 +533,8 @@ var SegmentDisplayManager = /*#__PURE__*/ (function () {
         if (value !== this.segmentValues[segmentId].get(context)) {
             this.segmentValues[segmentId].set(context, value)
             this.devices.forEach(function (device) {
-                if (_instanceof(device, MainDevice)) {
+                if (true) {
+                    // _instanceof(device, MainDevice)
                     device.ports.output.sendMidi(context, [0xb0, 0x40 + segmentId, value])
                 }
             })
@@ -582,10 +586,12 @@ var SegmentDisplayManager = /*#__PURE__*/ (function () {
         if (timeFormat !== this.lastTimeFormat.get(context)) {
             this.lastTimeFormat.set(context, timeFormat)
             this.devices.forEach(function (device) {
-                if (_instanceof(device, MainDevice)) {
+                if (true) {
+                    // _instanceof(device, MainDevice)
                     var _device_controlSectionElements_displayLeds = device.controlSectionElements.displayLeds,
                         smpteLed = _device_controlSectionElements_displayLeds.smpte,
                         beatsLed = _device_controlSectionElements_displayLeds.beats
+
                     smpteLed.mSurfaceValue.setProcessValue(context, +/^(?:[\d]+\:){3}[\d]+$/.test(time))
                     beatsLed.mSurfaceValue.setProcessValue(context, +/^(?:[ \d]+\.){2} \d\.[\d ]+$/.test(time))
                 }
@@ -649,14 +655,18 @@ function setupDeviceConnection(driver2, devices2) {
 }
 
 // src/midi/index.ts
-var makeGlobalBooleanVariables = function (surface2) {
+var GlobalBooleanVariable = function (surface) {}
+
+var ContextStateVariable = function (surface) {}
+
+var makeGlobalBooleanVariables = function (surface) {
     return {
-        areMotorsActive: new GlobalBooleanVariable(surface2),
-        isValueDisplayModeActive: new GlobalBooleanVariable(surface2),
+        areMotorsActive: new GlobalBooleanVariable(surface),
+        isValueDisplayModeActive: new GlobalBooleanVariable(surface),
         isEncoderAssignmentActive: createElements(6, function () {
-            return new GlobalBooleanVariable(surface2)
+            return new GlobalBooleanVariable(surface)
         }),
-        isFlipModeActive: new GlobalBooleanVariable(surface2),
+        isFlipModeActive: new GlobalBooleanVariable(surface),
     }
 }
 
@@ -673,7 +683,7 @@ function bindDeviceToMidi(device, globalBooleanVariables2, activationCallbacks2,
             ports2.output.sendMidi(context, [0xe0 + faderIndex, value & 127, value >> 7])
         }
 
-        var isFaderTouched = false
+        var isFaderTouched = new Map()
 
         fader.mTouchedValueInternal.mOnProcessValueChange = function (context, value) {
             var isFaderTouchedValue = Boolean(value)
@@ -683,8 +693,8 @@ function bindDeviceToMidi(device, globalBooleanVariables2, activationCallbacks2,
             }
         }
 
-        var forceUpdate = true
-        var lastFaderValue = 0
+        var forceUpdate = new Map()
+        var lastFaderValue = new Map()
 
         fader.mSurfaceValue.mOnProcessValueChange = function (context, newValue, difference) {
             if (
@@ -726,6 +736,7 @@ function bindDeviceToMidi(device, globalBooleanVariables2, activationCallbacks2,
             var _step_value = _slicedToArray(_step.value, 2),
                 channelIndex = _step_value[0],
                 channel = _step_value[1]
+
             channel.encoder.mEncoderValue.mMidiBinding
                 .setInputPort(ports.input)
                 .bindToControlChange(0, 16 + channelIndex)
@@ -779,9 +790,10 @@ function bindDeviceToMidi(device, globalBooleanVariables2, activationCallbacks2,
                     currentEncoderColor.isAssigned ? currentEncoderColor : channelColor.get(context)
                 )
             }
-            var currentParameterName = ''
-            var currentDisplayValue = ''
-            var isLocalValueModeActive = false
+            var currentParameterName = new Map()
+            var currentDisplayValue = new Map()
+            var isLocalValueModeActive = new Map()
+
             var updateDisplay = function (context) {
                 device.lcdManager.setChannelText(
                     context,
@@ -1126,11 +1138,11 @@ function setShiftableButtonsLedValues(controlSectionElements, context, value) {
     }
 }
 
-function bindCursorValueControlButton(page2, button, encoder, jogWheel) {
-    var subPageArea = page2.makeSubPageArea('Cursor Value Control')
+function bindCursorValueControlButton(page, button, encoder, jogWheel) {
+    var subPageArea = page.makeSubPageArea('Cursor Value Control')
     var inactiveSubpage = subPageArea.makeSubPage('Cursor Value Control Inactive')
     var activeSubpage = subPageArea.makeSubPage('Cursor Value Control Active')
-    var encoderDisplayMode = page2.mCustom.makeHostValueVariable('cursorValueControlEncoderDisplayMode')
+    var encoderDisplayMode = page.mCustom.makeHostValueVariable('cursorValueControlEncoderDisplayMode')
 
     activeSubpage.mOnActivate = function (context) {
         encoderDisplayMode.setProcessValue(context, 0 /* SingleDot */)
@@ -1143,25 +1155,25 @@ function bindCursorValueControlButton(page2, button, encoder, jogWheel) {
         jogWheel.mKnobModeEnabledValue.setProcessValue(context, 0)
     }
 
-    page2.makeActionBinding(button.mSurfaceValue, activeSubpage.mAction.mActivate).setSubPage(inactiveSubpage)
-    page2.makeActionBinding(button.mSurfaceValue, inactiveSubpage.mAction.mActivate).setSubPage(activeSubpage)
-    page2.makeValueBinding(encoder.mEncoderValue, page2.mHostAccess.mMouseCursor.mValueUnderMouse).setSubPage(activeSubpage)
-    page2.makeValueBinding(encoder.mDisplayModeValue, encoderDisplayMode).setSubPage(activeSubpage)
+    page.makeActionBinding(button.mSurfaceValue, activeSubpage.mAction.mActivate).setSubPage(inactiveSubpage)
+    page.makeActionBinding(button.mSurfaceValue, inactiveSubpage.mAction.mActivate).setSubPage(activeSubpage)
+    page.makeValueBinding(encoder.mEncoderValue, page.mHostAccess.mMouseCursor.mValueUnderMouse).setSubPage(activeSubpage)
+    page.makeValueBinding(encoder.mDisplayModeValue, encoderDisplayMode).setSubPage(activeSubpage)
 
-    var dummyHostVariable = page2.mCustom.makeHostValueVariable('dummy')
-    page2.makeValueBinding(jogWheel.mSurfaceValue, dummyHostVariable).setSubPage(inactiveSubpage)
-    page2.makeValueBinding(jogWheel.mSurfaceValue, page2.mHostAccess.mMouseCursor.mValueUnderMouse).setSubPage(activeSubpage)
+    var dummyHostVariable = page.mCustom.makeHostValueVariable('dummy')
+    page.makeValueBinding(jogWheel.mSurfaceValue, dummyHostVariable).setSubPage(inactiveSubpage)
+    page.makeValueBinding(jogWheel.mSurfaceValue, page.mHostAccess.mMouseCursor.mValueUnderMouse).setSubPage(activeSubpage)
 }
 
-function bindControlButtons(page2, controlSectionElements, channelElements, mixerBankZone) {
-    var host = page2.mHostAccess
+function bindControlButtons(page, controlSectionElements, channelElements, mixerBankZone) {
+    var host = page.mHostAccess
     var buttons = controlSectionElements.buttons
-    var buttonsSubPageArea = page2.makeSubPageArea('Control Buttons')
+    var buttonsSubPageArea = page.makeSubPageArea('Control Buttons')
     var regularSubPage = buttonsSubPageArea.makeSubPage('Regular')
     var shiftSubPage = buttonsSubPageArea.makeSubPage('Shift')
 
     buttons.number.forEach(function (button, buttonIndex) {
-        page2.makeCommandBinding(
+        page.makeCommandBinding(
             button.mSurfaceValue,
             'Channel & Track Visibility',
             'Channel and Rack Configuration '.concat(buttonIndex + 1)
@@ -1177,7 +1189,7 @@ function bindControlButtons(page2, controlSectionElements, channelElements, mixe
             _iteratorNormalCompletion = true
         ) {
             var button = _step.value
-            page2.makeCommandBinding(button.mSurfaceValue, 'MIDI Remote', 'Open MIDI Remote Mapping Assistant')
+            page.makeCommandBinding(button.mSurfaceValue, 'MIDI Remote', 'Open MIDI Remote Mapping Assistant')
         }
     } catch (err) {
         _didIteratorError = true
@@ -1193,24 +1205,24 @@ function bindControlButtons(page2, controlSectionElements, channelElements, mixe
             }
         }
     }
-    page2.makeCommandBinding(buttons.edit.mSurfaceValue, 'Edit', 'Edit Channel Settings').setSubPage(regularSubPage)
-    page2.makeCommandBinding(buttons.edit.mSurfaceValue, 'Windows', 'Close All Plug-in Windows').setSubPage(shiftSubPage)
-    page2.makeCommandBinding(buttons.modify[0].mSurfaceValue, 'Edit', 'Undo').setSubPage(regularSubPage)
-    page2.makeCommandBinding(buttons.modify[0].mSurfaceValue, 'Edit', 'History').setSubPage(shiftSubPage)
-    page2.makeCommandBinding(buttons.modify[1].mSurfaceValue, 'Edit', 'Redo')
-    page2.makeCommandBinding(buttons.modify[2].mSurfaceValue, 'File', 'Save').setSubPage(regularSubPage)
-    page2.makeCommandBinding(buttons.modify[2].mSurfaceValue, 'File', 'Save New Version').setSubPage(shiftSubPage)
-    page2.makeCommandBinding(buttons.modify[3].mSurfaceValue, 'File', 'Revert')
-    page2.makeValueBinding(buttons.automation[0].mSurfaceValue, host.mTrackSelection.mMixerChannel.mValue.mAutomationRead).setTypeToggle()
-    page2.makeValueBinding(buttons.automation[1].mSurfaceValue, host.mTrackSelection.mMixerChannel.mValue.mAutomationWrite).setTypeToggle()
-    bindCursorValueControlButton(page2, buttons.automation[2], channelElements[7].encoder, controlSectionElements.jogWheel)
-    page2.makeCommandBinding(buttons.automation[3].mSurfaceValue, 'Project', 'Bring To Front')
-    page2.makeCommandBinding(buttons.automation[4].mSurfaceValue, 'Devices', 'Mixer')
-    page2.makeCommandBinding(buttons.utility[0].mSurfaceValue, 'MixConsole History', 'Undo MixConsole Step')
-    page2.makeCommandBinding(buttons.utility[1].mSurfaceValue, 'MixConsole History', 'Redo MixConsole Step')
-    page2.makeCommandBinding(buttons.utility[2].mSurfaceValue, 'Edit', 'Deactivate All Solo').setSubPage(regularSubPage)
-    page2.makeCommandBinding(buttons.utility[2].mSurfaceValue, 'Edit', 'Unmute All').setSubPage(shiftSubPage)
-    page2.makeActionBinding(buttons.utility[3].mSurfaceValue, shiftSubPage.mAction.mActivate).mOnValueChange = function (
+    page.makeCommandBinding(buttons.edit.mSurfaceValue, 'Edit', 'Edit Channel Settings').setSubPage(regularSubPage)
+    page.makeCommandBinding(buttons.edit.mSurfaceValue, 'Windows', 'Close All Plug-in Windows').setSubPage(shiftSubPage)
+    page.makeCommandBinding(buttons.modify[0].mSurfaceValue, 'Edit', 'Undo').setSubPage(regularSubPage)
+    page.makeCommandBinding(buttons.modify[0].mSurfaceValue, 'Edit', 'History').setSubPage(shiftSubPage)
+    page.makeCommandBinding(buttons.modify[1].mSurfaceValue, 'Edit', 'Redo')
+    page.makeCommandBinding(buttons.modify[2].mSurfaceValue, 'File', 'Save').setSubPage(regularSubPage)
+    page.makeCommandBinding(buttons.modify[2].mSurfaceValue, 'File', 'Save New Version').setSubPage(shiftSubPage)
+    page.makeCommandBinding(buttons.modify[3].mSurfaceValue, 'File', 'Revert')
+    page.makeValueBinding(buttons.automation[0].mSurfaceValue, host.mTrackSelection.mMixerChannel.mValue.mAutomationRead).setTypeToggle()
+    page.makeValueBinding(buttons.automation[1].mSurfaceValue, host.mTrackSelection.mMixerChannel.mValue.mAutomationWrite).setTypeToggle()
+    bindCursorValueControlButton(page, buttons.automation[2], channelElements[7].encoder, controlSectionElements.jogWheel)
+    page.makeCommandBinding(buttons.automation[3].mSurfaceValue, 'Project', 'Bring To Front')
+    page.makeCommandBinding(buttons.automation[4].mSurfaceValue, 'Devices', 'Mixer')
+    page.makeCommandBinding(buttons.utility[0].mSurfaceValue, 'MixConsole History', 'Undo MixConsole Step')
+    page.makeCommandBinding(buttons.utility[1].mSurfaceValue, 'MixConsole History', 'Redo MixConsole Step')
+    page.makeCommandBinding(buttons.utility[2].mSurfaceValue, 'Edit', 'Deactivate All Solo').setSubPage(regularSubPage)
+    page.makeCommandBinding(buttons.utility[2].mSurfaceValue, 'Edit', 'Unmute All').setSubPage(shiftSubPage)
+    page.makeActionBinding(buttons.utility[3].mSurfaceValue, shiftSubPage.mAction.mActivate).mOnValueChange = function (
         context,
         mapping,
         value
@@ -1225,35 +1237,35 @@ function bindControlButtons(page2, controlSectionElements, channelElements, mixe
     }
 
     var mTransport = host.mTransport
-    page2.makeCommandBinding(buttons.transport[0].mSurfaceValue, 'Transport', 'To Left Locator').setSubPage(regularSubPage)
-    page2.makeCommandBinding(buttons.transport[0].mSurfaceValue, 'Transport', 'Set Left Locator').setSubPage(shiftSubPage)
-    page2.makeCommandBinding(buttons.transport[1].mSurfaceValue, 'Transport', 'To Right Locator').setSubPage(regularSubPage)
-    page2.makeCommandBinding(buttons.transport[1].mSurfaceValue, 'Transport', 'Set Right Locator').setSubPage(shiftSubPage)
-    page2.makeValueBinding(buttons.transport[2].mSurfaceValue, mTransport.mValue.mCycleActive).setTypeToggle()
-    page2.makeCommandBinding(buttons.transport[3].mSurfaceValue, 'Transport', 'Auto Punch In')
-    page2.makeCommandBinding(buttons.transport[4].mSurfaceValue, 'Transport', 'Locate Previous Marker')
-    page2.makeCommandBinding(buttons.transport[5].mSurfaceValue, 'Transport', 'Insert Marker')
-    page2.makeCommandBinding(buttons.transport[6].mSurfaceValue, 'Transport', 'Locate Next Marker')
-    page2.makeValueBinding(buttons.transport[7].mSurfaceValue, mTransport.mValue.mRewind)
-    page2.makeValueBinding(buttons.transport[8].mSurfaceValue, mTransport.mValue.mForward)
-    page2.makeValueBinding(buttons.transport[9].mSurfaceValue, mTransport.mValue.mStop).setTypeToggle()
-    page2.makeValueBinding(buttons.transport[10].mSurfaceValue, mTransport.mValue.mStart).setTypeToggle()
-    page2.makeValueBinding(buttons.transport[11].mSurfaceValue, mTransport.mValue.mRecord).setTypeToggle()
+    page.makeCommandBinding(buttons.transport[0].mSurfaceValue, 'Transport', 'To Left Locator').setSubPage(regularSubPage)
+    page.makeCommandBinding(buttons.transport[0].mSurfaceValue, 'Transport', 'Set Left Locator').setSubPage(shiftSubPage)
+    page.makeCommandBinding(buttons.transport[1].mSurfaceValue, 'Transport', 'To Right Locator').setSubPage(regularSubPage)
+    page.makeCommandBinding(buttons.transport[1].mSurfaceValue, 'Transport', 'Set Right Locator').setSubPage(shiftSubPage)
+    page.makeValueBinding(buttons.transport[2].mSurfaceValue, mTransport.mValue.mCycleActive).setTypeToggle()
+    page.makeCommandBinding(buttons.transport[3].mSurfaceValue, 'Transport', 'Auto Punch In')
+    page.makeCommandBinding(buttons.transport[4].mSurfaceValue, 'Transport', 'Locate Previous Marker')
+    page.makeCommandBinding(buttons.transport[5].mSurfaceValue, 'Transport', 'Insert Marker')
+    page.makeCommandBinding(buttons.transport[6].mSurfaceValue, 'Transport', 'Locate Next Marker')
+    page.makeValueBinding(buttons.transport[7].mSurfaceValue, mTransport.mValue.mRewind)
+    page.makeValueBinding(buttons.transport[8].mSurfaceValue, mTransport.mValue.mForward)
+    page.makeValueBinding(buttons.transport[9].mSurfaceValue, mTransport.mValue.mStop).setTypeToggle()
+    page.makeValueBinding(buttons.transport[10].mSurfaceValue, mTransport.mValue.mStart).setTypeToggle()
+    page.makeValueBinding(buttons.transport[11].mSurfaceValue, mTransport.mValue.mRecord).setTypeToggle()
     var _buttons_navigation = buttons.navigation,
         bank = _buttons_navigation.bank,
         channel = _buttons_navigation.channel
-    page2.makeActionBinding(bank.left.mSurfaceValue, mixerBankZone.mAction.mPrevBank)
-    page2.makeActionBinding(bank.right.mSurfaceValue, mixerBankZone.mAction.mNextBank)
-    page2.makeActionBinding(channel.left.mSurfaceValue, mixerBankZone.mAction.mShiftLeft)
-    page2.makeActionBinding(channel.right.mSurfaceValue, mixerBankZone.mAction.mShiftRight)
+    page.makeActionBinding(bank.left.mSurfaceValue, mixerBankZone.mAction.mPrevBank)
+    page.makeActionBinding(bank.right.mSurfaceValue, mixerBankZone.mAction.mNextBank)
+    page.makeActionBinding(channel.left.mSurfaceValue, mixerBankZone.mAction.mShiftLeft)
+    page.makeActionBinding(channel.right.mSurfaceValue, mixerBankZone.mAction.mShiftRight)
 }
 
-function bindJogWheelSection(page2, controlSectionElements) {
-    var jogWheelSubPageArea = page2.makeSubPageArea('jogWeel')
+function bindJogWheelSection(page, controlSectionElements) {
+    var jogWheelSubPageArea = page.makeSubPageArea('jogWeel')
     var scrubSubPage = jogWheelSubPageArea.makeSubPage('scrub')
     var jogSubPage = jogWheelSubPageArea.makeSubPage('jog')
     var scrubButton = controlSectionElements.buttons.scrub
-    page2.makeActionBinding(scrubButton.mSurfaceValue, jogWheelSubPageArea.mAction.mNext)
+    page.makeActionBinding(scrubButton.mSurfaceValue, jogWheelSubPageArea.mAction.mNext)
     jogSubPage.mOnActivate = function (context) {
         scrubButton.mLedValue.setProcessValue(context, 1)
     }
@@ -1263,19 +1275,19 @@ function bindJogWheelSection(page2, controlSectionElements) {
     var _controlSectionElements_jogWheel = controlSectionElements.jogWheel,
         jogLeft = _controlSectionElements_jogWheel.mJogLeftValue,
         jogRight = _controlSectionElements_jogWheel.mJogRightValue
-    page2.makeCommandBinding(jogLeft, 'Transport', 'Jog Left').setSubPage(jogSubPage)
-    page2.makeCommandBinding(jogRight, 'Transport', 'Jog Right').setSubPage(jogSubPage)
-    page2.makeCommandBinding(jogLeft, 'Transport', 'Nudge Cursor Left').setSubPage(scrubSubPage)
-    page2.makeCommandBinding(jogRight, 'Transport', 'Nudge Cursor Right').setSubPage(scrubSubPage)
+    page.makeCommandBinding(jogLeft, 'Transport', 'Jog Left').setSubPage(jogSubPage)
+    page.makeCommandBinding(jogRight, 'Transport', 'Jog Right').setSubPage(jogSubPage)
+    page.makeCommandBinding(jogLeft, 'Transport', 'Nudge Cursor Left').setSubPage(scrubSubPage)
+    page.makeCommandBinding(jogRight, 'Transport', 'Nudge Cursor Right').setSubPage(scrubSubPage)
 }
 
-function bindSegmentDisplaySection(page2, controlSectionElements) {
-    page2.makeCommandBinding(controlSectionElements.buttons.timeMode.mSurfaceValue, 'Transport', 'Exchange Time Formats')
+function bindSegmentDisplaySection(page, controlSectionElements) {
+    page.makeCommandBinding(controlSectionElements.buttons.timeMode.mSurfaceValue, 'Transport', 'Exchange Time Formats')
 }
 
-function bindDirectionButtons(page2, controlSectionElements) {
+function bindDirectionButtons(page, controlSectionElements) {
     var buttons = controlSectionElements.buttons
-    var subPageArea = page2.makeSubPageArea('Direction Buttons')
+    var subPageArea = page.makeSubPageArea('Direction Buttons')
     var navigateSubPage = subPageArea.makeSubPage('Navigate')
     var zoomSubPage = subPageArea.makeSubPage('Zoom')
     zoomSubPage.mOnActivate = function (context) {
@@ -1285,18 +1297,18 @@ function bindDirectionButtons(page2, controlSectionElements) {
         buttons.navigation.directions.center.mLedValue.setProcessValue(context, 0)
     }
     var directions = buttons.navigation.directions
-    page2.makeCommandBinding(directions.up.mSurfaceValue, 'Navigate', 'Up').setSubPage(navigateSubPage)
-    page2.makeCommandBinding(directions.up.mSurfaceValue, 'Zoom', 'Zoom Out Vertically').setSubPage(zoomSubPage)
-    page2.makeCommandBinding(directions.down.mSurfaceValue, 'Navigate', 'Down').setSubPage(navigateSubPage)
-    page2.makeCommandBinding(directions.down.mSurfaceValue, 'Zoom', 'Zoom In Vertically').setSubPage(zoomSubPage)
-    page2.makeCommandBinding(directions.left.mSurfaceValue, 'Navigate', 'Left').setSubPage(navigateSubPage)
-    page2.makeCommandBinding(directions.left.mSurfaceValue, 'Zoom', 'Zoom Out').setSubPage(zoomSubPage)
-    page2.makeCommandBinding(directions.right.mSurfaceValue, 'Navigate', 'Right').setSubPage(navigateSubPage)
-    page2.makeCommandBinding(directions.right.mSurfaceValue, 'Zoom', 'Zoom In').setSubPage(zoomSubPage)
-    page2.makeActionBinding(directions.center.mSurfaceValue, subPageArea.mAction.mNext)
+    page.makeCommandBinding(directions.up.mSurfaceValue, 'Navigate', 'Up').setSubPage(navigateSubPage)
+    page.makeCommandBinding(directions.up.mSurfaceValue, 'Zoom', 'Zoom Out Vertically').setSubPage(zoomSubPage)
+    page.makeCommandBinding(directions.down.mSurfaceValue, 'Navigate', 'Down').setSubPage(navigateSubPage)
+    page.makeCommandBinding(directions.down.mSurfaceValue, 'Zoom', 'Zoom In Vertically').setSubPage(zoomSubPage)
+    page.makeCommandBinding(directions.left.mSurfaceValue, 'Navigate', 'Left').setSubPage(navigateSubPage)
+    page.makeCommandBinding(directions.left.mSurfaceValue, 'Zoom', 'Zoom Out').setSubPage(zoomSubPage)
+    page.makeCommandBinding(directions.right.mSurfaceValue, 'Navigate', 'Right').setSubPage(navigateSubPage)
+    page.makeCommandBinding(directions.right.mSurfaceValue, 'Zoom', 'Zoom In').setSubPage(zoomSubPage)
+    page.makeActionBinding(directions.center.mSurfaceValue, subPageArea.mAction.mNext)
 }
 
-function bindFootControl(page2, controlSectionElements) {
+function bindFootControl(page, controlSectionElements) {
     var _iteratorNormalCompletion = true,
         _didIteratorError = false,
         _iteratorError = undefined
@@ -1307,7 +1319,7 @@ function bindFootControl(page2, controlSectionElements) {
             _iteratorNormalCompletion = true
         ) {
             var footSwitch = _step.value
-            page2.makeCommandBinding(footSwitch.mSurfaceValue, 'MIDI Remote', 'Open MIDI Remote Mapping Assistant')
+            page.makeCommandBinding(footSwitch.mSurfaceValue, 'MIDI Remote', 'Open MIDI Remote Mapping Assistant')
         }
     } catch (err) {
         _didIteratorError = true
@@ -1326,12 +1338,11 @@ function bindFootControl(page2, controlSectionElements) {
 }
 
 // src/mapping/encoders.ts
-var import_midiremote_api_v1 = require('midiremote_api_v1')
-function bindEncoders(page2, devices2, mixerBankChannels, segmentDisplayManager2, globalBooleanVariables2) {
+function bindEncoders(page, devices2, mixerBankChannels, segmentDisplayManager2, globalBooleanVariables2) {
     var channelElements = devices2.flatMap(function (device) {
         return device.channelElements
     })
-    
+
     var deviceButtons = devices2
         .filter(function (device) {
             return _instanceof(device, MainDevice)
@@ -1341,12 +1352,12 @@ function bindEncoders(page2, devices2, mixerBankChannels, segmentDisplayManager2
         })
 
     var channelEncoderDisplayModeHostValues = channelElements.map(function (channel, channelIndex) {
-        var hostValue = page2.mCustom.makeHostValueVariable('encoderDisplayMode'.concat(channelIndex))
-        page2.makeValueBinding(channel.encoder.mDisplayModeValue, hostValue)
+        var hostValue = page.mCustom.makeHostValueVariable('encoderDisplayMode'.concat(channelIndex))
+        page.makeValueBinding(channel.encoder.mDisplayModeValue, hostValue)
         return hostValue
     })
 
-    var subPageArea = page2.makeSubPageArea('Encoders')
+    var subPageArea = page.makeSubPageArea('Encoders')
     var bindEncoderAssignments = function (assignmentButtonId, pages) {
         var encoderPageSize = channelElements.length
         pages = pages.flatMap(function (page3) {
@@ -1383,8 +1394,8 @@ function bindEncoders(page2, devices2, mixerBankChannels, segmentDisplayManager2
                 ) {
                     var _step_value = _step.value,
                         flipButton = _step_value.flip
-                    page2.makeActionBinding(flipButton.mSurfaceValue, flipSubPage.mAction.mActivate).setSubPage(subPage)
-                    page2.makeActionBinding(flipButton.mSurfaceValue, subPage.mAction.mActivate).setSubPage(flipSubPage)
+                    page.makeActionBinding(flipButton.mSurfaceValue, flipSubPage.mAction.mActivate).setSubPage(subPage)
+                    page.makeActionBinding(flipButton.mSurfaceValue, subPage.mAction.mActivate).setSubPage(flipSubPage)
                 }
             } catch (err) {
                 _didIteratorError = true
@@ -1441,6 +1452,7 @@ function bindEncoders(page2, devices2, mixerBankChannels, segmentDisplayManager2
             flipSubPage.mOnActivate = function (context) {
                 globalBooleanVariables2.isFlipModeActive.set(context, true, true)
             }
+
             var assignments =
                 typeof assignmentsConfig === 'function'
                     ? mixerBankChannels.map(function (channel, channelIndex) {
@@ -1460,30 +1472,26 @@ function bindEncoders(page2, devices2, mixerBankChannels, segmentDisplayManager2
 
                     var assignment = _objectSpread(
                         {
-                            // @ts-expect-error `assignments[channelIndex]` may be undefined, but TS doesn't
                             // consider that
                             displayMode: 0 /* SingleDot */,
-                            // @ts-expect-error
-                            encoderValue: page2.mCustom.makeHostValueVariable('unassignedEncoderValue'),
-                            pushToggleValue: page2.mCustom.makeHostValueVariable('unassignedEncoderPushValue'),
+                            encoderValue: page.mCustom.makeHostValueVariable('unassignedEncoderValue'),
+                            pushToggleValue: page.mCustom.makeHostValueVariable('unassignedEncoderPushValue'),
                         },
                         assignments[channelIndex]
                     )
-                    
-                    page2.makeValueBinding(encoder.mEncoderValue, assignment.encoderValue).setSubPage(subPage)
+
+                    page.makeValueBinding(encoder.mEncoderValue, assignment.encoderValue).setSubPage(subPage)
                     if (config.enableAutoSelect) {
-                        page2
-                            .makeValueBinding(fader.mTouchedValue, mixerBankChannels[channelIndex].mValue.mSelected)
+                        page.makeValueBinding(fader.mTouchedValue, mixerBankChannels[channelIndex].mValue.mSelected)
                             .filterByValue(1)
                             .setSubPage(subPage)
                     }
                     if (assignment.pushToggleValue) {
-                        page2.makeValueBinding(encoder.mPushValue, assignment.pushToggleValue).setTypeToggle().setSubPage(subPage)
+                        page.makeValueBinding(encoder.mPushValue, assignment.pushToggleValue).setTypeToggle().setSubPage(subPage)
                     }
-                    page2.makeValueBinding(fader.mSurfaceValue, assignment.encoderValue).setSubPage(flipSubPage)
+                    page.makeValueBinding(fader.mSurfaceValue, assignment.encoderValue).setSubPage(flipSubPage)
                     if (config.enableAutoSelect) {
-                        page2
-                            .makeValueBinding(fader.mTouchedValue, mixerBankChannels[channelIndex].mValue.mSelected)
+                        page.makeValueBinding(fader.mTouchedValue, mixerBankChannels[channelIndex].mValue.mSelected)
                             .filterByValue(+areAssignmentsChannelRelated)
                             .setSubPage(flipSubPage)
                     }
@@ -1527,7 +1535,7 @@ function bindEncoders(page2, devices2, mixerBankChannels, segmentDisplayManager2
             ) {
                 var buttons = _step.value
                 var encoderAssignButtonValue = buttons.encoderAssign[assignmentButtonId].mSurfaceValue
-                page2.makeActionBinding(encoderAssignButtonValue, createdSubPages[0].subPage.mAction.mActivate)
+                page.makeActionBinding(encoderAssignButtonValue, createdSubPages[0].subPage.mAction.mActivate)
                 var previousSubPages = createdSubPages[0]
                 var _iteratorNormalCompletion1 = true,
                     _didIteratorError1 = false,
@@ -1539,12 +1547,12 @@ function bindEncoders(page2, devices2, mixerBankChannels, segmentDisplayManager2
                         _iteratorNormalCompletion1 = true
                     ) {
                         var currentSubPages = _step1.value
-                        page2
-                            .makeActionBinding(encoderAssignButtonValue, currentSubPages.subPage.mAction.mActivate)
-                            .setSubPage(previousSubPages.subPage)
-                        page2
-                            .makeActionBinding(encoderAssignButtonValue, currentSubPages.subPage.mAction.mActivate)
-                            .setSubPage(previousSubPages.flipSubPage)
+                        page.makeActionBinding(encoderAssignButtonValue, currentSubPages.subPage.mAction.mActivate).setSubPage(
+                            previousSubPages.subPage
+                        )
+                        page.makeActionBinding(encoderAssignButtonValue, currentSubPages.subPage.mAction.mActivate).setSubPage(
+                            previousSubPages.flipSubPage
+                        )
                         previousSubPages = currentSubPages
                     }
                 } catch (err) {
@@ -1627,7 +1635,7 @@ function bindEncoders(page2, devices2, mixerBankChannels, segmentDisplayManager2
         },
     ])
 
-    var mChannelEQ = page2.mHostAccess.mTrackSelection.mMixerChannel.mChannelEQ
+    var mChannelEQ = page.mHostAccess.mTrackSelection.mMixerChannel.mChannelEQ
     bindEncoderAssignments(2, [
         {
             name: 'EQ',
@@ -1658,8 +1666,8 @@ function bindEncoders(page2, devices2, mixerBankChannels, segmentDisplayManager2
             areAssignmentsChannelRelated: false,
         },
     ])
-    var mSends = page2.mHostAccess.mTrackSelection.mMixerChannel.mSends
-    var sendSlotsCount = import_midiremote_api_v1.mDefaults.getNumberOfSendSlots()
+    var mSends = page.mHostAccess.mTrackSelection.mMixerChannel.mSends
+    var sendSlotsCount = midiremote_api.mDefaults.getNumberOfSendSlots()
     bindEncoderAssignments(3, [
         {
             name: 'Sends',
@@ -1688,7 +1696,7 @@ function bindEncoders(page2, devices2, mixerBankChannels, segmentDisplayManager2
         },
     ])
 
-    var effectsViewer = page2.mHostAccess.mTrackSelection.mMixerChannel.mInsertAndStripEffects
+    var effectsViewer = page.mHostAccess.mTrackSelection.mMixerChannel.mInsertAndStripEffects
         .makeInsertEffectViewer('Inserts')
         .followPluginWindowInFocus()
     var parameterBankZone = effectsViewer.mParameterBankZone
@@ -1721,7 +1729,7 @@ function bindEncoders(page2, devices2, mixerBankChannels, segmentDisplayManager2
             var buttons = _step.value
             for (var _i = 0, _iter = [pluginSubPages.subPage, pluginSubPages.flipSubPage]; _i < _iter.length; _i++) {
                 var subPage = _iter[_i]
-                page2.makeActionBinding(buttons.encoderAssign[4].mSurfaceValue, parameterBankZone.mAction.mNextBank).setSubPage(subPage)
+                page.makeActionBinding(buttons.encoderAssign[4].mSurfaceValue, parameterBankZone.mAction.mNextBank).setSubPage(subPage)
             }
         }
     } catch (err) {
@@ -1739,8 +1747,8 @@ function bindEncoders(page2, devices2, mixerBankChannels, segmentDisplayManager2
         }
     }
 
-    var mQuickControls = page2.mHostAccess.mTrackSelection.mMixerChannel.mQuickControls
-    var mStripEffects = page2.mHostAccess.mTrackSelection.mMixerChannel.mInsertAndStripEffects.mStripEffects
+    var mQuickControls = page.mHostAccess.mTrackSelection.mMixerChannel.mQuickControls
+    var mStripEffects = page.mHostAccess.mTrackSelection.mMixerChannel.mInsertAndStripEffects.mStripEffects
     bindEncoderAssignments(5, [
         {
             name: 'Quick Controls',
@@ -1776,8 +1784,8 @@ function bindEncoders(page2, devices2, mixerBankChannels, segmentDisplayManager2
 }
 
 // src/mapping/index.ts
-function makeHostMapping(page2, devices2, segmentDisplayManager2, globalBooleanVariables2, activationCallbacks2) {
-    var mixerBankZone = page2.mHostAccess.mMixConsole
+function makeHostMapping(page, devices2, segmentDisplayManager2, globalBooleanVariables2, activationCallbacks2) {
+    var mixerBankZone = page.mHostAccess.mMixConsole
         .makeMixerBankZone()
         .excludeInputChannels()
         .excludeOutputChannels()
@@ -1788,38 +1796,39 @@ function makeHostMapping(page2, devices2, segmentDisplayManager2, globalBooleanV
         })
         .map(function (channelElements) {
             var channel = mixerBankZone.makeMixerBankChannel()
-            page2.makeValueBinding(channelElements.scribbleStrip.trackTitle, channel.mValue.mSelected)
-            page2.makeValueBinding(channelElements.vuMeter, channel.mValue.mVUMeter)
+            page.makeValueBinding(channelElements.scribbleStrip.trackTitle, channel.mValue.mSelected)
+            page.makeValueBinding(channelElements.vuMeter, channel.mValue.mVUMeter)
             var buttons = channelElements.buttons
-            page2.makeValueBinding(buttons.record.mSurfaceValue, channel.mValue.mRecordEnable).setTypeToggle()
-            page2.makeValueBinding(buttons.solo.mSurfaceValue, channel.mValue.mSolo).setTypeToggle()
-            page2.makeValueBinding(buttons.mute.mSurfaceValue, channel.mValue.mMute).setTypeToggle()
-            page2.makeValueBinding(buttons.select.mSurfaceValue, channel.mValue.mSelected).setTypeToggle()
-            page2.makeValueBinding(channelElements.fader.mSurfaceValue, channel.mValue.mVolume)
+            page.makeValueBinding(buttons.record.mSurfaceValue, channel.mValue.mRecordEnable).setTypeToggle()
+            page.makeValueBinding(buttons.solo.mSurfaceValue, channel.mValue.mSolo).setTypeToggle()
+            page.makeValueBinding(buttons.mute.mSurfaceValue, channel.mValue.mMute).setTypeToggle()
+            page.makeValueBinding(buttons.select.mSurfaceValue, channel.mValue.mSelected).setTypeToggle()
+            page.makeValueBinding(channelElements.fader.mSurfaceValue, channel.mValue.mVolume)
             return channel
         })
-    bindEncoders(page2, devices2, mixerBankChannels, segmentDisplayManager2, globalBooleanVariables2)
+    bindEncoders(page, devices2, mixerBankChannels, segmentDisplayManager2, globalBooleanVariables2)
     devices2.forEach(function (device) {
         if (_instanceof(device, MainDevice)) {
             var controlSectionElements = device.controlSectionElements
-            bindSegmentDisplaySection(page2, controlSectionElements)
-            page2.makeValueBinding(
+            bindSegmentDisplaySection(page, controlSectionElements)
+            page.makeValueBinding(
                 controlSectionElements.mainFader.mSurfaceValue,
                 config.mapMainFaderToControlRoom
-                    ? page2.mHostAccess.mControlRoom.mMainChannel.mLevelValue
-                    : page2.mHostAccess.mMixConsole.makeMixerBankZone().includeOutputChannels().makeMixerBankChannel().mValue.mVolume
+                    ? page.mHostAccess.mControlRoom.mMainChannel.mLevelValue
+                    : page.mHostAccess.mMixConsole.makeMixerBankZone().includeOutputChannels().makeMixerBankChannel().mValue.mVolume
             )
-            bindControlButtons(page2, controlSectionElements, device.channelElements, mixerBankZone)
-            bindDirectionButtons(page2, controlSectionElements)
-            bindJogWheelSection(page2, controlSectionElements)
-            bindFootControl(page2, controlSectionElements)
+            bindControlButtons(page, controlSectionElements, device.channelElements, mixerBankZone)
+            bindDirectionButtons(page, controlSectionElements)
+            bindJogWheelSection(page, controlSectionElements)
+            bindFootControl(page, controlSectionElements)
         }
     })
-    var isDriverActivated = false
+    var isDriverActivated = new Map()
     var initialTransportLocatorPosition = new ContextStateVariable({
         time: '',
         timeFormat: '',
     })
+
     activationCallbacks2.addCallback(function (context) {
         isDriverActivated.set(context, true)
         var _initialTransportLocatorPosition_get = initialTransportLocatorPosition.get(context),
@@ -1834,7 +1843,8 @@ function makeHostMapping(page2, devices2, segmentDisplayManager2, globalBooleanV
             }
         })
     })
-    page2.mHostAccess.mTransport.mTimeDisplay.mPrimary.mTransportLocator.mOnChange = function (context, mapping, time, timeFormat) {
+
+    page.mHostAccess.mTransport.mTimeDisplay.mPrimary.mTransportLocator.mOnChange = function (context, mapping, time, timeFormat) {
         if (!isDriverActivated.get(context)) {
             initialTransportLocatorPosition.set(context, {
                 time: time,
@@ -1847,8 +1857,10 @@ function makeHostMapping(page2, devices2, segmentDisplayManager2, globalBooleanV
 }
 
 // src/index.ts
-Reflect.get = void 0
-var driver = import_midiremote_api_v12.default.makeDeviceDriver('Behringer', 'X-Touch', 'github.com/bjoluc')
+
+// 2. create the device driver main object
+var driver = midiremote_api.makeDeviceDriver('Behringer', 'X-Touch', 'github.com/bjoluc')
+
 var surface = decorateSurface(driver.mSurface)
 var devices = new Devices(driver, surface)
 
@@ -1873,4 +1885,4 @@ devices.forEach(function (device) {
     bindDeviceToMidi(device, globalBooleanVariables, activationCallbacks, timerUtils)
 })
 
-makeHostMapping(page, devices, segmentDisplayManager, globalBooleanVariables, activationCallbacks) /*! Bundled license information:
+makeHostMapping(page, devices, segmentDisplayManager, globalBooleanVariables, activationCallbacks)

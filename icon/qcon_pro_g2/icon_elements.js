@@ -319,9 +319,9 @@ function makeChannelControl(surface, midiInput, midiOutput, x, y, channelIndex) 
         .bindToNote(0, 32 + channelIndex)
 
     channelControl.pushEncoder.mEncoderValue.mOnProcessValueChange = function (activeDevice, value, diff) {
-        // console.log('Encoder Change: ' + channelIndex + '::' + value + ':' + diff)
-
         var displayMode = channelControl.mDisplayModeValue.getProcessValue(activeDevice)
+        console.log('Encoder Change: ' + channelIndex + '::' + value + ':' + diff + ', displayMode:' + displayMode)
+
         var isCenterLedOn = value === (displayMode === VPOT_MODE_SPREAD /* Spread */ ? 0 : 0.5)
         var position = 1 + Math.round(value * (displayMode === VPOT_MODE_SPREAD /* Spread */ ? 5 : 10))
         midiOutput.sendMidi(activeDevice, [0xb0, 0x30 + channelIndex, (+isCenterLedOn << 6) + (displayMode << 4) + position])

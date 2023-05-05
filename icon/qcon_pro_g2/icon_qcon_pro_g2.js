@@ -477,6 +477,7 @@ function makePageMixer() {
         var btnMuteSurfaceValue = surfaceElements.channelControls[channelIndex].btnMute.mSurfaceValue
         var btnSoloSurfaceValue = surfaceElements.channelControls[channelIndex].btnSolo.mSurfaceValue
         var btnRecordSurfaceValue = surfaceElements.channelControls[channelIndex].btnRecord.mSurfaceValue
+        var mDisplayModeValue = surfaceElements.channelControls[channelIndex].mDisplayModeValue
 
         // FaderKnobs - Volume, Pan, Editor Open
         page.makeValueBinding(knobSurfaceValue, hostMixerBankChannel.mValue.mPan).setSubPage(subPageFaderVolume)
@@ -495,6 +496,11 @@ function makePageMixer() {
 
         // VU Meter
         page.makeValueBinding(surfaceElements.channelControls[channelIndex].vuMeter, hostMixerBankChannel.mValue.mVUMeter)
+
+        // Knob displayMode
+        var hostValue = page.mCustom.makeHostValueVariable('encoderDisplayMode'.concat(channelIndex.toString()))
+        page.makeValueBinding(mDisplayModeValue, hostValue)
+        // Knob displayMode default to Pan
     }
 
     return page
@@ -514,7 +520,7 @@ function makePageSelectedTrack() {
     // Custom variable for track the selectedTrack so we can get to it's name
     page.makeValueBinding(surfaceElements.selectedTrack, selectedTrackChannel.mValue.mVolume)
 
-    /// SendsQC subPage
+    // SendsQC subPage
     // Sends on PushEncodes and mute button for pre/post
     // Focus QC on Faders
     // Fader
@@ -619,7 +625,7 @@ function makePageSelectedTrack() {
         page.makeValueBinding(fader2SurfaceValue, eqBand[idx].mFreq).setSubPage(subPageEQ)
     }
 
-    /// CueSends subPage
+    // CueSends subPage
     for (var idx = 0; idx < selectedTrackChannel.mCueSends.getSize(); ++idx) {
         var knobSurfaceValue = surfaceElements.channelControls[idx].pushEncoder.mEncoderValue
         var knobPushValue = surfaceElements.channelControls[idx].pushEncoder.mPushValue
@@ -740,6 +746,7 @@ function makePageControlRoom() {
         surfaceElements.channelControls[0].btnSelect.mSurfaceValue,
         controlRoom.mMainChannel.mMetronomeClickActiveValue
     ).setTypeToggle()
+
     // Phones[0]
     page.makeValueBinding(
         surfaceElements.channelControls[1].fdrFader.mSurfaceValue,
@@ -856,6 +863,15 @@ mixerPage.mOnActivate = function (activeDevice) {
     activeDevice.setState('activePage', 'Mixer')
     clearAllLeds(activeDevice, midiOutput)
     clearChannelState(activeDevice)
+
+    surfaceElements.channelControls[0].mDisplayModeValue.setProcessValue(activeDevice, 0 /* SingleDot */)
+    surfaceElements.channelControls[1].mDisplayModeValue.setProcessValue(activeDevice, 1 /* BoostOrCut */)
+    surfaceElements.channelControls[2].mDisplayModeValue.setProcessValue(activeDevice, 2 /* Wrap */)
+    surfaceElements.channelControls[3].mDisplayModeValue.setProcessValue(activeDevice, 3 /* Spread */)
+    surfaceElements.channelControls[4].mDisplayModeValue.setProcessValue(activeDevice, 0 /* SingleDot */)
+    surfaceElements.channelControls[5].mDisplayModeValue.setProcessValue(activeDevice, 1 /* BoostOrCut */)
+    surfaceElements.channelControls[6].mDisplayModeValue.setProcessValue(activeDevice, 2 /* Wrap */)
+    surfaceElements.channelControls[7].mDisplayModeValue.setProcessValue(activeDevice, 3 /* Spread */)
 }
 
 selectedTrackPage.mOnActivate = function (activeDevice) {
@@ -877,6 +893,7 @@ channelStripPage.mOnActivate = function (activeDevice) {
     activeDevice.setState('activePage', 'ChannelStrip')
     clearAllLeds(activeDevice, midiOutput)
     clearChannelState(activeDevice)
+
     activeDevice.setState('activeSubPage', 'Gate')
     midiOutput.sendMidi(activeDevice, [0x90, 24, 127])
     midiOutput.sendMidi(activeDevice, [0x90, 25, 0])
@@ -897,7 +914,7 @@ midiPage.mOnActivate = function (activeDevice) {
     var activePage = 'Midi'
     activeDevice.setState('activePage', activePage)
     clearAllLeds(activeDevice, midiOutput)
-    // clearChannelState(activeDevice)
+
     // On load I'm setting the pitchbend fader to the center position. Whenever you release it it will jump back to this point
     // midiOutput.sendMidi(activeDevice, [0xE0, 0, 64]) // to put pitchbend in center
     // ! This init must match the CC bindings create in the makeMidiPage function - it's annoying and needs a refactor
