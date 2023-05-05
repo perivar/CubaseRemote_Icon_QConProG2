@@ -10,7 +10,7 @@ module.exports = {
     printWidth: 140,
     overrides: [
         {
-            files: ['jsconfig.json'],
+            files: ['jsconfig.json', 'tsconfig.json'],
             options: {
                 tabWidth: 2,
             },

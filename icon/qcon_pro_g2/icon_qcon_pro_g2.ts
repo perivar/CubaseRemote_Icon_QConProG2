@@ -7,31 +7,31 @@
 // Portions of this implementation where inspired by other midi remote creates to whom I wish to say thank you!
 // - Mackie C4 by Ron Garrison <ron.garrison@gmail.com> https://github.com/rwgarrison/midiremote-userscripts/tree/main/mackie/c4
 
-var iconElements = require('./icon_elements')
-var makeChannelControl = iconElements.makeChannelControl
-var makeMasterControl = iconElements.makeMasterControl
-var makeTransport = iconElements.makeTransport
-var clearAllLeds = iconElements.clearAllLeds
-var Helper_updateDisplay = iconElements.Helper_updateDisplay
+import iconElements = require('./icon_elements')
+const makeChannelControl = iconElements.makeChannelControl
+const makeMasterControl = iconElements.makeMasterControl
+const makeTransport = iconElements.makeTransport
+const clearAllLeds = iconElements.clearAllLeds
+const Helper_updateDisplay = iconElements.Helper_updateDisplay
 
-var helper = require('./icon_helper')
-var makeLabel = helper.display.makeLabel
-var setTextOfColumn = helper.display.setTextOfColumn
-var setTextOfLine = helper.display.setTextOfLine
+import helper = require('./icon_helper')
+const makeLabel = helper.display.makeLabel
+const setTextOfColumn = helper.display.setTextOfColumn
+const setTextOfLine = helper.display.setTextOfLine
 
 //-----------------------------------------------------------------------------
 // 1. DRIVER SETUP - create driver object, midi ports and detection information
 //-----------------------------------------------------------------------------
 
 // 1. get the api's entry point
-var midiremote_api = require('midiremote_api_v1')
+import midiremote_api = require('midiremote_api_v1')
 
 // 2. create the device driver main object
-var deviceDriver = midiremote_api.makeDeviceDriver('Icon', 'QCon Pro G2', 'Nerseth')
+const deviceDriver = midiremote_api.makeDeviceDriver('Icon', 'QCon Pro G2', 'Nerseth')
 
 // 3. create objects representing the hardware's MIDI ports
-var midiInput = deviceDriver.mPorts.makeMidiInput()
-var midiOutput = deviceDriver.mPorts.makeMidiOutput()
+const midiInput = deviceDriver.mPorts.makeMidiInput()
+const midiOutput = deviceDriver.mPorts.makeMidiOutput()
 
 deviceDriver.mOnActivate = function (activeDevice) {
     console.log('Icon QCon Pro G2 Activated')
@@ -45,13 +45,13 @@ deviceDriver
     .expectInputNameContains('iCON QCON Pro G2')
     .expectOutputNameContains('iCON QCON Pro G2')
 
-var surface = deviceDriver.mSurface
+const surface = deviceDriver.mSurface
 
 //-----------------------------------------------------------------------------
 // 2. SURFACE LAYOUT - create control elements and midi bindings
 //-----------------------------------------------------------------------------
 function makeSurfaceElements() {
-    var surfaceElements = {}
+    const surfaceElements: any = {}
 
     // Display - 2lines
     surfaceElements.d2Display = surface.makeBlindPanel(0, 0, 17, 3)
@@ -60,11 +60,11 @@ function makeSurfaceElements() {
 
     surfaceElements.channelControls = {}
 
-    var xKnobStrip = 0
-    var yKnobStrip = 3
+    const xKnobStrip = 0
+    const yKnobStrip = 3
 
     // add the main channels
-    for (var i = 0; i < surfaceElements.numStrips; ++i) {
+    for (let i = 0; i < surfaceElements.numStrips; ++i) {
         surfaceElements.channelControls[i] = makeChannelControl(surface, midiInput, midiOutput, xKnobStrip, yKnobStrip, i)
     }
 
@@ -262,7 +262,7 @@ function makeSurfaceElements() {
     return surfaceElements
 }
 
-var surfaceElements = makeSurfaceElements()
+const surfaceElements = makeSurfaceElements()
 
 //-----------------------------------------------------------------------------
 // 3. HOST MAPPING - create mapping pages and host bindings
@@ -277,7 +277,7 @@ var surfaceElements = makeSurfaceElements()
  * @returns sub page
  */
 function makeSubPage(subPageArea, name) {
-    var subPage = subPageArea.makeSubPage(name)
+    const subPage = subPageArea.makeSubPage(name)
 
     subPage.mOnActivate = function (activeDevice) {
         console.log('sub page ' + name + ' activated')
@@ -387,14 +387,14 @@ function makeSubPage(subPageArea, name) {
  * @param {string} name
  */
 function makePageWithDefaults(name) {
-    var page = deviceDriver.mMapping.makePage(name)
-    var jogSubPageArea = page.makeSubPageArea('Jog')
-    var subPageJogNudge = makeSubPage(jogSubPageArea, 'Nudge')
-    var subPageJogScrub = makeSubPage(jogSubPageArea, 'Scrub')
+    const page = deviceDriver.mMapping.makePage(name)
+    const jogSubPageArea = page.makeSubPageArea('Jog')
+    const subPageJogNudge = makeSubPage(jogSubPageArea, 'Nudge')
+    const subPageJogScrub = makeSubPage(jogSubPageArea, 'Scrub')
 
-    var zoomSubPageArea = page.makeSubPageArea('Zoom')
-    var subPageJogZoom = makeSubPage(zoomSubPageArea, 'Zoom')
-    var subPageJobNav = makeSubPage(zoomSubPageArea, 'Nav')
+    const zoomSubPageArea = page.makeSubPageArea('Zoom')
+    const subPageJogZoom = makeSubPage(zoomSubPageArea, 'Zoom')
+    const subPageJobNav = makeSubPage(zoomSubPageArea, 'Nav')
 
     // Transport controls
     page.makeActionBinding(surfaceElements.masterControl.btnChannelLeft.mSurfaceValue, deviceDriver.mAction.mPrevPage)
@@ -448,15 +448,15 @@ function makePageWithDefaults(name) {
     // page.makeActionBinding(surfaceElements.transport.knobJogWheel.mPushValue, jogSubPageArea.mAction.mNext)
     page.makeActionBinding(surfaceElements.transport.btnScrub.mSurfaceValue, jogSubPageArea.mAction.mNext)
 
-    var MasterFaderSubPageArea = page.makeSubPageArea('MasterFader')
-    var subPageMasterFaderValue = makeSubPage(MasterFaderSubPageArea, 'MF_ValueUnderCursor')
+    const MasterFaderSubPageArea = page.makeSubPageArea('MasterFader')
+    const subPageMasterFaderValue = makeSubPage(MasterFaderSubPageArea, 'MF_ValueUnderCursor')
 
     page.makeValueBinding(surfaceElements.masterControl.fdrFader.mSurfaceValue, page.mHostAccess.mMouseCursor.mValueUnderMouse)
         .setValueTakeOverModeJump()
         .setSubPage(subPageMasterFaderValue)
 
     // Get selected tracks
-    var selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
+    const selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
 
     // Automation for selected tracks
     page.makeValueBinding(surfaceElements.btnRead.mSurfaceValue, selectedTrackChannel.mValue.mAutomationRead).setTypeToggle()
@@ -466,32 +466,32 @@ function makePageWithDefaults(name) {
 }
 
 function makePageMixer() {
-    var page = makePageWithDefaults('Mixer')
+    const page = makePageWithDefaults('Mixer')
 
-    var FaderSubPageArea = page.makeSubPageArea('FadersKnobs')
-    var subPageFaderVolume = makeSubPage(FaderSubPageArea, 'Volume')
+    const FaderSubPageArea = page.makeSubPageArea('FadersKnobs')
+    const subPageFaderVolume = makeSubPage(FaderSubPageArea, 'Volume')
 
-    var ButtonSubPageArea = page.makeSubPageArea('Buttons')
-    var subPageButtonDefaultSet = makeSubPage(ButtonSubPageArea, 'DefaultSet')
+    const ButtonSubPageArea = page.makeSubPageArea('Buttons')
+    const subPageButtonDefaultSet = makeSubPage(ButtonSubPageArea, 'DefaultSet')
 
-    var hostMixerBankZone = page.mHostAccess.mMixConsole
+    const hostMixerBankZone = page.mHostAccess.mMixConsole
         .makeMixerBankZone('AudioInstrBanks')
         .includeAudioChannels()
         .includeInstrumentChannels()
         .setFollowVisibility(true)
 
-    for (var channelIndex = 0; channelIndex < surfaceElements.numStrips; ++channelIndex) {
-        var hostMixerBankChannel = hostMixerBankZone.makeMixerBankChannel()
+    for (let channelIndex = 0; channelIndex < surfaceElements.numStrips; ++channelIndex) {
+        const hostMixerBankChannel = hostMixerBankZone.makeMixerBankChannel()
 
-        var knobSurfaceValue = surfaceElements.channelControls[channelIndex].pushEncoder.mEncoderValue
-        var knobPushValue = surfaceElements.channelControls[channelIndex].pushEncoder.mPushValue
-        var faderSurfaceValue = surfaceElements.channelControls[channelIndex].fdrFader.mSurfaceValue
-        var faderTouchSurfaceValue = surfaceElements.channelControls[channelIndex].btnFaderTouch.mSurfaceValue
-        var btnSelectSurfaceValue = surfaceElements.channelControls[channelIndex].btnSelect.mSurfaceValue
-        var btnMuteSurfaceValue = surfaceElements.channelControls[channelIndex].btnMute.mSurfaceValue
-        var btnSoloSurfaceValue = surfaceElements.channelControls[channelIndex].btnSolo.mSurfaceValue
-        var btnRecordSurfaceValue = surfaceElements.channelControls[channelIndex].btnRecord.mSurfaceValue
-        var mDisplayModeValue = surfaceElements.channelControls[channelIndex].mDisplayModeValue
+        const knobSurfaceValue = surfaceElements.channelControls[channelIndex].pushEncoder.mEncoderValue
+        const knobPushValue = surfaceElements.channelControls[channelIndex].pushEncoder.mPushValue
+        const faderSurfaceValue = surfaceElements.channelControls[channelIndex].fdrFader.mSurfaceValue
+        const faderTouchSurfaceValue = surfaceElements.channelControls[channelIndex].btnFaderTouch.mSurfaceValue
+        const btnSelectSurfaceValue = surfaceElements.channelControls[channelIndex].btnSelect.mSurfaceValue
+        const btnMuteSurfaceValue = surfaceElements.channelControls[channelIndex].btnMute.mSurfaceValue
+        const btnSoloSurfaceValue = surfaceElements.channelControls[channelIndex].btnSolo.mSurfaceValue
+        const btnRecordSurfaceValue = surfaceElements.channelControls[channelIndex].btnRecord.mSurfaceValue
+        const mDisplayModeValue = surfaceElements.channelControls[channelIndex].mDisplayModeValue
 
         // FaderKnobs - Volume, Pan, Editor Open
         page.makeValueBinding(knobSurfaceValue, hostMixerBankChannel.mValue.mPan).setSubPage(subPageFaderVolume)
@@ -512,7 +512,7 @@ function makePageMixer() {
         page.makeValueBinding(surfaceElements.channelControls[channelIndex].vuMeter, hostMixerBankChannel.mValue.mVUMeter)
 
         // Knob displayMode
-        var hostValue = page.mCustom.makeHostValueVariable('encoderDisplayMode'.concat(channelIndex.toString()))
+        const hostValue = page.mCustom.makeHostValueVariable('encoderDisplayMode'.concat(channelIndex.toString()))
         page.makeValueBinding(mDisplayModeValue, hostValue)
         // Knob displayMode default to Pan
     }
@@ -521,27 +521,27 @@ function makePageMixer() {
 }
 
 function makePageSelectedTrack() {
-    var page = makePageWithDefaults('Selected Channel')
+    const page = makePageWithDefaults('Selected Channel')
 
-    var faderSubPageArea = page.makeSubPageArea('Faders')
-    var subPageSendsQC = makeSubPage(faderSubPageArea, 'SendsQC')
-    var subPageEQ = makeSubPage(faderSubPageArea, 'EQ')
-    var subPageCueSends = makeSubPage(faderSubPageArea, 'CueSends')
-    var subPagePreFilter = makeSubPage(faderSubPageArea, 'PreFilter')
+    const faderSubPageArea = page.makeSubPageArea('Faders')
+    const subPageSendsQC = makeSubPage(faderSubPageArea, 'SendsQC')
+    const subPageEQ = makeSubPage(faderSubPageArea, 'EQ')
+    const subPageCueSends = makeSubPage(faderSubPageArea, 'CueSends')
+    const subPagePreFilter = makeSubPage(faderSubPageArea, 'PreFilter')
 
-    var selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
+    const selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
 
-    // Custom variable for track the selectedTrack so we can get to it's name
+    // Custom constiable for track the selectedTrack so we can get to it's name
     page.makeValueBinding(surfaceElements.selectedTrack, selectedTrackChannel.mValue.mVolume)
 
     // SendsQC subPage
     // Sends on PushEncodes and mute button for pre/post
     // Focus QC on Faders
     // Fader
-    for (var idx = 0; idx < surfaceElements.numStrips; ++idx) {
-        var knobSurfaceValue = surfaceElements.channelControls[idx].pushEncoder.mEncoderValue
-        var knobPushValue = surfaceElements.channelControls[idx].pushEncoder.mPushValue
-        var faderSurfaceValue = surfaceElements.channelControls[idx].fdrFader.mSurfaceValue
+    for (let idx = 0; idx < surfaceElements.numStrips; ++idx) {
+        const knobSurfaceValue = surfaceElements.channelControls[idx].pushEncoder.mEncoderValue
+        const knobPushValue = surfaceElements.channelControls[idx].pushEncoder.mPushValue
+        const faderSurfaceValue = surfaceElements.channelControls[idx].fdrFader.mSurfaceValue
 
         page.makeValueBinding(knobSurfaceValue, selectedTrackChannel.mSends.getByIndex(idx).mLevel).setSubPage(subPageSendsQC)
         page.makeValueBinding(knobPushValue, selectedTrackChannel.mSends.getByIndex(idx).mOn).setTypeToggle().setSubPage(subPageSendsQC)
@@ -623,13 +623,13 @@ function makePageSelectedTrack() {
     eqBand[1] = selectedTrackChannel.mChannelEQ.mBand2
     eqBand[2] = selectedTrackChannel.mChannelEQ.mBand3
     eqBand[3] = selectedTrackChannel.mChannelEQ.mBand4
-    for (var idx = 0; idx < 4; ++idx) {
-        var knobSurfaceValue = surfaceElements.channelControls[idx].pushEncoder.mEncoderValue
-        var knob2SurfaceValue = surfaceElements.channelControls[idx + 4].pushEncoder.mEncoderValue
-        var knobPushValue = surfaceElements.channelControls[idx].pushEncoder.mPushValue
-        var knob2PushValue = surfaceElements.channelControls[idx + 4].pushEncoder.mPushValue
-        var faderSurfaceValue = surfaceElements.channelControls[idx].fdrFader.mSurfaceValue
-        var fader2SurfaceValue = surfaceElements.channelControls[idx + 4].fdrFader.mSurfaceValue
+    for (let idx = 0; idx < 4; ++idx) {
+        const knobSurfaceValue = surfaceElements.channelControls[idx].pushEncoder.mEncoderValue
+        const knob2SurfaceValue = surfaceElements.channelControls[idx + 4].pushEncoder.mEncoderValue
+        const knobPushValue = surfaceElements.channelControls[idx].pushEncoder.mPushValue
+        const knob2PushValue = surfaceElements.channelControls[idx + 4].pushEncoder.mPushValue
+        const faderSurfaceValue = surfaceElements.channelControls[idx].fdrFader.mSurfaceValue
+        const fader2SurfaceValue = surfaceElements.channelControls[idx + 4].fdrFader.mSurfaceValue
 
         page.makeValueBinding(knobSurfaceValue, eqBand[idx].mFilterType).setSubPage(subPageEQ)
         page.makeValueBinding(knob2SurfaceValue, eqBand[idx].mQ).setSubPage(subPageEQ)
@@ -640,10 +640,10 @@ function makePageSelectedTrack() {
     }
 
     // CueSends subPage
-    for (var idx = 0; idx < selectedTrackChannel.mCueSends.getSize(); ++idx) {
-        var knobSurfaceValue = surfaceElements.channelControls[idx].pushEncoder.mEncoderValue
-        var knobPushValue = surfaceElements.channelControls[idx].pushEncoder.mPushValue
-        var faderSurfaceValue = surfaceElements.channelControls[idx].fdrFader.mSurfaceValue
+    for (let idx = 0; idx < selectedTrackChannel.mCueSends.getSize(); ++idx) {
+        const knobSurfaceValue = surfaceElements.channelControls[idx].pushEncoder.mEncoderValue
+        const knobPushValue = surfaceElements.channelControls[idx].pushEncoder.mPushValue
+        const faderSurfaceValue = surfaceElements.channelControls[idx].fdrFader.mSurfaceValue
 
         page.makeValueBinding(knobSurfaceValue, selectedTrackChannel.mCueSends.getByIndex(idx).mPan).setSubPage(subPageCueSends)
         page.makeValueBinding(knobPushValue, selectedTrackChannel.mCueSends.getByIndex(idx).mOn).setTypeToggle().setSubPage(subPageCueSends)
@@ -664,19 +664,19 @@ function makePageSelectedTrack() {
     }
 
     // PreFilter subPage
-    var knobSurfaceValue = surfaceElements.channelControls[0].pushEncoder.mEncoderValue
-    var knob2SurfaceValue = surfaceElements.channelControls[1].pushEncoder.mEncoderValue
-    var knob3SurfaceValue = surfaceElements.channelControls[2].pushEncoder.mEncoderValue
+    const knobSurfaceValue = surfaceElements.channelControls[0].pushEncoder.mEncoderValue
+    const knob2SurfaceValue = surfaceElements.channelControls[1].pushEncoder.mEncoderValue
+    const knob3SurfaceValue = surfaceElements.channelControls[2].pushEncoder.mEncoderValue
 
-    var knobPushValue = surfaceElements.channelControls[0].pushEncoder.mPushValue
-    var knob2PushValue = surfaceElements.channelControls[1].pushEncoder.mPushValue
-    var knob3PushValue = surfaceElements.channelControls[2].pushEncoder.mPushValue
+    const knobPushValue = surfaceElements.channelControls[0].pushEncoder.mPushValue
+    const knob2PushValue = surfaceElements.channelControls[1].pushEncoder.mPushValue
+    const knob3PushValue = surfaceElements.channelControls[2].pushEncoder.mPushValue
 
-    var faderSurfaceValue = surfaceElements.channelControls[0].fdrFader.mSurfaceValue
-    var fader2SurfaceValue = surfaceElements.channelControls[1].fdrFader.mSurfaceValue
-    var fader3SurfaceValue = surfaceElements.channelControls[2].fdrFader.mSurfaceValue
+    const faderSurfaceValue = surfaceElements.channelControls[0].fdrFader.mSurfaceValue
+    const fader2SurfaceValue = surfaceElements.channelControls[1].fdrFader.mSurfaceValue
+    const fader3SurfaceValue = surfaceElements.channelControls[2].fdrFader.mSurfaceValue
 
-    var preFilter = selectedTrackChannel.mPreFilter
+    const preFilter = selectedTrackChannel.mPreFilter
 
     page.makeValueBinding(surfaceElements.channelControls[0].btnSelect.mSurfaceValue, preFilter.mBypass)
         .setTypeToggle()
@@ -705,20 +705,20 @@ function makePageSelectedTrack() {
 }
 
 function makePageChannelStrip() {
-    var page = makePageWithDefaults('ChannelStrip')
+    const page = makePageWithDefaults('ChannelStrip')
 
-    var strip = page.makeSubPageArea('Strip')
-    var gatePage = makeSubPage(strip, 'Gate')
-    var compressorPage = makeSubPage(strip, 'Compressor')
-    var toolsPage = makeSubPage(strip, 'Tools')
-    var saturatorPage = makeSubPage(strip, 'Saturator')
-    var limiterPage = makeSubPage(strip, 'Limiter')
+    const strip = page.makeSubPageArea('Strip')
+    const gatePage = makeSubPage(strip, 'Gate')
+    const compressorPage = makeSubPage(strip, 'Compressor')
+    const toolsPage = makeSubPage(strip, 'Tools')
+    const saturatorPage = makeSubPage(strip, 'Saturator')
+    const limiterPage = makeSubPage(strip, 'Limiter')
 
-    var selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
-    var stripEffects = selectedTrackChannel.mInsertAndStripEffects.mStripEffects
+    const selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
+    const stripEffects = selectedTrackChannel.mInsertAndStripEffects.mStripEffects
 
-    for (var idx = 0; idx < surfaceElements.numStrips; ++idx) {
-        var faderSurfaceValue = surfaceElements.channelControls[idx].fdrFader.mSurfaceValue
+    for (let idx = 0; idx < surfaceElements.numStrips; ++idx) {
+        const faderSurfaceValue = surfaceElements.channelControls[idx].fdrFader.mSurfaceValue
 
         page.makeValueBinding(faderSurfaceValue, stripEffects.mGate.mParameterBankZone.makeParameterValue()).setSubPage(gatePage)
         page.makeValueBinding(faderSurfaceValue, stripEffects.mCompressor.mParameterBankZone.makeParameterValue()).setSubPage(
@@ -729,9 +729,9 @@ function makePageChannelStrip() {
         page.makeValueBinding(faderSurfaceValue, stripEffects.mLimiter.mParameterBankZone.makeParameterValue()).setSubPage(limiterPage)
     }
 
-    for (var idx = 0; idx < 5; ++idx) {
-        var faderStrip = surfaceElements.channelControls[idx]
-        var type = ['mGate', 'mCompressor', 'mTools', 'mSaturator', 'mLimiter'][idx]
+    for (let idx = 0; idx < 5; ++idx) {
+        const faderStrip = surfaceElements.channelControls[idx]
+        const type = ['mGate', 'mCompressor', 'mTools', 'mSaturator', 'mLimiter'][idx]
         page.makeValueBinding(faderStrip.btnRecord.mSurfaceValue, stripEffects[type].mOn).setTypeToggle()
         page.makeValueBinding(faderStrip.btnMute.mSurfaceValue, stripEffects[type].mBypass).setTypeToggle()
     }
@@ -746,9 +746,9 @@ function makePageChannelStrip() {
 }
 
 function makePageControlRoom() {
-    var page = makePageWithDefaults('ControlRoom')
+    const page = makePageWithDefaults('ControlRoom')
 
-    var controlRoom = page.mHostAccess.mControlRoom
+    const controlRoom = page.mHostAccess.mControlRoom
 
     // Main
     page.makeValueBinding(
@@ -775,13 +775,13 @@ function makePageControlRoom() {
         controlRoom.getPhonesChannelByIndex(0).mMetronomeClickActiveValue
     ).setTypeToggle()
 
-    var maxCueSends = controlRoom.getMaxCueChannels() < 8 ? controlRoom.getMaxCueChannels() : 8
+    const maxCueSends = controlRoom.getMaxCueChannels() < 8 ? controlRoom.getMaxCueChannels() : 8
 
-    for (var i = 0; i < maxCueSends; ++i) {
-        var cueSend = controlRoom.getCueChannelByIndex(i)
+    for (let i = 0; i < maxCueSends; ++i) {
+        const cueSend = controlRoom.getCueChannelByIndex(i)
 
-        var knobSurfaceValue = surfaceElements.channelControls[i].pushEncoder.mEncoderValue
-        var knobPushValue = surfaceElements.channelControls[i].pushEncoder.mPushValue
+        const knobSurfaceValue = surfaceElements.channelControls[i].pushEncoder.mEncoderValue
+        const knobPushValue = surfaceElements.channelControls[i].pushEncoder.mPushValue
 
         page.makeValueBinding(knobSurfaceValue, cueSend.mLevelValue)
         page.makeValueBinding(knobPushValue, cueSend.mMuteValue).setTypeToggle()
@@ -791,7 +791,7 @@ function makePageControlRoom() {
 }
 
 function makePageMidi() {
-    var page = makePageWithDefaults('Midi')
+    const page = makePageWithDefaults('Midi')
 
     /**
      *
@@ -800,7 +800,7 @@ function makePageMidi() {
      * @param {number} cc
      * @param {number} fader
      */
-    function makeMidiCCBinding(page, displayName, cc, fader) {
+    function makeMidiCCBinding(page: MR_FactoryMappingPage, displayName, cc, fader) {
         // TODO: I have no idea what page.mCustom.makeHostValueVariable actually does
         // all I know is I can make a value binding this way.
         // I can't seem to be able to look it up or access it all once made.
@@ -809,16 +809,16 @@ function makePageMidi() {
                 surfaceElements.channelControls[fader].fdrFader.mSurfaceValue,
                 page.mCustom.makeHostValueVariable(displayName)
             )
-            .setValueTakeOverModeJump().mOnValueChange = function (activeDevice, mapping, value, value2) {
+            .setValueTakeOverModeJump().mOnValueChange = function (activeDevice, mapping, value, arg3) {
             // console.log(displayName + ":" + mapping + "::" + value + "::" + value2)
-            var activePage = activeDevice.getState('activePage')
-            var faderValueTitles = activeDevice.getState(activePage + ' - Fader - ValueTitles')
-            var faderValues = activeDevice.getState(activePage + ' - Fader - Values')
+            const activePage = activeDevice.getState('activePage')
+            const faderValueTitles = activeDevice.getState(activePage + ' - Fader - ValueTitles')
+            const faderValues = activeDevice.getState(activePage + ' - Fader - Values')
 
-            var ccValue = Math.ceil(value * 127)
-            var pitchBendValue = Math.ceil(value * 16383)
-            var value1 = pitchBendValue % 128
-            var value2 = Math.floor(pitchBendValue / 128)
+            const ccValue = Math.ceil(value * 127)
+            const pitchBendValue = Math.ceil(value * 16383)
+            const value1 = pitchBendValue % 128
+            const value2 = Math.floor(pitchBendValue / 128)
 
             // this is the value going back to the icon Fader
             midiOutput.sendMidi(activeDevice, [0xe0 + fader, value1, value2])
@@ -849,18 +849,18 @@ function makePageMidi() {
     return page
 }
 
-var mixerPage = makePageMixer()
-var selectedTrackPage = makePageSelectedTrack()
-var channelStripPage = makePageChannelStrip()
-var controlRoomPage = makePageControlRoom()
-var midiPage = makePageMidi()
+const mixerPage = makePageMixer()
+const selectedTrackPage = makePageSelectedTrack()
+const channelStripPage = makePageChannelStrip()
+const controlRoomPage = makePageControlRoom()
+const midiPage = makePageMidi()
 
 // Function to clear out the Channel State for the display titles/values
 // the OnDisplayChange callback is not called if the Channel doesn't have an updated
 // Title. So switching to QC would leave the old Mixer Page "Volume" title kicking around
 // in the state. By clearing state on the page activation it will update all that are changing.
 function clearChannelState(activeDevice) {
-    var activePage = activeDevice.getState('activePage')
+    const activePage = activeDevice.getState('activePage')
 
     activeDevice.setState(activePage + ' - Fader - Title', '')
     activeDevice.setState(activePage + ' - Fader - ValueTitles', '')
@@ -925,7 +925,7 @@ controlRoomPage.mOnActivate = function (activeDevice) {
 
 midiPage.mOnActivate = function (activeDevice) {
     console.log('Icon QCon Pro G2 page "Midi" activated')
-    var activePage = 'Midi'
+    const activePage = 'Midi'
     activeDevice.setState('activePage', activePage)
     clearAllLeds(activeDevice, midiOutput)
 
@@ -933,7 +933,7 @@ midiPage.mOnActivate = function (activeDevice) {
     // midiOutput.sendMidi(activeDevice, [0xE0, 0, 64]) // to put pitchbend in center
     // ! This init must match the CC bindings create in the makeMidiPage function - it's annoying and needs a refactor
     // WIP Refactor me
-    var faderValueTitles = activeDevice.getState(activePage + ' - Fader - ValueTitles')
+    let faderValueTitles = activeDevice.getState(activePage + ' - Fader - ValueTitles')
     faderValueTitles = setTextOfColumn(0, makeLabel('CC1', 6), faderValueTitles)
     faderValueTitles = setTextOfColumn(1, makeLabel('CC11', 6), faderValueTitles)
     activeDevice.setState(activePage + ' - Fader - ValueTitles', setTextOfLine(faderValueTitles))
