@@ -9,7 +9,7 @@
     "moduleResolution": "node",
     "target": "es5",
     "checkJs": false,
-    "lib": ["es5"],
+    "lib": ["ES2015"],
     "removeComments": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

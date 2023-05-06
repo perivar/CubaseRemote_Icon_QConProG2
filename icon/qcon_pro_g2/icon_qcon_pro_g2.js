@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var icon_elements_1 = require("./icon_elements");
 var iconElements = require("./icon_elements");
 var makeChannelControl = iconElements.makeChannelControl;
 var makeMasterControl = iconElements.makeMasterControl;
@@ -15,7 +16,7 @@ var deviceDriver = midiremote_api.makeDeviceDriver('Icon', 'QCon Pro G2', 'Nerse
 var midiInput = deviceDriver.mPorts.makeMidiInput();
 var midiOutput = deviceDriver.mPorts.makeMidiOutput();
 deviceDriver.mOnActivate = function (activeDevice) {
-    console.log('Icon QCon Pro G2 Activated');
+    (0, icon_elements_1.LOG)('Icon QCon Pro G2 Activated');
 };
 deviceDriver
     .makeDetectionUnit()
@@ -121,7 +122,7 @@ function makeSurfaceElements() {
     surfaceElements.btnNext.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 90);
     surfaceElements.selectedTrack = surface.makeCustomValueVariable('selectedTrack');
     surfaceElements.selectedTrack.mOnTitleChange = function (activeDevice, objectTitle, valueTitle) {
-        console.log('SelectedTrack Title Change: ' + objectTitle + ':' + valueTitle);
+        (0, icon_elements_1.LOG)('SelectedTrack Title Change: ' + objectTitle + ':' + valueTitle);
         activeDevice.setState('selectedTrackName', objectTitle);
     };
     return surfaceElements;
@@ -130,7 +131,7 @@ var surfaceElements = makeSurfaceElements();
 function makeSubPage(subPageArea, name) {
     var subPage = subPageArea.makeSubPage(name);
     subPage.mOnActivate = function (activeDevice) {
-        console.log('sub page ' + name + ' activated');
+        (0, icon_elements_1.LOG)('sub page ' + name + ' activated');
         activeDevice.setState('activeSubPage', name);
         switch (name) {
             case 'Scrub':
@@ -253,10 +254,10 @@ function makePageWithDefaults(name) {
 }
 function makePageMixer() {
     var page = makePageWithDefaults('Mixer');
-    var FaderSubPageArea = page.makeSubPageArea('FadersKnobs');
-    var subPageFaderVolume = makeSubPage(FaderSubPageArea, 'Volume');
-    var ButtonSubPageArea = page.makeSubPageArea('Buttons');
-    var subPageButtonDefaultSet = makeSubPage(ButtonSubPageArea, 'DefaultSet');
+    var faderSubPageArea = page.makeSubPageArea('FadersKnobs');
+    var subPageFaderVolume = makeSubPage(faderSubPageArea, 'Volume');
+    var buttonSubPageArea = page.makeSubPageArea('Buttons');
+    var subPageButtonDefaultSet = makeSubPage(buttonSubPageArea, 'DefaultSet');
     var hostMixerBankZone = page.mHostAccess.mMixConsole
         .makeMixerBankZone('AudioInstrBanks')
         .includeAudioChannels()
@@ -377,7 +378,9 @@ function makePageSelectedTrack() {
         var knobPushValue_3 = surfaceElements.channelControls[idx].pushEncoder.mPushValue;
         var faderSurfaceValue_3 = surfaceElements.channelControls[idx].fdrFader.mSurfaceValue;
         page.makeValueBinding(knobSurfaceValue_3, selectedTrackChannel.mCueSends.getByIndex(idx).mPan).setSubPage(subPageCueSends);
-        page.makeValueBinding(knobPushValue_3, selectedTrackChannel.mCueSends.getByIndex(idx).mOn).setTypeToggle().setSubPage(subPageCueSends);
+        page.makeValueBinding(knobPushValue_3, selectedTrackChannel.mCueSends.getByIndex(idx).mOn)
+            .setTypeToggle()
+            .setSubPage(subPageCueSends);
         page.makeValueBinding(faderSurfaceValue_3, selectedTrackChannel.mCueSends.getByIndex(idx).mLevel).setSubPage(subPageCueSends);
         page.makeValueBinding(surfaceElements.channelControls[idx].btnSelect.mSurfaceValue, selectedTrackChannel.mCueSends.getByIndex(idx).mOn)
             .setTypeToggle()
@@ -507,21 +510,21 @@ function clearChannelState(activeDevice) {
     activeDevice.setState('displayType', 'Fader');
 }
 mixerPage.mOnActivate = function (activeDevice) {
-    console.log('Icon QCon Pro G2 page "Mixer" activated');
+    (0, icon_elements_1.LOG)('Icon QCon Pro G2 page "Mixer" activated');
     activeDevice.setState('activePage', 'Mixer');
     clearAllLeds(activeDevice, midiOutput);
     clearChannelState(activeDevice);
-    surfaceElements.channelControls[0].mDisplayModeValue.setProcessValue(activeDevice, 0);
+    surfaceElements.channelControls[0].mDisplayModeValue.setProcessValue(activeDevice, 1);
     surfaceElements.channelControls[1].mDisplayModeValue.setProcessValue(activeDevice, 1);
-    surfaceElements.channelControls[2].mDisplayModeValue.setProcessValue(activeDevice, 2);
-    surfaceElements.channelControls[3].mDisplayModeValue.setProcessValue(activeDevice, 3);
-    surfaceElements.channelControls[4].mDisplayModeValue.setProcessValue(activeDevice, 0);
+    surfaceElements.channelControls[2].mDisplayModeValue.setProcessValue(activeDevice, 1);
+    surfaceElements.channelControls[3].mDisplayModeValue.setProcessValue(activeDevice, 1);
+    surfaceElements.channelControls[4].mDisplayModeValue.setProcessValue(activeDevice, 1);
     surfaceElements.channelControls[5].mDisplayModeValue.setProcessValue(activeDevice, 1);
-    surfaceElements.channelControls[6].mDisplayModeValue.setProcessValue(activeDevice, 2);
-    surfaceElements.channelControls[7].mDisplayModeValue.setProcessValue(activeDevice, 3);
+    surfaceElements.channelControls[6].mDisplayModeValue.setProcessValue(activeDevice, 1);
+    surfaceElements.channelControls[7].mDisplayModeValue.setProcessValue(activeDevice, 1);
 };
 selectedTrackPage.mOnActivate = function (activeDevice) {
-    console.log('Icon QCon Pro G2 page "Selected Track" activated');
+    (0, icon_elements_1.LOG)('Icon QCon Pro G2 page "Selected Track" activated');
     activeDevice.setState('activePage', 'SelectedTrack');
     clearAllLeds(activeDevice, midiOutput);
     clearChannelState(activeDevice);
@@ -530,9 +533,13 @@ selectedTrackPage.mOnActivate = function (activeDevice) {
     midiOutput.sendMidi(activeDevice, [0x90, 1, 0]);
     midiOutput.sendMidi(activeDevice, [0x90, 2, 0]);
     midiOutput.sendMidi(activeDevice, [0x90, 3, 0]);
+    surfaceElements.channelControls[0].mDisplayModeValue.setProcessValue(activeDevice, 0);
+    surfaceElements.channelControls[1].mDisplayModeValue.setProcessValue(activeDevice, 1);
+    surfaceElements.channelControls[2].mDisplayModeValue.setProcessValue(activeDevice, 0);
+    surfaceElements.channelControls[3].mDisplayModeValue.setProcessValue(activeDevice, 1);
 };
 channelStripPage.mOnActivate = function (activeDevice) {
-    console.log('Icon QCon Pro G2 page "Channel Strip" activated');
+    (0, icon_elements_1.LOG)('Icon QCon Pro G2 page "Channel Strip" activated');
     activeDevice.setState('activePage', 'ChannelStrip');
     clearAllLeds(activeDevice, midiOutput);
     clearChannelState(activeDevice);
@@ -544,13 +551,13 @@ channelStripPage.mOnActivate = function (activeDevice) {
     midiOutput.sendMidi(activeDevice, [0x90, 28, 0]);
 };
 controlRoomPage.mOnActivate = function (activeDevice) {
-    console.log('Icon QCon Pro G2 page "ControlRoom" activated');
+    (0, icon_elements_1.LOG)('Icon QCon Pro G2 page "ControlRoom" activated');
     activeDevice.setState('activePage', 'ControlRoom');
     clearAllLeds(activeDevice, midiOutput);
     clearChannelState(activeDevice);
 };
 midiPage.mOnActivate = function (activeDevice) {
-    console.log('Icon QCon Pro G2 page "Midi" activated');
+    (0, icon_elements_1.LOG)('Icon QCon Pro G2 page "Midi" activated');
     var activePage = 'Midi';
     activeDevice.setState('activePage', activePage);
     clearAllLeds(activeDevice, midiOutput);

@@ -6,7 +6,7 @@ module.exports = {
     trailingComma: 'es5',
     tabWidth: 4,
     endOfLine: 'auto',
-    semi: false,
+    semi: true,
     printWidth: 140,
     overrides: [
         {
