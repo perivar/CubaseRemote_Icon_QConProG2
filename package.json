@@ -1,0 +1,45 @@
+{
+    "name": "cubaseremote_icon_qconprog2",
+    "version": "1.0.0",
+    "description": "",
+    "scripts": {
+        "build": "yarn tsc && yarn clean && yarn lint-fix",
+        "tsc": "tsc",
+        "clean": "ts-node ./postinstall.ts",
+        "clean-and-fix": "yarn clean && yarn lint-fix",
+        "lint": "eslint \"**/*.{js,ts}\"",
+        "lint-fix": "eslint \"**/*.{js,ts}\" --fix",
+        "format": "prettier --check \"**/*.{js,ts}\"",
+        "format-fix": "prettier --write \"**/*.{js,ts}\"",
+        "dev": "tsc-watch --noClear -p ./tsconfig.json --onSuccess \"yarn clean-and-fix\"",
+        "test": "jest"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/perivar/CubaseRemote_Icon_QConProG2.git"
+    },
+    "keywords": [],
+    "author": "perivar",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/perivar/CubaseRemote_Icon_QConProG2/issues"
+    },
+    "homepage": "https://github.com/perivar/CubaseRemote_Icon_QConProG2#readme",
+    "devDependencies": {
+        "@types/jest": "^29.5.1",
+        "@types/node": "^20.1.0",
+        "@typescript-eslint/eslint-plugin": "^5.59.2",
+        "@typescript-eslint/parser": "^5.59.2",
+        "eslint": "^8.40.0",
+        "eslint-config-prettier": "^8.8.0",
+        "eslint-plugin-import": "^2.27.5",
+        "eslint-plugin-prettier": "^4.2.1",
+        "eslint-plugin-simple-import-sort": "^10.0.0",
+        "eslint-plugin-unused-imports": "^2.0.0",
+        "jest": "^29.5.0",
+        "prettier": "2.8.8",
+        "ts-node": "^10.9.1",
+        "tsc-watch": "^6.0.4",
+        "typescript": "^5.0.4"
+    }
+}

@@ -2,18 +2,19 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      ".": [".api"],
       "midiremote_api_v1": [".api/v1"]
     },
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "es5",
-    "checkJs": false,
+    "checkJs": true,
     "lib": ["ES2015"],
-    "removeComments": true,
+    "removeComments": false,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": false,
+    "strict": false,
+    "noEmit": false,
     "skipLibCheck": true
   },
   "include": ["icon/*/*.ts"],

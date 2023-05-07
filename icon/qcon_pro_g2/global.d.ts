@@ -1,3 +1,3 @@
-declare var performance: {
-    now: () => number;
-};
+declare let performance: {
+    now: () => number
+}
