@@ -29,7 +29,7 @@ var VPOT_DISPLAY_TYPE
  * @param {MR_ActiveDevice} activeDevice
  * @param {MR_DeviceMidiOutput} midiOutput
  */
-var _sendDisplayData = function (row, text, activeDevice, midiOutput) {
+var sendDisplayData = function (row, text, activeDevice, midiOutput) {
   var lenText = text.length < 56 ? text.length : 56
   var data = [0xf0, 0x00, 0x00, 0x66, 0x14, 0x12]
   var out = data.concat(56 * row) // Row 1 offset
@@ -51,7 +51,7 @@ var _sendDisplayData = function (row, text, activeDevice, midiOutput) {
  * @param {MR_ActiveDevice} activeDevice
  * @param {MR_DeviceMidiOutput} midiOutput
  */
-var Helper_updateDisplay = function (idRow1, idRow2, idAltRow1, idAltRow2, activeDevice, midiOutput) {
+var updateDisplay = function (idRow1, idRow2, idAltRow1, idAltRow2, activeDevice, midiOutput) {
   // Display ids
   activeDevice.setState('Display - idRow1', idRow1)
   activeDevice.setState('Display - idRow2', idRow2)
@@ -75,16 +75,16 @@ var Helper_updateDisplay = function (idRow1, idRow2, idAltRow1, idAltRow2, activ
     // Update display if it has changed
     if (newAltRow1 !== prevAltRow1 || newAltRow2 !== prevAltRow2 || activeDisplayType !== displayType) {
       LOG('AltRows Display update: ' + newAltRow1 + '::' + newAltRow2)
-      _sendDisplayData(1, newAltRow1, activeDevice, midiOutput)
-      _sendDisplayData(0, newAltRow2, activeDevice, midiOutput)
+      sendDisplayData(1, newAltRow1, activeDevice, midiOutput)
+      sendDisplayData(0, newAltRow2, activeDevice, midiOutput)
     }
   } else {
     // Update display if it has changed
     if (newRow1 !== prevRow1 || newRow2 !== prevRow2 || activeDisplayType !== displayType) {
       LOG('Rows Display update' + idRow1 + '::' + idRow2)
       LOG('Rows Display update' + newRow1 + '::' + newRow2)
-      _sendDisplayData(1, newRow1, activeDevice, midiOutput)
-      _sendDisplayData(0, newRow2, activeDevice, midiOutput)
+      sendDisplayData(1, newRow1, activeDevice, midiOutput)
+      sendDisplayData(0, newRow2, activeDevice, midiOutput)
     }
   }
   // Update Active display state
@@ -119,41 +119,41 @@ var Helper_updateDisplay = function (idRow1, idRow2, idAltRow1, idAltRow2, activ
  * @param {MR_DeviceMidiInput} midiInput
  * @param {MR_DeviceMidiOutput} midiOutput
  * @param {MR_Button} btn
- * @param {number} chn
- * @param {number} num
+ * @param {number} channelNumber
+ * @param {number} controlChangeNumber
  */
-var bindButton2CC = function (midiInput, midiOutput, btn, chn, num) {
+var bindButton2CC = function (midiInput, midiOutput, btn, channelNumber, controlChangeNumber) {
   // TODO: when is setOutputPort needed?
-  return btn.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToControlChange(chn, num)
+  return btn.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToControlChange(channelNumber, controlChangeNumber)
 }
 /**
  * Bind button to Midi Note Utility Function
  * @param {MR_DeviceMidiInput} midiInput
  * @param {MR_DeviceMidiOutput} midiOutput
  * @param {MR_Button} btn
- * @param {number} chn
- * @param {number} num
+ * @param {number} channelNumber
+ * @param {number} pitch
  */
-var bindButton2Note = function (midiInput, midiOutput, btn, chn, num) {
+var bindButton2Note = function (midiInput, midiOutput, btn, channelNumber, pitch) {
   // TODO: when is setOutputPort needed?
-  return btn.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(chn, num)
+  return btn.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(channelNumber, pitch)
 }
 /**
  * Make a Button
  * @param {MR_DeviceSurface} surface
  * @param {MR_DeviceMidiInput} midiInput
  * @param {MR_DeviceMidiOutput} midiOutput
- * @param {number} x           - x location of the button in the gui
- * @param {number} y           - y location of the button in the gui
- * @param {number} w           - width of the button
- * @param {number} h           - height of the button
- * @param {number} chn
- * @param {number} num
+ * @param {number} x             - x location of the button in the gui
+ * @param {number} y             - y location of the button in the gui
+ * @param {number} w             - width of the button
+ * @param {number} h             - height of the button
+ * @param {number} channelNumber - midi channel
+ * @param {number} pitch         - midi note
  * @param {boolean} circle
  */
-var makeButton = function (surface, midiInput, midiOutput, x, y, w, h, chn, num, circle) {
+var makeButton = function (surface, midiInput, midiOutput, x, y, w, h, channelNumber, pitch, circle) {
   var btn = surface.makeButton(x, y, w, h)
-  bindButton2Note(midiInput, midiOutput, btn, chn, num)
+  bindButton2Note(midiInput, midiOutput, btn, channelNumber, pitch)
   if (circle) {
     btn.setShapeCircle()
   }
@@ -164,21 +164,22 @@ var makeButton = function (surface, midiInput, midiOutput, x, y, w, h, chn, num,
  * @param {MR_DeviceSurface} surface
  * @param {MR_DeviceMidiInput} midiInput
  * @param {MR_DeviceMidiOutput} midiOutput
- * @param {number} note
- * @param {number} x           - x location of the led button in the gui
- * @param {number} y           - y location of the led button in the gui
- * @param {number} w           - width of the led button
- * @param {number} h           - height of the led button
+ * @param {number} x             - x location of the led button in the gui
+ * @param {number} y             - y location of the led button in the gui
+ * @param {number} w             - width of the led button
+ * @param {number} h             - height of the led button
+ * @param {number} channelNumber - midi channel
+ * @param {number} pitch         - midi note
  * @param {boolean} circle
  */
-var makeLedButton = function (surface, midiInput, midiOutput, note, x, y, w, h, circle) {
-  var btn = makeButton(surface, midiInput, midiOutput, x, y, w, h, 0, note, circle)
+var makeLedButton = function (surface, midiInput, midiOutput, x, y, w, h, channelNumber, pitch, circle) {
+  var btn = makeButton(surface, midiInput, midiOutput, x, y, w, h, channelNumber, pitch, circle)
   // btn.mSurfaceValue.mOnProcessValueChange = function (activeDevice) {
   //     // LOG("LedButton ProcessValue Change:" + btn.mSurfaceValue.getProcessValue(activeDevice))
   //     if (btn.mSurfaceValue.getProcessValue(activeDevice) > 0) {
-  //         midiOutput.sendMidi(activeDevice, [0x90, note, 127])
+  //         midiOutput.sendMidi(activeDevice, [0x90, pitch, 127])
   //     } else {
-  //         midiOutput.sendMidi(activeDevice, [0x90, note, 0])
+  //         midiOutput.sendMidi(activeDevice, [0x90, pitch, 0])
   //     }
   // }
   // when registering a callback function, best thing is to use the “bind”-method to bind members to the “this” object within the callback function.
@@ -188,13 +189,13 @@ var makeLedButton = function (surface, midiInput, midiOutput, note, x, y, w, h, 
   // https://blog.logrocket.com/access-correct-this-inside-callback-javascript/
   btn.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value, diff) {
     if (value) {
-      midiOutput.sendMidi(activeDevice, [0x90, this.note, 127])
-      LOG('NOTE_ON =>' + this.note)
+      midiOutput.sendMidi(activeDevice, [0x90, this.pitch, 127])
+      LOG('NOTE_ON =>' + this.pitch)
     } else {
-      midiOutput.sendMidi(activeDevice, [0x90, this.note, 0])
-      LOG('NOTE_OFF =>' + this.note)
+      midiOutput.sendMidi(activeDevice, [0x90, this.pitch, 0])
+      LOG('NOTE_OFF =>' + this.pitch)
     }
-  }.bind({ note: note })
+  }.bind({ pitch: pitch })
   return btn
 }
 /**
@@ -206,39 +207,43 @@ var clearAllLeds = function (activeDevice, midiOutput) {
   LOG('Clear all Leds')
   // Mixer buttons
   for (var i = 0; i < 8; ++i) {
-    midiOutput.sendMidi(activeDevice, [0x90, 24 + i, 0])
-    midiOutput.sendMidi(activeDevice, [0x90, 16 + i, 0])
-    midiOutput.sendMidi(activeDevice, [0x90, 8 + i, 0])
     midiOutput.sendMidi(activeDevice, [0x90, 0 + i, 0])
+    midiOutput.sendMidi(activeDevice, [0x90, 8 + i, 0])
+    midiOutput.sendMidi(activeDevice, [0x90, 16 + i, 0])
+    midiOutput.sendMidi(activeDevice, [0x90, 24 + i, 0])
   }
   // Master Fader buttons
+  midiOutput.sendMidi(activeDevice, [0x90, 46, 0]) // Bank Left
+  midiOutput.sendMidi(activeDevice, [0x90, 47, 0]) // Bank Right
+  midiOutput.sendMidi(activeDevice, [0x90, 48, 0]) // Channel Left
+  midiOutput.sendMidi(activeDevice, [0x90, 49, 0]) // Channel Right
   midiOutput.sendMidi(activeDevice, [0x90, 50, 0]) // Flip
-  midiOutput.sendMidi(activeDevice, [0x90, 74, 0])
-  midiOutput.sendMidi(activeDevice, [0x90, 75, 0])
   // Transport Buttons
-  midiOutput.sendMidi(activeDevice, [0x90, 48, 0])
-  midiOutput.sendMidi(activeDevice, [0x90, 49, 0])
-  midiOutput.sendMidi(activeDevice, [0x90, 46, 0])
-  midiOutput.sendMidi(activeDevice, [0x90, 47, 0])
-  midiOutput.sendMidi(activeDevice, [0x90, 91, 0])
-  midiOutput.sendMidi(activeDevice, [0x90, 92, 0])
-  midiOutput.sendMidi(activeDevice, [0x90, 93, 0])
-  midiOutput.sendMidi(activeDevice, [0x90, 94, 0])
-  midiOutput.sendMidi(activeDevice, [0x90, 95, 0])
-  midiOutput.sendMidi(activeDevice, [0x90, 86, 0])
+  midiOutput.sendMidi(activeDevice, [0x90, 86, 0]) // Cycle
+  midiOutput.sendMidi(activeDevice, [0x90, 91, 0]) // Rewind
+  midiOutput.sendMidi(activeDevice, [0x90, 92, 0]) // Fast Fwd
+  midiOutput.sendMidi(activeDevice, [0x90, 93, 0]) // Stop
+  midiOutput.sendMidi(activeDevice, [0x90, 94, 0]) // Play
+  midiOutput.sendMidi(activeDevice, [0x90, 95, 0]) // Record
+  midiOutput.sendMidi(activeDevice, [0x90, 96, 0]) // Cursor Up (zoomVertOut)
+  midiOutput.sendMidi(activeDevice, [0x90, 97, 0]) // Cursor Down (zoomVertIn)
+  midiOutput.sendMidi(activeDevice, [0x90, 98, 0]) // Cursor Left (zoomHorizOut)
+  midiOutput.sendMidi(activeDevice, [0x90, 99, 0]) // Cursor Right (zoomHorizIn)
+  midiOutput.sendMidi(activeDevice, [0x90, 100, 0]) // Zoom
+  midiOutput.sendMidi(activeDevice, [0x90, 101, 0]) // Scrub button
 }
 /**
  * Make a Touch Fader
  * @param {MR_DeviceSurface} surface
  * @param {MR_DeviceMidiInput} midiInput
  * @param {MR_DeviceMidiOutput} midiOutput
- * @param {number} channelIndex - channelIndex of the fader.
  * @param {number} x            - x location of the fader in the gui
  * @param {number} y            - y location of the fader in the gui
  * @param {number} w            - width of the fader.
  * @param {number} h            - height of the fader.
+ * @param {number} channelIndex - channelIndex of the fader.
  */
-var makeTouchFader = function (surface, midiInput, midiOutput, channelIndex, x, y, w, h) {
+var makeTouchFader = function (surface, midiInput, midiOutput, x, y, w, h, channelIndex) {
   var touchFader = {}
   touchFader.surface = surface
   touchFader.midiInput = midiInput
@@ -289,8 +294,8 @@ var bindCommandKnob = function (knob, commandIncrease, commandDecrease) {
  * @param {MR_DeviceSurface} surface
  * @param {MR_DeviceMidiInput} midiInput
  * @param {MR_DeviceMidiOutput} midiOutput
- * @param {number} x            - x location of the push encoder in the gui
- * @param {number} y            - y location of the push encoder in the gui
+ * @param {number} x            - x location of the first push encoder in the gui
+ * @param {number} y            - y location of the first push encoder in the gui
  * @param {number} channelIndex - channel index of the push encoder
  * @returns {Object}
  */
@@ -345,14 +350,14 @@ var makeChannelControl = function (surface, midiInput, midiOutput, x, y, channel
     }
   }
   // Channel Buttons
-  channelControl.btnRecord = makeLedButton(surface, midiInput, midiOutput, 0 + channelIndex, channelControl.x, channelControl.y + 2, 2, 2, false)
-  channelControl.btnSolo = makeLedButton(surface, midiInput, midiOutput, 8 + channelIndex, channelControl.x, channelControl.y + 4, 2, 2, false)
-  channelControl.btnMute = makeLedButton(surface, midiInput, midiOutput, 16 + channelIndex, channelControl.x, channelControl.y + 6, 2, 2, false)
-  channelControl.btnSelect = makeLedButton(surface, midiInput, midiOutput, 24 + channelIndex, channelControl.x, channelControl.y + 8, 2, 2, false)
+  channelControl.btnRecord = makeLedButton(surface, midiInput, midiOutput, channelControl.x, channelControl.y + 2, 2, 2, 0, 0 + channelIndex)
+  channelControl.btnSolo = makeLedButton(surface, midiInput, midiOutput, channelControl.x, channelControl.y + 4, 2, 2, 0, 8 + channelIndex)
+  channelControl.btnMute = makeLedButton(surface, midiInput, midiOutput, channelControl.x, channelControl.y + 6, 2, 2, 0, 16 + channelIndex)
+  channelControl.btnSelect = makeLedButton(surface, midiInput, midiOutput, channelControl.x, channelControl.y + 8, 2, 2, 0, 24 + channelIndex)
   // Fader + Fader Touch
   var fader_x = channelControl.x
   var fader_y = channelControl.y + 11
-  var touchFader = makeTouchFader(surface, midiInput, midiOutput, channelIndex, fader_x, fader_y, 2, 10)
+  var touchFader = makeTouchFader(surface, midiInput, midiOutput, fader_x, fader_y, 2, 10, channelIndex)
   channelControl.btnFaderTouch = touchFader.btnFaderTouch
   channelControl.fdrFader = touchFader.fdrFader
   channelControl.btnFaderTouch.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value, diff) {
@@ -371,7 +376,7 @@ var makeChannelControl = function (surface, midiInput, midiOutput, x, y, channel
         // MIDI Page is special since it uses a separate midi port and completely separate display and MIDI routing setup
         // This update of the display is simply to ensure that should this event be received (which it is during init for example) then
         // the Midi display state values won't be overwritten as they are handed by the custom onValueChange call in the page
-        Helper_updateDisplay(
+        updateDisplay(
           activePage + ' - Fader - ValueTitles',
           activePage + ' - Fader - Values',
           activePage + ' - Pan - ValueTitles',
@@ -383,7 +388,7 @@ var makeChannelControl = function (surface, midiInput, midiOutput, x, y, channel
       case 'ChannelStrip':
       case 'SelectedTrack':
         activeDevice.setState(activePage + ' - Fader - ValueTitles', setTextOfColumn(channelIndex, makeLabel(valueTitle, 6), faderValueTitles))
-        Helper_updateDisplay(
+        updateDisplay(
           activePage + ' - Fader - ValueTitles',
           activePage + ' - Fader - Values',
           activePage + ' - Pan - ValueTitles',
@@ -395,7 +400,7 @@ var makeChannelControl = function (surface, midiInput, midiOutput, x, y, channel
       default:
         activeDevice.setState(activePage + ' - Fader - Title', setTextOfColumn(channelIndex, makeLabel(objectTitle, 6), faderTitles))
         activeDevice.setState(activePage + ' - Fader - ValueTitles', setTextOfColumn(channelIndex, makeLabel(valueTitle, 6), faderValueTitles))
-        Helper_updateDisplay(
+        updateDisplay(
           activePage + ' - Fader - Title',
           activePage + ' - Fader - Values',
           activePage + ' - Pan - Title',
@@ -419,7 +424,7 @@ var makeChannelControl = function (surface, midiInput, midiOutput, x, y, channel
           break
         default:
           activeDevice.setState(activePage + ' - Fader - Values', setTextOfColumn(channelIndex, makeLabel(value, 6), faderValues))
-          Helper_updateDisplay(
+          updateDisplay(
             activeDevice.getState('Display - idRow1'),
             activePage + ' - Fader - Values',
             activeDevice.getState('Display - idAltRow1'),
@@ -442,7 +447,7 @@ var makeChannelControl = function (surface, midiInput, midiOutput, x, y, channel
         // MIDI Page is special since it uses a separate midi port and completely separate display and MIDI routing setup
         // This update of the display is simply to ensure that should this event be received (which it is during init for example) then
         // the Midi display state values won't be overwritten as they are handed by the custom onValueChange call in the page
-        Helper_updateDisplay(
+        updateDisplay(
           activePage + ' - Fader - ValueTitles',
           activePage + ' - Fader - Values',
           activePage + ' - Pan - ValueTitles',
@@ -459,7 +464,7 @@ var makeChannelControl = function (surface, midiInput, midiOutput, x, y, channel
               title = 'None'
             }
             activeDevice.setState(activePage + ' - Pan - ValueTitles', setTextOfColumn(channelIndex, makeLabel(title, 6), panValueTitles))
-            Helper_updateDisplay(
+            updateDisplay(
               activePage + ' - Fader - ValueTitles',
               activePage + ' - Fader - Values',
               activePage + ' - Pan - ValueTitles',
@@ -474,7 +479,7 @@ var makeChannelControl = function (surface, midiInput, midiOutput, x, y, channel
               title2 = 'None'
             }
             activeDevice.setState(activePage + ' - Pan - ValueTitles', setTextOfColumn(channelIndex, makeLabel(title2, 6), panValueTitles))
-            Helper_updateDisplay(
+            updateDisplay(
               activePage + ' - Fader - ValueTitles',
               activePage + ' - Fader - Values',
               activePage + ' - Pan - ValueTitles',
@@ -488,7 +493,7 @@ var makeChannelControl = function (surface, midiInput, midiOutput, x, y, channel
       default:
         activeDevice.setState(activePage + ' - Pan - Title', setTextOfColumn(channelIndex, makeLabel(objectTitle, 6), panTitles))
         activeDevice.setState(activePage + ' - Pan - ValueTitles', setTextOfColumn(channelIndex, makeLabel(valueTitle, 6), panValueTitles))
-        Helper_updateDisplay(
+        updateDisplay(
           activePage + ' - Fader - Title',
           activePage + ' - Fader - Values',
           activePage + ' - Pan - Title',
@@ -504,7 +509,7 @@ var makeChannelControl = function (surface, midiInput, midiOutput, x, y, channel
     LOG('Pan Value Change: ' + channelIndex + '::' + value + ':' + units + ':' + activePage)
     var panValues = activeDevice.getState(activePage + ' - Pan - Values')
     activeDevice.setState(activePage + ' - Pan - Values', setTextOfColumn(channelIndex, makeLabel(value, 6), panValues))
-    Helper_updateDisplay(
+    updateDisplay(
       activeDevice.getState('Display - idRow1'),
       activeDevice.getState('Display - idRow2'),
       activeDevice.getState('Display - idAltRow1'),
@@ -540,18 +545,18 @@ var makeMasterControl = function (surface, midiInput, midiOutput, x, y, channelI
   // Buttons above Fader Master
   // Track/Fader Control: Flip
   // Cannot use a LedButton since we are modifying the Led in the mOnProcessValueChange callback
-  // masterControl.btnFlip = makeLedButton(surface, midiInput, midiOutput, 50, start_x, start_y, 2, 2)
+  // masterControl.btnFlip = makeLedButton(surface, midiInput, midiOutput, start_x, start_y, 2, 2, 0, 50)
   masterControl.btnFlip = makeButton(surface, midiInput, midiOutput, start_x, start_y, 2, 2, 0, 50)
   // Track/Fader Control: Channel Left
-  masterControl.btnChannelLeft = makeLedButton(surface, midiInput, midiOutput, 48, start_x, start_y + 2, 2, 2)
+  masterControl.btnChannelLeft = makeLedButton(surface, midiInput, midiOutput, start_x, start_y + 2, 2, 2, 0, 48)
   // Track/Fader Control: Channel Right
-  masterControl.btnChannelRight = makeLedButton(surface, midiInput, midiOutput, 49, start_x, start_y + 4, 2, 2)
+  masterControl.btnChannelRight = makeLedButton(surface, midiInput, midiOutput, start_x, start_y + 4, 2, 2, 0, 49)
   // Track/Fader Control: Bank Left
-  masterControl.btnBankLeft = makeLedButton(surface, midiInput, midiOutput, 46, start_x, start_y + 6, 2, 2)
+  masterControl.btnBankLeft = makeLedButton(surface, midiInput, midiOutput, start_x, start_y + 6, 2, 2, 0, 46)
   // Track/Fader Control: Bank Right
-  masterControl.btnBankRight = makeLedButton(surface, midiInput, midiOutput, 47, start_x, start_y + 8, 2, 2)
+  masterControl.btnBankRight = makeLedButton(surface, midiInput, midiOutput, start_x, start_y + 8, 2, 2, 0, 47)
   // Fader + Fader Touch
-  var touchFader = makeTouchFader(surface, midiInput, midiOutput, channelIndex, start_x, start_y + 11, 2, 10)
+  var touchFader = makeTouchFader(surface, midiInput, midiOutput, start_x, start_y + 11, 2, 10, channelIndex)
   masterControl.btnFaderTouch = touchFader.btnFaderTouch
   masterControl.fdrFader = touchFader.fdrFader
   masterControl.fdrFader.mSurfaceValue.mOnTitleChange = function (activeDevice, objectTitle, valueTitle) {
@@ -565,7 +570,7 @@ var makeMasterControl = function (surface, midiInput, midiOutput, x, y, channelI
     // Check to see if we are in the correct display mode - otherwise don't display
     // ! This isn't done via the touch value as the touch onProcessValueChange may be processed after the mOnDisplayValueChange
     if (activeDevice.getState('Display - idRow1') === 'MasterFader - Title') {
-      Helper_updateDisplay('MasterFader - Title', 'MasterFader - Values', 'MasterFader - Title', 'MasterFader - Values', activeDevice, midiOutput)
+      updateDisplay('MasterFader - Title', 'MasterFader - Values', 'MasterFader - Title', 'MasterFader - Values', activeDevice, midiOutput)
     }
   }
   // masterControl.fdrFader.mSurfaceValue.mOnProcessValueChange = (activeDevice: MR_ActiveDevice, value: number, diff: number) => {
@@ -576,7 +581,7 @@ var makeMasterControl = function (surface, midiInput, midiOutput, x, y, channelI
     // diff === -1 means touch released
     if (diff == -1) {
       // Reset the display to previous values
-      Helper_updateDisplay(
+      updateDisplay(
         activeDevice.getState('MasterFader - stashRow1'),
         activeDevice.getState('MasterFader - stashRow2'),
         activeDevice.getState('MasterFader - stashAltRow1'),
@@ -591,13 +596,13 @@ var makeMasterControl = function (surface, midiInput, midiOutput, x, y, channelI
       activeDevice.setState('MasterFader - stashRow2', activeDevice.getState('Display - idRow2'))
       activeDevice.setState('MasterFader - stashAltRow1', activeDevice.getState('Display - idAltRow1'))
       activeDevice.setState('MasterFader - stashAltRow2', activeDevice.getState('Display - idAltRow2'))
-      Helper_updateDisplay('MasterFader - Title', 'MasterFader - Values', 'MasterFader - Title', 'MasterFader - Values', activeDevice, midiOutput)
+      updateDisplay('MasterFader - Title', 'MasterFader - Values', 'MasterFader - Title', 'MasterFader - Values', activeDevice, midiOutput)
     }
   }
   // Use Flip as switch mode button
   masterControl.btnFlip.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value, diff) {
     LOG('Button Flip Change: ' + channelIndex + '::' + value + ':' + diff)
-    var note = 50 // Flip
+    var note = 50 // Flip midi note
     // diff === -1 means touch released
     if (diff == -1) {
       var displayType = activeDevice.getState('displayType')
@@ -614,7 +619,7 @@ var makeMasterControl = function (surface, midiInput, midiOutput, x, y, channelI
         // turn off LED
         midiOutput.sendMidi(activeDevice, [0x90, note, 0])
       }
-      Helper_updateDisplay(
+      updateDisplay(
         activeDevice.getState('Display - idRow1'),
         activeDevice.getState('Display - idRow2'),
         activeDevice.getState('Display - idAltRow1'),
@@ -646,18 +651,18 @@ var makeTransport = function (surface, midiInput, midiOutput, x, y) {
   }
   // Row 14
   // Rewind
-  transport.btnRewind = makeLedButton(surface, midiInput, midiOutput, 91, 25, 14, 2, 2)
+  transport.btnRewind = makeLedButton(surface, midiInput, midiOutput, 25, 14, 2, 2, 0, 91)
   // Cycle
-  transport.btnCycle = makeLedButton(surface, midiInput, midiOutput, 86, 27, 14, 2, 2)
+  transport.btnCycle = makeLedButton(surface, midiInput, midiOutput, 27, 14, 2, 2, 0, 86)
   // Fast Fwd
-  transport.btnFastFwd = makeLedButton(surface, midiInput, midiOutput, 92, 29, 14, 2, 2)
+  transport.btnFastFwd = makeLedButton(surface, midiInput, midiOutput, 29, 14, 2, 2, 0, 92)
   // Row 16
   // Record
-  transport.btnRecord = makeLedButton(surface, midiInput, midiOutput, 95, 25, 16, 2, 2)
+  transport.btnRecord = makeLedButton(surface, midiInput, midiOutput, 25, 16, 2, 2, 0, 95)
   // Play
-  transport.btnPlay = makeLedButton(surface, midiInput, midiOutput, 94, 27, 16, 2, 2)
+  transport.btnPlay = makeLedButton(surface, midiInput, midiOutput, 27, 16, 2, 2, 0, 94)
   // Stop
-  transport.btnStop = makeLedButton(surface, midiInput, midiOutput, 93, 29, 16, 2, 2)
+  transport.btnStop = makeLedButton(surface, midiInput, midiOutput, 29, 16, 2, 2, 0, 93)
   // The Jog wheel will change CC/Note based on which of the Zoom buttons have been activated
   // None - CC 60
   // Vertical -   Note Clockwise  97, CounterClockwise 96
@@ -679,7 +684,7 @@ var makeTransport = function (surface, midiInput, midiOutput, x, y) {
   // Scrub button on push encoder
   // transport.knobJogWheel.mPushValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 101)
   // Scrub button
-  transport.btnScrub = makeLedButton(surface, midiInput, midiOutput, 101, 26, 19, 2, 2)
+  transport.btnScrub = makeLedButton(surface, midiInput, midiOutput, 26, 19, 2, 2, 0, 101)
   // Custom jogging variables
   transport.jogLeftVariable = surface.makeCustomValueVariable('jogLeft')
   transport.jogRightVariable = surface.makeCustomValueVariable('jogRight')
@@ -687,26 +692,28 @@ var makeTransport = function (surface, midiInput, midiOutput, x, y) {
   bindCommandKnob(transport.knobJogWheel.mSurfaceValue, transport.jogRightVariable, transport.jogLeftVariable)
   // Zoom Vertical
   // Cursor Up (zoomVertOut)
-  transport.btnCursorUp = makeLedButton(surface, midiInput, midiOutput, 96, 22, 19, 2, 2)
+  transport.btnCursorUp = makeLedButton(surface, midiInput, midiOutput, 22, 19, 2, 2, 0, 96)
   // Cursor Down (zoomVertIn)
-  transport.btnCursorDown = makeLedButton(surface, midiInput, midiOutput, 97, 22, 23, 2, 2)
+  transport.btnCursorDown = makeLedButton(surface, midiInput, midiOutput, 22, 23, 2, 2, 0, 97)
   // Zoom Horizontal
   // Cursor Left (zoomHorizOut)
-  transport.btnCursorLeft = makeLedButton(surface, midiInput, midiOutput, 98, 20, 21, 2, 2)
+  transport.btnCursorLeft = makeLedButton(surface, midiInput, midiOutput, 20, 21, 2, 2, 0, 98)
   // Cursor Right (zoomHorizIn)
-  transport.btnCursorRight = makeLedButton(surface, midiInput, midiOutput, 99, 24, 21, 2, 2)
+  transport.btnCursorRight = makeLedButton(surface, midiInput, midiOutput, 24, 21, 2, 2, 0, 99)
   // Zoom
-  transport.btnZoom = makeLedButton(surface, midiInput, midiOutput, 100, 22, 21, 2, 2)
+  transport.btnZoom = makeLedButton(surface, midiInput, midiOutput, 22, 21, 2, 2, 0, 100)
   return transport
 }
 module.exports = {
+  makeButton: makeButton,
+  makeLedButton: makeLedButton,
+  bindButton2CC: bindButton2CC,
+  bindButton2Note: bindButton2Note,
   makeChannelControl: makeChannelControl,
   makeMasterControl: makeMasterControl,
   makeTransport: makeTransport,
   clearAllLeds: clearAllLeds,
-  Helper_updateDisplay: Helper_updateDisplay,
+  updateDisplay: updateDisplay,
   LOG: LOG,
   VPOT_DISPLAY_TYPE: VPOT_DISPLAY_TYPE,
-  bindButton2CC: bindButton2CC,
-  bindButton2Note: bindButton2Note,
 }

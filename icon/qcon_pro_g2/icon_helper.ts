@@ -1,25 +1,25 @@
 /**
  * Set Text of Column
  * @param {number} columnIndex
- * @param {string} col_text
- * @param {string} original_text
+ * @param {string} columnText
+ * @param {string} originalText
  * @returns new text
  */
-const setTextOfColumn = (columnIndex: number, col_text: string, original_text: string) => {
+const setTextOfColumn = (columnIndex: number, columnText: string, originalText: string) => {
   const col = columnIndex * 7
-  const text = (col_text + '       ').slice(0, 7) // ensure to always clear a column
+  const text = (columnText + '       ').slice(0, 7) // ensure to always clear a column
 
-  // original_text must be the full width of the display when setting a column
+  // originalText must be the full width of the display when setting a column
   // so pad with spaces if it isn't
-  let new_text = original_text.slice(0, 56)
-  let length = new_text.length
+  let newText = originalText.slice(0, 56)
+  let length = newText.length
   while (length++ < 56) {
-    new_text = new_text.concat(' ')
+    newText = newText.concat(' ')
   }
 
-  new_text = new_text.substring(0, col) + text + new_text.substring(col + 7, new_text.length)
+  newText = newText.substring(0, col) + text + newText.substring(col + 7, newText.length)
 
-  return new_text
+  return newText
 }
 
 /**
@@ -48,7 +48,7 @@ const makeLabel = (value: string, length: number) => {
     return value
   }
 
-  // If to long shorten it by removing vowels and making it CamelCase to remove spaces
+  // If too long shorten it by removing vowels and making it CamelCase to remove spaces
   const words = value.split(' ')
   let label = ''
 
@@ -58,7 +58,7 @@ const makeLabel = (value: string, length: number) => {
     let tempStr = currentStr
 
     // convert first letter to upper case and remove all vowels after first letter
-    tempStr = tempStr.substr(0, 1).toUpperCase() + tempStr.substr(1).replace(/[aeiou]/gi, '')
+    tempStr = tempStr.charAt(0).toUpperCase() + tempStr.substring(1).replace(/[aeiou]/gi, '')
 
     label += tempStr
   }

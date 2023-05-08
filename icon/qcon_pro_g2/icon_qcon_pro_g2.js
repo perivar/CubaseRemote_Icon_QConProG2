@@ -6,13 +6,16 @@
 //
 // Portions of this implementation where inspired by other midi remote creates to whom I wish to say thank you!
 // - Mackie C4 by Ron Garrison <ron.garrison@gmail.com> https://github.com/rwgarrison/midiremote-userscripts/tree/main/mackie/c4
+// - Behringer X-Touch by Bjorn https://github.com/bjoluc/cubase-xtouch-midiremote
 
 var iconElements = require('./icon_elements')
 var makeChannelControl = iconElements.makeChannelControl
 var makeMasterControl = iconElements.makeMasterControl
 var makeTransport = iconElements.makeTransport
 var clearAllLeds = iconElements.clearAllLeds
-var Helper_updateDisplay = iconElements.Helper_updateDisplay
+var updateDisplay = iconElements.updateDisplay
+var makeButton = iconElements.makeButton
+var makeLedButton = iconElements.makeLedButton
 var helper = require('./icon_helper')
 var makeLabel = helper.display.makeLabel
 var setTextOfColumn = helper.display.setTextOfColumn
@@ -46,7 +49,7 @@ var makeSurfaceElements = function () {
   // Display - 2lines
   surfaceElements.d2Display = surface.makeBlindPanel(0, 0, 17, 3)
   surfaceElements.numStrips = 8
-  surfaceElements.channelControls = {}
+  surfaceElements.channelControls = []
   var xKnobStrip = 0
   var yKnobStrip = 3
   // add the main channels
@@ -59,140 +62,98 @@ var makeSurfaceElements = function () {
   surfaceElements.transport = makeTransport(surface, midiInput, midiOutput, xKnobStrip, yKnobStrip)
   // Upper Button Row
   // Name/Value
-  surfaceElements.btnNameValue = surface.makeButton(21, 1, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnNameValue, 0, 52)
+  surfaceElements.btnNameValue = makeLedButton(surface, midiInput, midiOutput, 21, 1, 2, 2, 0, 52)
   // SMPTE/Beats
-  surfaceElements.btnSmpteBeats = surface.makeButton(23, 1, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnSmpteBeats, 0, 53)
+  surfaceElements.btnSmpteBeats = makeLedButton(surface, midiInput, midiOutput, 23, 1, 2, 2, 0, 53)
   // Undo
-  surfaceElements.btnUndo = surface.makeButton(25, 1, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnUndo, 0, 70)
+  surfaceElements.btnUndo = makeLedButton(surface, midiInput, midiOutput, 25, 1, 2, 2, 0, 70)
   // Redo
-  surfaceElements.btnRedo = surface.makeButton(27, 1, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnRedo, 0, 71)
+  surfaceElements.btnRedo = makeLedButton(surface, midiInput, midiOutput, 27, 1, 2, 2, 0, 71)
   // Save
-  surfaceElements.btnSave = surface.makeButton(29, 1, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnSave, 0, 72)
+  surfaceElements.btnSave = makeLedButton(surface, midiInput, midiOutput, 29, 1, 2, 2, 0, 72)
   // Function Buttons - Upper Row
   // F1
-  surfaceElements.btnF1 = surface.makeButton(23, 4, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnF1, 0, 54)
+  surfaceElements.btnF1 = makeLedButton(surface, midiInput, midiOutput, 23, 4, 2, 1, 0, 54)
   // F2
-  surfaceElements.btnF2 = surface.makeButton(25, 4, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnF2, 0, 55)
+  surfaceElements.btnF2 = makeLedButton(surface, midiInput, midiOutput, 25, 4, 2, 1, 0, 55)
   // F3
-  surfaceElements.btnF3 = surface.makeButton(27, 4, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnF3, 0, 56)
+  surfaceElements.btnF3 = makeLedButton(surface, midiInput, midiOutput, 27, 4, 2, 1, 0, 56)
   // F4
-  surfaceElements.btnF4 = surface.makeButton(29, 4, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnF4, 0, 57)
+  surfaceElements.btnF4 = makeLedButton(surface, midiInput, midiOutput, 29, 4, 2, 1, 0, 57)
   // Function Buttons - Second Row
   // F5
-  surfaceElements.btnF5 = surface.makeButton(23, 5, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnF5, 0, 58)
+  surfaceElements.btnF5 = makeLedButton(surface, midiInput, midiOutput, 23, 5, 2, 1, 0, 58)
   // F6
-  surfaceElements.btnF6 = surface.makeButton(25, 5, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnF6, 0, 59)
+  surfaceElements.btnF6 = makeLedButton(surface, midiInput, midiOutput, 25, 5, 2, 1, 0, 59)
   // F7
-  surfaceElements.btnF7 = surface.makeButton(27, 5, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnF7, 0, 60)
+  surfaceElements.btnF7 = makeLedButton(surface, midiInput, midiOutput, 27, 5, 2, 1, 0, 60)
   // F8
-  surfaceElements.btnF8 = surface.makeButton(29, 5, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnF8, 0, 61)
+  surfaceElements.btnF8 = makeLedButton(surface, midiInput, midiOutput, 29, 5, 2, 1, 0, 61)
   // Row 6
   // Layer2: F1
-  surfaceElements.btnLayer2F1 = surface.makeButton(23, 6, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnLayer2F1, 0, 62)
+  surfaceElements.btnLayer2F1 = makeLedButton(surface, midiInput, midiOutput, 23, 6, 2, 1, 0, 62)
   // Layer2: F2
-  surfaceElements.btnLayer2F2 = surface.makeButton(25, 6, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnLayer2F2, 0, 63)
+  surfaceElements.btnLayer2F2 = makeLedButton(surface, midiInput, midiOutput, 25, 6, 2, 1, 0, 63)
   // Layer2: F3
-  surfaceElements.btnLayer2F3 = surface.makeButton(27, 6, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnLayer2F3, 0, 64)
+  surfaceElements.btnLayer2F3 = makeLedButton(surface, midiInput, midiOutput, 27, 6, 2, 1, 0, 64)
   // Layer2: F4
-  surfaceElements.btnLayer2F4 = surface.makeButton(29, 6, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnLayer2F4, 0, 65)
+  surfaceElements.btnLayer2F4 = makeLedButton(surface, midiInput, midiOutput, 29, 6, 2, 1, 0, 65)
   // Row 7
   // Layer2: F5
-  surfaceElements.btnLayer2F5 = surface.makeButton(23, 7, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnLayer2F5, 0, 66)
+  surfaceElements.btnLayer2F5 = makeLedButton(surface, midiInput, midiOutput, 23, 7, 2, 1, 0, 66)
   // Layer2: F6
-  surfaceElements.btnLayer2F6 = surface.makeButton(25, 7, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnLayer2F6, 0, 67)
+  surfaceElements.btnLayer2F6 = makeLedButton(surface, midiInput, midiOutput, 25, 7, 2, 1, 0, 67)
   // Layer2: F7
-  surfaceElements.btnLayer2F7 = surface.makeButton(27, 7, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnLayer2F7, 0, 68)
+  surfaceElements.btnLayer2F7 = makeLedButton(surface, midiInput, midiOutput, 27, 7, 2, 1, 0, 68)
   // Edit
-  surfaceElements.btnEdit = surface.makeButton(29, 7, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnEdit, 0, 51)
+  surfaceElements.btnEdit = makeLedButton(surface, midiInput, midiOutput, 29, 7, 2, 1, 0, 51)
   // Row 9
   // Assignment: Page Up
-  surfaceElements.btnPageUp = surface.makeButton(19, 9, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnPageUp, 0, 40)
+  surfaceElements.btnPageUp = makeLedButton(surface, midiInput, midiOutput, 19, 9, 2, 2, 0, 40)
   // Assignment: Page Down
-  surfaceElements.btnPageDown = surface.makeButton(21, 9, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnPageDown, 0, 41)
+  surfaceElements.btnPageDown = makeLedButton(surface, midiInput, midiOutput, 21, 9, 2, 2, 0, 41)
   // Assignment: Pan
-  surfaceElements.btnPan = surface.makeButton(23, 9, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnPan, 0, 42)
+  surfaceElements.btnPan = makeLedButton(surface, midiInput, midiOutput, 23, 9, 2, 2, 0, 42)
   // Assignment: Inserts
-  surfaceElements.btnInserts = surface.makeButton(25, 9, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnInserts, 0, 43)
+  surfaceElements.btnInserts = makeLedButton(surface, midiInput, midiOutput, 25, 9, 2, 2, 0, 43)
   // Assignment: Eq
-  surfaceElements.btnEq = surface.makeButton(27, 9, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnEq, 0, 44)
+  surfaceElements.btnEq = makeLedButton(surface, midiInput, midiOutput, 27, 9, 2, 2, 0, 44)
   // Assignment: Fx Send
-  surfaceElements.btnFxSend = surface.makeButton(29, 9, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnFxSend, 0, 45)
+  surfaceElements.btnFxSend = makeLedButton(surface, midiInput, midiOutput, 29, 9, 2, 2, 0, 45)
   // Row 11
   // Automation: Read
-  surfaceElements.btnRead = surface.makeButton(19, 11, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnRead, 0, 74)
+  surfaceElements.btnRead = makeLedButton(surface, midiInput, midiOutput, 19, 11, 2, 2, 0, 74)
   // Automation: Write
-  surfaceElements.btnWrite = surface.makeButton(21, 11, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnWrite, 0, 75)
+  surfaceElements.btnWrite = makeLedButton(surface, midiInput, midiOutput, 21, 11, 2, 2, 0, 75)
   // Sends
-  surfaceElements.btnSends = surface.makeButton(23, 11, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnSends, 0, 76)
+  surfaceElements.btnSends = makeLedButton(surface, midiInput, midiOutput, 23, 11, 2, 2, 0, 76)
   // Project
-  surfaceElements.btnProject = surface.makeButton(25, 11, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnProject, 0, 77)
+  surfaceElements.btnProject = makeLedButton(surface, midiInput, midiOutput, 25, 11, 2, 2, 0, 77)
   // Mixer
-  surfaceElements.btnMixer = surface.makeButton(27, 11, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnMixer, 0, 78)
+  surfaceElements.btnMixer = makeLedButton(surface, midiInput, midiOutput, 27, 11, 2, 2, 0, 78)
   // Motors
-  surfaceElements.btnMotors = surface.makeButton(29, 11, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnMotors, 0, 79)
+  surfaceElements.btnMotors = makeLedButton(surface, midiInput, midiOutput, 29, 11, 2, 2, 0, 79)
   // Row 14
   // VST
-  surfaceElements.btnVst = surface.makeButton(19, 14, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnVst, 0, 80)
+  surfaceElements.btnVst = makeLedButton(surface, midiInput, midiOutput, 19, 14, 2, 2, 0, 80)
   // Master
-  surfaceElements.btnMaster = surface.makeButton(21, 14, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnMaster, 0, 81)
+  surfaceElements.btnMaster = makeLedButton(surface, midiInput, midiOutput, 21, 14, 2, 2, 0, 81)
   // Shift
-  surfaceElements.btnShift = surface.makeButton(23, 14, 2, 2)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnShift, 0, 83)
+  surfaceElements.btnShift = makeLedButton(surface, midiInput, midiOutput, 23, 14, 2, 2, 0, 83)
   // Row 16 Upper
   // Left
-  surfaceElements.btnLeft = surface.makeButton(19, 16, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnLeft, 0, 84)
+  surfaceElements.btnLeft = makeLedButton(surface, midiInput, midiOutput, 19, 16, 2, 1, 0, 84)
   // Right
-  surfaceElements.btnRight = surface.makeButton(21, 16, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnRight, 0, 85)
+  surfaceElements.btnRight = makeLedButton(surface, midiInput, midiOutput, 21, 16, 2, 1, 0, 85)
   // Solo Defeat
-  surfaceElements.btnSoloDefeat = surface.makeButton(23, 16, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnSoloDefeat, 0, 82)
+  surfaceElements.btnSoloDefeat = makeLedButton(surface, midiInput, midiOutput, 23, 16, 2, 1, 0, 82)
   // Row 17 Lower
   // Previous
-  surfaceElements.btnPrevious = surface.makeButton(19, 17, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnPrevious, 0, 88)
+  surfaceElements.btnPrevious = makeLedButton(surface, midiInput, midiOutput, 19, 17, 2, 1, 0, 88)
   // Add
-  surfaceElements.btnAdd = surface.makeButton(21, 17, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnAdd, 0, 89)
+  surfaceElements.btnAdd = makeLedButton(surface, midiInput, midiOutput, 21, 17, 2, 1, 0, 89)
   // Next
-  surfaceElements.btnNext = surface.makeButton(23, 17, 2, 1)
-  iconElements.bindButton2Note(midiInput, midiOutput, surfaceElements.btnNext, 0, 90)
+  surfaceElements.btnNext = makeLedButton(surface, midiInput, midiOutput, 23, 17, 2, 1, 0, 90)
   // Track the selected track name
   surfaceElements.selectedTrack = surface.makeCustomValueVariable('selectedTrack')
   surfaceElements.selectedTrack.mOnTitleChange = function (activeDevice, objectTitle, valueTitle) {
@@ -308,7 +269,7 @@ var makeSubPage = function (subPageArea, name) {
         midiOutput.sendMidi(activeDevice, [0x90, 28, 127])
         break
     }
-    Helper_updateDisplay('Row1', 'Row2', 'AltRow1', 'AltRow2', activeDevice, midiOutput)
+    updateDisplay('Row1', 'Row2', 'AltRow1', 'AltRow2', activeDevice, midiOutput)
   }
   return subPage
 }
@@ -646,7 +607,7 @@ var makePageMidi = function () {
       // and this updates the D2 Display
       activeDevice.setState(activePage + ' - Fader - ValueTitles', setTextOfColumn(fader, makeLabel(displayName, 6), faderValueTitles))
       activeDevice.setState(activePage + ' - Fader - Values', setTextOfColumn(fader, makeLabel(ccValue.toString(), 6), faderValues))
-      Helper_updateDisplay(
+      updateDisplay(
         activePage + ' - Fader - ValueTitles',
         activePage + ' - Fader - Values',
         activePage + ' - Pan - ValueTitles',
@@ -746,7 +707,7 @@ midiPage.mOnActivate = function (activeDevice) {
   faderValueTitles = setTextOfColumn(0, makeLabel('CC1', 6), faderValueTitles)
   faderValueTitles = setTextOfColumn(1, makeLabel('CC11', 6), faderValueTitles)
   activeDevice.setState(activePage + ' - Fader - ValueTitles', setTextOfLine(faderValueTitles))
-  Helper_updateDisplay(
+  updateDisplay(
     activePage + ' - Fader - ValueTitles',
     activePage + ' - Fader - Values',
     activePage + ' - Pan - ValueTitles',
