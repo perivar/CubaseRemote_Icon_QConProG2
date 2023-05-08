@@ -123,8 +123,8 @@ var updateDisplay = function (idRow1, idRow2, idAltRow1, idAltRow2, activeDevice
  * @param {number} controlChangeNumber
  */
 var bindButton2CC = function (midiInput, midiOutput, btn, channelNumber, controlChangeNumber) {
-  // TODO: when is setOutputPort needed?
-  return btn.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToControlChange(channelNumber, controlChangeNumber)
+  // setOutputPort is not normally used, but can be used for e.g. motorized faders
+  return btn.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToControlChange(channelNumber, controlChangeNumber)
 }
 /**
  * Bind button to Midi Note Utility Function
@@ -135,8 +135,8 @@ var bindButton2CC = function (midiInput, midiOutput, btn, channelNumber, control
  * @param {number} pitch
  */
 var bindButton2Note = function (midiInput, midiOutput, btn, channelNumber, pitch) {
-  // TODO: when is setOutputPort needed?
-  return btn.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(channelNumber, pitch)
+  // setOutputPort is not normally used, but can be used for e.g. motorized faders
+  btn.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToNote(channelNumber, pitch)
 }
 /**
  * Make a Button
@@ -190,10 +190,10 @@ var makeLedButton = function (surface, midiInput, midiOutput, x, y, w, h, channe
   btn.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value, diff) {
     if (value) {
       midiOutput.sendMidi(activeDevice, [0x90, this.pitch, 127])
-      LOG('NOTE_ON =>' + this.pitch)
+      LOG('Led ON for note: ' + this.pitch)
     } else {
       midiOutput.sendMidi(activeDevice, [0x90, this.pitch, 0])
-      LOG('NOTE_OFF =>' + this.pitch)
+      LOG('Led OFF for note: ' + this.pitch)
     }
   }.bind({ pitch: pitch })
   return btn
@@ -259,6 +259,7 @@ var makeTouchFader = function (surface, midiInput, midiOutput, x, y, w, h, chann
   // Fader Touch + Fader
   touchFader.btnFaderTouch = makeButton(surface, midiInput, midiOutput, x, y, w, 1, 0, 104 + channelIndex)
   touchFader.fdrFader = surface.makeFader(x, y + 1, w, h).setTypeVertical()
+  // make sure to also use setOutputPort to support motorized faders
   touchFader.fdrFader.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToPitchBend(channelIndex)
   return touchFader
 }
@@ -315,13 +316,9 @@ var makeChannelControl = function (surface, midiInput, midiOutput, x, y, channel
   channelControl.mDisplayModeValue = surface.makeCustomValueVariable('encoderDisplayMode')
   channelControl.pushEncoder.mEncoderValue.mMidiBinding
     .setInputPort(midiInput)
-    .setOutputPort(midiOutput)
     .bindToControlChange(0, 16 + channelIndex)
     .setTypeRelativeSignedBit()
-  channelControl.pushEncoder.mPushValue.mMidiBinding
-    .setInputPort(midiInput)
-    .setOutputPort(midiOutput)
-    .bindToNote(0, 32 + channelIndex)
+  channelControl.pushEncoder.mPushValue.mMidiBinding.setInputPort(midiInput).bindToNote(0, 32 + channelIndex)
   channelControl.pushEncoder.mEncoderValue.mOnProcessValueChange = function (activeDevice, value, diff) {
     var displayMode = channelControl.mDisplayModeValue.getProcessValue(activeDevice)
     LOG('Encoder Change: ' + channelIndex + '::' + value + ':' + diff + ', displayMode:' + displayMode)
@@ -615,9 +612,11 @@ var makeMasterControl = function (surface, midiInput, midiOutput, x, y, channelI
       if (displayType === 'Pan') {
         // turn on LED
         midiOutput.sendMidi(activeDevice, [0x90, note, 127])
+        LOG('Flip => Led ON for note: ' + note)
       } else {
         // turn off LED
         midiOutput.sendMidi(activeDevice, [0x90, note, 0])
+        LOG('Flip => Led OFF for note: ' + note)
       }
       updateDisplay(
         activeDevice.getState('Display - idRow1'),
@@ -675,14 +674,9 @@ var makeTransport = function (surface, midiInput, midiOutput, x, y) {
   // TODO: One weird side effect of this is the Knob displayed in Cubase will show its "value" in a weird way.
   // I wonder if there is a way to change that behavior?
   transport.knobJogWheel = surface.makeKnob(27, 21, 4, 4)
-  transport.knobJogWheel.mSurfaceValue.mMidiBinding
-    .setInputPort(midiInput)
-    .setOutputPort(midiOutput)
-    .setIsConsuming(true)
-    .bindToControlChange(0, 60)
-    .setTypeAbsolute()
+  transport.knobJogWheel.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setIsConsuming(true).bindToControlChange(0, 60).setTypeAbsolute()
   // Scrub button on push encoder
-  // transport.knobJogWheel.mPushValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 101)
+  // transport.knobJogWheel.mPushValue.mMidiBinding.setInputPort(midiInput).bindToNote(0, 101)
   // Scrub button
   transport.btnScrub = makeLedButton(surface, midiInput, midiOutput, 26, 19, 2, 2, 0, 101)
   // Custom jogging variables
