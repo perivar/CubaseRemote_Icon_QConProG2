@@ -484,8 +484,8 @@ var Devices = (function () {
             driver2
                 .makeDetectionUnit()
                 .detectPortPair(this.devices[0].ports.input, this.devices[0].ports.output)
-                .expectInputNameEquals('X-Touch')
-                .expectOutputNameEquals('X-Touch')
+                .expectInputNameContains('iCON QCON Pro G2')
+                .expectOutputNameContains('iCON QCON Pro G2')
         }
     }
 
@@ -2093,7 +2093,7 @@ function makeHostMapping(
 // src/index.ts
 
 // 2. create the device driver main object
-var driver = midiremote_api.makeDeviceDriver('Behringer', 'X-Touch', 'github.com/bjoluc')
+var driver = midiremote_api.makeDeviceDriver('Icon', 'QCon Pro G2', 'Nerseth')
 
 var surface = decorateSurface(driver.mSurface)
 var devices = new Devices(driver, surface)
