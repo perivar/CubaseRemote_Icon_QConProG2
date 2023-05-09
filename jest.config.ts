@@ -10,7 +10,7 @@ const config: Config.InitialOptions = {
     testEnvironment: 'node',
     roots: ['icon'],
     transform: {
-        '\\.[jt]sx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
+        '\\.[t]sx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
     },
     testRegex: '/__tests__/.*.test.ts$',
     transformIgnorePatterns: [`node_modules/(?!${untranspiledModulePatterns.join('|')})`],
