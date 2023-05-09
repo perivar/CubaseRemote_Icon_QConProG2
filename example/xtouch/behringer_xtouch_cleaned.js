@@ -100,12 +100,8 @@ function makeTimerUtils(page, surface) {
 function decorateSurface(surface) {
     var decoratedSurface = surface
 
-    decoratedSurface.makeLedButton = function () {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key]
-        }
-        var _surface2
-        var button = (_surface2 = surface).makeButton.apply(_surface2, args)
+    decoratedSurface.makeLedButton = function (args) {
+        var button = surface.makeButton(args)
         button.onSurfaceValueChange = makeCallbackCollection(
             button.mSurfaceValue,
             'mOnProcessValueChange'
@@ -113,20 +109,20 @@ function decorateSurface(surface) {
         button.mLedValue = surface.makeCustomValueVariable('LedButtonLed')
         var shadowValue = surface.makeCustomValueVariable('LedButtonProxy')
 
-        button.bindToNote = function (ports, note) {
-            var isChannelButton =
-                arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false
+        button.bindToNote = function (ports, note, isChannelButton) {
             var currentSurfaceValue = new Map()
             button.mSurfaceValue.mMidiBinding.setInputPort(ports.input).bindToNote(0, note)
             button.onSurfaceValueChange.addCallback(function (context, newValue) {
                 currentSurfaceValue.set(context, newValue)
                 ports.output.sendNoteOn(context, note, newValue || currentLedValue.get(context))
             })
+
             var currentLedValue = new Map()
             button.mLedValue.mOnProcessValueChange = function (context, newValue) {
                 currentLedValue.set(context, newValue)
                 ports.output.sendNoteOn(context, note, newValue)
             }
+
             shadowValue.mMidiBinding.setInputPort(ports.input).bindToNote(0, note)
             shadowValue.mOnProcessValueChange = function (context, newValue) {
                 ports.output.sendNoteOn(
@@ -147,42 +143,33 @@ function decorateSurface(surface) {
         return button
     }
 
-    decoratedSurface.makeLedPushEncoder = function () {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key]
-        }
-        var _surface2
-        var encoder = (_surface2 = surface).makePushEncoder.apply(_surface2, args)
+    decoratedSurface.makeLedPushEncoder = function (args) {
+        var encoder = surface.makePushEncoder(args)
         encoder.mDisplayModeValue = surface.makeCustomValueVariable('encoderDisplayMode')
         return encoder
     }
 
-    decoratedSurface.makeTouchSensitiveFader = function () {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key]
-        }
-        var _surface2
-        var fader = (_surface2 = surface).makeFader.apply(_surface2, args)
+    decoratedSurface.makeTouchSensitiveFader = function (args) {
+        var fader = surface.makeFader(args)
         fader.mTouchedValue = surface.makeCustomValueVariable('faderTouched')
         fader.mTouchedValueInternal = surface.makeCustomValueVariable('faderTouchedInternal')
         return fader
     }
 
-    decoratedSurface.makeJogWheel = function () {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key]
-        }
-        var _surface2
-        var jogWheel = (_surface2 = surface).makeKnob.apply(_surface2, args)
+    decoratedSurface.makeJogWheel = function (args) {
+        var jogWheel = surface.makeKnob(args)
         var mProxyValue = surface.makeCustomValueVariable('jogWheelProxy')
+
         jogWheel.mKnobModeEnabledValue = surface.makeCustomValueVariable('jogWheelKnobModeEnabled')
         jogWheel.mJogRightValue = surface.makeCustomValueVariable('jogWheelJogRight')
         jogWheel.mJogLeftValue = surface.makeCustomValueVariable('jogWheelJogLeft')
+
         jogWheel.bindToControlChange = function (input, controlChangeNumber) {
             mProxyValue.mMidiBinding
                 .setInputPort(input)
                 .bindToControlChange(0, controlChangeNumber)
                 .setTypeRelativeSignedBit()
+
             mProxyValue.mOnProcessValueChange = function (context, value, difference) {
                 var jumpOffset = 0.4
                 if (value < 0.5 - jumpOffset) {
@@ -197,6 +184,7 @@ function decorateSurface(surface) {
                         difference += jumpOffset
                     }
                 }
+
                 if (jogWheel.mKnobModeEnabledValue.getProcessValue(context)) {
                     jogWheel.mSurfaceValue.setProcessValue(
                         context,
@@ -222,12 +210,9 @@ function decorateSurface(surface) {
         return jogWheel
     }
 
-    decoratedSurface.makeDecoratedLamp = function () {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key]
-        }
-        var _decoratedSurface
-        var lamp = (_decoratedSurface = decoratedSurface).makeLamp.apply(_decoratedSurface, args)
+    decoratedSurface.makeDecoratedLamp = function (args) {
+        var lamp = surface.makeLamp(args)
+
         lamp.bindToNote = function (output, note) {
             lamp.mSurfaceValue.mOnProcessValueChange = function (context, value) {
                 output.sendNoteOn(context, note, value)
@@ -332,9 +317,11 @@ var nextPortPairIndex = 1
 function makePortPair(driver2, isExtender) {
     var name = isExtender ? 'Extender' : 'Main'
     var portPairIndex = nextPortPairIndex++
+
     var input = driver2.mPorts.makeMidiInput(
         'Input '.concat(portPairIndex.toString(), ' - ').concat(name)
     )
+
     var output = driver2.mPorts.makeMidiOutput(
         'Output '.concat(portPairIndex.toString(), ' - ').concat(name)
     )
@@ -498,12 +485,13 @@ var Devices = (function () {
 
 // src/midi/managers/SegmentDisplayManager.ts
 var SegmentDisplayManager = (function () {
-    function updateSegment(context, segmentId, digit) {
-        var hasDot = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : false
-        var value = 48 + (digit !== null && digit !== void 0 ? digit : -16)
+    function updateSegment(context, segmentId, digit, hasDot) {
+        var value = 0x30 + (digit !== null && digit !== 0 ? digit : -0x10)
+
         if (hasDot) {
-            value += 64
+            value += 0x40
         }
+
         if (value !== this.segmentValues[segmentId].get(context)) {
             this.segmentValues[segmentId].set(context, value)
             this.devices.forEach(function (device) {
@@ -518,41 +506,24 @@ var SegmentDisplayManager = (function () {
     function updateSegmentsByString(context, lastSegmentId, string) {
         var currentSegmentId = lastSegmentId
         var hasCurrentSegmentDot = false
-        var _iteratorNormalCompletion = true,
-            _didIteratorError = false,
-            _iteratorError = undefined
-        try {
-            for (
-                var _iterator = Array.from(string).reverse()[Symbol.iterator](), _step;
-                !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
-                _iteratorNormalCompletion = true
-            ) {
-                var char = _step.value
-                if (char === '.' || char === ':') {
-                    hasCurrentSegmentDot = true
-                } else {
-                    this.updateSegment(
-                        context,
-                        currentSegmentId,
-                        char === ' ' ? null : parseInt(char, 10),
-                        hasCurrentSegmentDot
-                    )
-                    currentSegmentId++
-                    hasCurrentSegmentDot = false
-                }
-            }
-        } catch (err) {
-            _didIteratorError = true
-            _iteratorError = err
-        } finally {
-            try {
-                if (!_iteratorNormalCompletion && _iterator.return != null) {
-                    _iterator.return()
-                }
-            } finally {
-                if (_didIteratorError) {
-                    throw _iteratorError
-                }
+        var _iteratorNormalCompletion = true
+        for (
+            var _iterator = Array.from(string).reverse()[Symbol.iterator](), _step;
+            !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
+            _iteratorNormalCompletion = true
+        ) {
+            var char = _step.value
+            if (char === '.' || char === ':') {
+                hasCurrentSegmentDot = true
+            } else {
+                this.updateSegment(
+                    context,
+                    currentSegmentId,
+                    char === ' ' ? null : parseInt(char, 10),
+                    hasCurrentSegmentDot
+                )
+                currentSegmentId++
+                hasCurrentSegmentDot = false
             }
         }
     }
@@ -583,6 +554,9 @@ var SegmentDisplayManager = (function () {
                 }
             })
         }
+
+        // If `time` is separated three times by `.` or `:`, fill it with spaces to match the way digits
+        // are grouped on the device
         var match = /^([\d ]+[\.\:])([\d ]+)([\.\:])([\d ]+)([\.\:])([\d ]+)$/.exec(time)
         if (match) {
             time =
@@ -620,30 +594,37 @@ var SegmentDisplayManager = (function () {
 })()
 
 // src/midi/connection.ts
-function setupDeviceConnection(driver2, devices2) {
-    var activationCallbacks2 = makeCallbackCollection(driver2, 'mOnActivate')
-    var segmentDisplayManager2 = new SegmentDisplayManager(devices2)
+function setupDeviceConnection(driver, devices) {
+    var activationCallbacks2 = makeCallbackCollection(driver, 'mOnActivate')
+    var segmentDisplayManager2 = new SegmentDisplayManager(devices)
 
-    driver2.mOnDeactivate = function (context) {
+    driver.mOnDeactivate = function (context) {
         segmentDisplayManager2.clearAssignment(context)
         segmentDisplayManager2.clearTime(context)
 
-        devices2.forEach(function (device) {
+        devices.forEach(function (device) {
             device.colorManager.resetColors(context)
             device.lcdManager.clearDisplays(context)
 
             var output = device.ports.output
+
+            // Reset faders
             for (var faderIndex = 0; faderIndex < 9; faderIndex++) {
                 output.sendMidi(context, [0xe0 + faderIndex, 0, 0])
             }
+
+            // Reset LEDs
             for (var note = 0; note < 118; note++) {
                 output.sendNoteOn(context, note, 0)
             }
+
+            // Reset encoder LED rings
             for (var encoderIndex = 0; encoderIndex < 8; encoderIndex++) {
                 output.sendMidi(context, [0xb0, 48 + encoderIndex, 0])
             }
         })
     }
+
     return {
         activationCallbacks: activationCallbacks2,
         segmentDisplayManager: segmentDisplayManager2,
@@ -662,6 +643,7 @@ var makeGlobalBooleanVariables = function (surface) {
         isEncoderAssignmentActive: createElements(6, function () {
             return new GlobalBooleanVariable(surface)
         }),
+
         isFlipModeActive: new GlobalBooleanVariable(surface),
     }
 }
@@ -669,16 +651,16 @@ var makeGlobalBooleanVariables = function (surface) {
 function bindDeviceToMidi(device, globalBooleanVariables2, activationCallbacks2, param) {
     var setTimeout = param.setTimeout
 
-    var bindFader = function bindFader(ports2, fader, faderIndex) {
-        fader.mSurfaceValue.mMidiBinding.setInputPort(ports2.input).bindToPitchBend(faderIndex)
-        fader.mTouchedValue.mMidiBinding.setInputPort(ports2.input).bindToNote(0, 104 + faderIndex)
+    var bindFader = function bindFader(ports, fader, faderIndex) {
+        fader.mSurfaceValue.mMidiBinding.setInputPort(ports.input).bindToPitchBend(faderIndex)
+        fader.mTouchedValue.mMidiBinding.setInputPort(ports.input).bindToNote(0, 104 + faderIndex)
         fader.mTouchedValueInternal.mMidiBinding
-            .setInputPort(ports2.input)
+            .setInputPort(ports.input)
             .bindToNote(0, 104 + faderIndex)
 
         var sendValue = function (context, value) {
             value *= 0x3fff
-            ports2.output.sendMidi(context, [0xe0 + faderIndex, value & 127, value >> 7])
+            ports.output.sendMidi(context, [0xe0 + faderIndex, value & 0x7f, value >> 7])
         }
 
         var isFaderTouched = new Map()
@@ -686,6 +668,7 @@ function bindDeviceToMidi(device, globalBooleanVariables2, activationCallbacks2,
         fader.mTouchedValueInternal.mOnProcessValueChange = function (context, value) {
             var isFaderTouchedValue = Boolean(value)
             isFaderTouched.set(context, isFaderTouchedValue)
+
             if (!isFaderTouchedValue) {
                 sendValue(context, lastFaderValue.get(context))
             }
@@ -695,6 +678,7 @@ function bindDeviceToMidi(device, globalBooleanVariables2, activationCallbacks2,
         var lastFaderValue = new Map()
 
         fader.mSurfaceValue.mOnProcessValueChange = function (context, newValue, difference) {
+            // Prevent identical messages to reduce fader noise
             if (
                 globalBooleanVariables2.areMotorsActive.get(context) &&
                 !isFaderTouched.get(context) &&
@@ -706,6 +690,7 @@ function bindDeviceToMidi(device, globalBooleanVariables2, activationCallbacks2,
             lastFaderValue.set(context, newValue)
         }
 
+        // Set fader to `0` when unassigned
         fader.mSurfaceValue.mOnTitleChange = function (context, title) {
             if (title === '') {
                 forceUpdate.set(context, true)
@@ -729,281 +714,246 @@ function bindDeviceToMidi(device, globalBooleanVariables2, activationCallbacks2,
     }
 
     var ports = device.ports
-    var _iteratorNormalCompletion = true,
-        _didIteratorError = false,
-        _iteratorError = undefined
-    try {
-        var _loop = function () {
-            var _step_value = _slicedToArray(_step.value, 2),
-                channelIndex = _step_value[0],
-                channel = _step_value[1]
 
-            channel.encoder.mEncoderValue.mMidiBinding
-                .setInputPort(ports.input)
-                .bindToControlChange(0, 16 + channelIndex)
-                .setTypeRelativeSignedBit()
+    for (var i = 0; i < device.channelElements.length; ++i) {
+        var channel = device.channelElements[i]
+        var channelIndex = i
 
-            channel.encoder.mPushValue.mMidiBinding
-                .setInputPort(ports.input)
-                .bindToNote(0, 32 + channelIndex)
+        channel.encoder.mEncoderValue.mMidiBinding
+            .setInputPort(ports.input)
+            .bindToControlChange(0, 16 + channelIndex)
+            .setTypeRelativeSignedBit()
 
-            channel.encoder.mEncoderValue.mOnProcessValueChange = function (context, newValue) {
-                var displayMode = channel.encoder.mDisplayModeValue.getProcessValue(context)
-                var isCenterLedOn = newValue === (displayMode === 3 /* Spread */ ? 0 : 0.5)
-                var position = 1 + Math.round(newValue * (displayMode === 3 /* Spread */ ? 5 : 10))
+        channel.encoder.mPushValue.mMidiBinding
+            .setInputPort(ports.input)
+            .bindToNote(0, 32 + channelIndex)
+
+        channel.encoder.mEncoderValue.mOnProcessValueChange = function (context, newValue) {
+            var displayMode = channel.encoder.mDisplayModeValue.getProcessValue(context)
+            var isCenterLedOn = newValue === (displayMode === 3 /* Spread */ ? 0 : 0.5)
+            var position = 1 + Math.round(newValue * (displayMode === 3 /* Spread */ ? 5 : 10))
+            ports.output.sendMidi(context, [
+                0xb0,
+                0x30 + channelIndex,
+                (+isCenterLedOn << 6) + (displayMode << 4) + position,
+            ])
+        }
+
+        var encoderColor = new ContextStateVariable({
+            isAssigned: false,
+            r: 0,
+            g: 0,
+            b: 0,
+        })
+
+        channel.encoder.mEncoderValue.mOnColorChange = function (context, r, g, b, _a, isAssigned) {
+            encoderColor.set(context, {
+                isAssigned: isAssigned,
+                r: r,
+                g: g,
+                b: b,
+            })
+            updateColor(context)
+        }
+
+        var channelColor = new ContextStateVariable({
+            isAssigned: false,
+            r: 0,
+            g: 0,
+            b: 0,
+        })
+
+        channel.buttons.select.mSurfaceValue.mOnColorChange = function (
+            context,
+            r,
+            g,
+            b,
+            _a,
+            isAssigned
+        ) {
+            channelColor.set(context, {
+                isAssigned: isAssigned,
+                r: r,
+                g: g,
+                b: b,
+            })
+            updateColor(context)
+        }
+
+        var updateColor = function (context) {
+            var currentEncoderColor = encoderColor.get(context)
+            device.colorManager.setChannelColorRgb(
+                context,
+                channelIndex, // Fall back to channel color if encoder is not assigned
+                currentEncoderColor.isAssigned ? currentEncoderColor : channelColor.get(context)
+            )
+        }
+
+        var currentParameterName = new Map()
+        var currentDisplayValue = new Map()
+        var isLocalValueModeActive = new Map()
+
+        var updateDisplay = function (context) {
+            device.lcdManager.setChannelText(
+                context,
+                0,
+                channelIndex,
+                isLocalValueModeActive.get(context) ||
+                    globalBooleanVariables2.isValueDisplayModeActive.get(context)
+                    ? currentDisplayValue.get(context)
+                    : currentParameterName.get(context)
+            )
+        }
+
+        channel.encoder.mEncoderValue.mOnDisplayValueChange = function (context, value) {
+            var _value
+            value =
+                (_value = {
+                    // French
+                    Éteint: 'Eteint',
+                    // Japanese
+                    オン: 'On',
+                    オフ: 'Off',
+                    // Russian
+                    'Вкл.': 'On',
+                    'Выкл.': 'Off',
+                    // Chinese
+                    开: 'On',
+                    关: 'Off',
+                }[value]) !== null && _value !== void 0
+                    ? _value
+                    : value
+
+            currentDisplayValue.set(
+                context,
+                LcdManager.centerString(
+                    LcdManager.abbreviateString(LcdManager.stripNonAsciiCharacters(value))
+                )
+            )
+
+            isLocalValueModeActive.set(context, true)
+
+            updateDisplay(context)
+            setTimeout(
+                context,
+                'updateDisplay'.concat(channelIndex),
+                function (context2) {
+                    isLocalValueModeActive.set(context2, false)
+                    updateDisplay(context2)
+                },
+                1
+            )
+        }
+
+        channel.encoder.mEncoderValue.mOnTitleChange = function (context, title1, title2) {
+            if (title1 === '') {
+                ports.output.sendMidi(context, [0xb0, 48 + channelIndex, 0])
+            }
+
+            isLocalValueModeActive.set(context, false)
+            var _title2
+            title2 =
+                (_title2 = {
+                    // English
+                    'Pan Left-Right': 'Pan',
+                    // German
+                    'Pan links/rechts': 'Pan',
+                    // Spanish
+                    'Pan izquierda-derecha': 'Pan',
+                    // French
+                    'Pan gauche-droit': 'Pan',
+                    'Pr\xe9/Post': 'PrePost',
+                    // Italian
+                    'Pan sinistra-destra': 'Pan',
+                    Monitoraggio: 'Monitor',
+                    // Japanese
+                    左右パン: 'Pan',
+                    モニタリング: 'Monitor',
+                    レベル: 'Level',
+                    // Portuguese
+                    'Pan Esquerda-Direita': 'Pan',
+                    Nível: 'Nivel',
+                    'Pr\xe9/P\xf3s': 'PrePost',
+                    // Russian
+                    'Панорама Лево-Право': 'Pan',
+                    Монитор: 'Monitor',
+                    Уровень: 'Level',
+                    'Пре/Пост': 'PrePost',
+                    // Chinese
+                    '声像 左-右': 'Pan',
+                    监听: 'Monitor',
+                    电平: 'Level',
+                    '前置/后置': 'PrePost',
+                }[title2]) !== null && _title2 !== void 0
+                    ? _title2
+                    : title2
+            currentParameterName.set(
+                context,
+                LcdManager.centerString(
+                    LcdManager.abbreviateString(LcdManager.stripNonAsciiCharacters(title2))
+                )
+            )
+            updateDisplay(context)
+        }
+
+        globalBooleanVariables2.isValueDisplayModeActive.addOnChangeCallback(updateDisplay)
+        channel.scribbleStrip.trackTitle.mOnTitleChange = function (context, title) {
+            device.lcdManager.setChannelText(
+                context,
+                1,
+                channelIndex,
+                LcdManager.abbreviateString(LcdManager.stripNonAsciiCharacters(title))
+            )
+        }
+
+        var lastMeterUpdateTime = 0
+        channel.vuMeter.mOnProcessValueChange = function (context, newValue) {
+            var now = performance.now()
+            if (now - lastMeterUpdateTime > 125) {
+                newValue = 1 + Math.log10(0.1 + 0.9 * (1 + Math.log10(0.1 + 0.9 * newValue)))
+                lastMeterUpdateTime = now
                 ports.output.sendMidi(context, [
-                    0xb0,
-                    0x30 + channelIndex,
-                    (+isCenterLedOn << 6) + (displayMode << 4) + position,
+                    0xd0,
+                    (channelIndex << 4) + Math.ceil(newValue * 14 - 0.25),
                 ])
             }
-
-            var encoderColor = new ContextStateVariable({
-                isAssigned: false,
-                r: 0,
-                g: 0,
-                b: 0,
-            })
-
-            channel.encoder.mEncoderValue.mOnColorChange = function (
-                context,
-                r,
-                g,
-                b,
-                _a,
-                isAssigned
-            ) {
-                encoderColor.set(context, {
-                    isAssigned: isAssigned,
-                    r: r,
-                    g: g,
-                    b: b,
-                })
-                updateColor(context)
-            }
-            var channelColor = new ContextStateVariable({
-                isAssigned: false,
-                r: 0,
-                g: 0,
-                b: 0,
-            })
-            channel.buttons.select.mSurfaceValue.mOnColorChange = function (
-                context,
-                r,
-                g,
-                b,
-                _a,
-                isAssigned
-            ) {
-                channelColor.set(context, {
-                    isAssigned: isAssigned,
-                    r: r,
-                    g: g,
-                    b: b,
-                })
-                updateColor(context)
-            }
-            var updateColor = function (context) {
-                var currentEncoderColor = encoderColor.get(context)
-                device.colorManager.setChannelColorRgb(
-                    context,
-                    channelIndex, // Fall back to channel color if encoder is not assigned
-                    currentEncoderColor.isAssigned ? currentEncoderColor : channelColor.get(context)
-                )
-            }
-            var currentParameterName = new Map()
-            var currentDisplayValue = new Map()
-            var isLocalValueModeActive = new Map()
-
-            var updateDisplay = function (context) {
-                device.lcdManager.setChannelText(
-                    context,
-                    0,
-                    channelIndex,
-                    isLocalValueModeActive.get(context) ||
-                        globalBooleanVariables2.isValueDisplayModeActive.get(context)
-                        ? currentDisplayValue.get(context)
-                        : currentParameterName.get(context)
-                )
-            }
-
-            channel.encoder.mEncoderValue.mOnDisplayValueChange = function (context, value) {
-                var _value
-                value =
-                    (_value = {
-                        // French
-                        Éteint: 'Eteint',
-                        // Japanese
-                        オン: 'On',
-                        オフ: 'Off',
-                        // Russian
-                        'Вкл.': 'On',
-                        'Выкл.': 'Off',
-                        // Chinese
-                        开: 'On',
-                        关: 'Off',
-                    }[value]) !== null && _value !== void 0
-                        ? _value
-                        : value
-                currentDisplayValue.set(
-                    context,
-                    LcdManager.centerString(
-                        LcdManager.abbreviateString(LcdManager.stripNonAsciiCharacters(value))
-                    )
-                )
-                isLocalValueModeActive.set(context, true)
-                updateDisplay(context)
-                setTimeout(
-                    context,
-                    'updateDisplay'.concat(channelIndex),
-                    function (context2) {
-                        isLocalValueModeActive.set(context2, false)
-                        updateDisplay(context2)
-                    },
-                    1
-                )
-            }
-
-            channel.encoder.mEncoderValue.mOnTitleChange = function (context, title1, title2) {
-                if (title1 === '') {
-                    ports.output.sendMidi(context, [0xb0, 48 + channelIndex, 0])
-                }
-
-                isLocalValueModeActive.set(context, false)
-                var _title2
-                title2 =
-                    (_title2 = {
-                        // English
-                        'Pan Left-Right': 'Pan',
-                        // German
-                        'Pan links/rechts': 'Pan',
-                        // Spanish
-                        'Pan izquierda-derecha': 'Pan',
-                        // French
-                        'Pan gauche-droit': 'Pan',
-                        'Pr\xe9/Post': 'PrePost',
-                        // Italian
-                        'Pan sinistra-destra': 'Pan',
-                        Monitoraggio: 'Monitor',
-                        // Japanese
-                        左右パン: 'Pan',
-                        モニタリング: 'Monitor',
-                        レベル: 'Level',
-                        // Portuguese
-                        'Pan Esquerda-Direita': 'Pan',
-                        Nível: 'Nivel',
-                        'Pr\xe9/P\xf3s': 'PrePost',
-                        // Russian
-                        'Панорама Лево-Право': 'Pan',
-                        Монитор: 'Monitor',
-                        Уровень: 'Level',
-                        'Пре/Пост': 'PrePost',
-                        // Chinese
-                        '声像 左-右': 'Pan',
-                        监听: 'Monitor',
-                        电平: 'Level',
-                        '前置/后置': 'PrePost',
-                    }[title2]) !== null && _title2 !== void 0
-                        ? _title2
-                        : title2
-                currentParameterName.set(
-                    context,
-                    LcdManager.centerString(
-                        LcdManager.abbreviateString(LcdManager.stripNonAsciiCharacters(title2))
-                    )
-                )
-                updateDisplay(context)
-            }
-
-            globalBooleanVariables2.isValueDisplayModeActive.addOnChangeCallback(updateDisplay)
-            channel.scribbleStrip.trackTitle.mOnTitleChange = function (context, title) {
-                device.lcdManager.setChannelText(
-                    context,
-                    1,
-                    channelIndex,
-                    LcdManager.abbreviateString(LcdManager.stripNonAsciiCharacters(title))
-                )
-            }
-
-            var lastMeterUpdateTime = 0
-            channel.vuMeter.mOnProcessValueChange = function (context, newValue) {
-                var now = performance.now()
-                if (now - lastMeterUpdateTime > 125) {
-                    newValue = 1 + Math.log10(0.1 + 0.9 * (1 + Math.log10(0.1 + 0.9 * newValue)))
-                    lastMeterUpdateTime = now
-                    ports.output.sendMidi(context, [
-                        0xd0,
-                        (channelIndex << 4) + Math.ceil(newValue * 14 - 0.25),
-                    ])
-                }
-            }
-
-            var buttons = channel.buttons
-            var _iteratorNormalCompletion = true,
-                _didIteratorError = false,
-                _iteratorError = undefined
-            try {
-                for (
-                    var _iterator = [buttons.record, buttons.solo, buttons.mute, buttons.select]
-                            .entries()
-                            [Symbol.iterator](),
-                        _step1;
-                    !(_iteratorNormalCompletion = (_step1 = _iterator.next()).done);
-                    _iteratorNormalCompletion = true
-                ) {
-                    var _step_value1 = _slicedToArray(_step1.value, 2),
-                        row = _step_value1[0],
-                        button = _step_value1[1]
-                    button.bindToNote(ports, row * 8 + channelIndex, true)
-                }
-            } catch (err) {
-                _didIteratorError = true
-                _iteratorError = err
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion && _iterator.return != null) {
-                        _iterator.return()
-                    }
-                } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError
-                    }
-                }
-            }
-            bindFader(ports, channel.fader, channelIndex)
         }
+
+        var buttons = channel.buttons
+
+        var _iteratorNormalCompletion = true
         for (
-            var _iterator = device.channelElements.entries()[Symbol.iterator](), _step;
-            !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
+            var _iterator = [buttons.record, buttons.solo, buttons.mute, buttons.select]
+                    .entries()
+                    [Symbol.iterator](),
+                _step1;
+            !(_iteratorNormalCompletion = (_step1 = _iterator.next()).done);
             _iteratorNormalCompletion = true
-        )
-            _loop()
-    } catch (err) {
-        _didIteratorError = true
-        _iteratorError = err
-    } finally {
-        try {
-            if (!_iteratorNormalCompletion && _iterator.return != null) {
-                _iterator.return()
-            }
-        } finally {
-            if (_didIteratorError) {
-                throw _iteratorError
-            }
+        ) {
+            var _step_value1 = _slicedToArray(_step1.value, 2),
+                row = _step_value1[0],
+                button = _step_value1[1]
+            button.bindToNote(ports, row * 8 + channelIndex, true)
         }
+
+        bindFader(ports, channel.fader, channelIndex)
     }
+
     if (_instanceof(device, MainDevice)) {
         var elements = device.controlSectionElements
         var buttons = elements.buttons
         var motorButton = buttons.automation[5]
+
         motorButton.onSurfaceValueChange.addCallback(function (context, value) {
             if (value === 1) {
                 globalBooleanVariables2.areMotorsActive.toggle(context)
             }
         })
+
         globalBooleanVariables2.areMotorsActive.addOnChangeCallback(function (context, value) {
             motorButton.mLedValue.setProcessValue(context, +value)
         })
+
         activationCallbacks2.addCallback(function (context) {
             ports.output.sendNoteOn(context, 79, 1)
             ports.output.sendNoteOn(context, 42, 1)
@@ -1023,102 +973,71 @@ function bindDeviceToMidi(device, globalBooleanVariables2, activationCallbacks2,
         globalBooleanVariables2.isFlipModeActive.addOnChangeCallback(function (context, value) {
             buttons.flip.mLedValue.setProcessValue(context, +value)
         })
-        var _iteratorNormalCompletion1 = true,
-            _didIteratorError1 = false,
-            _iteratorError1 = undefined
-        try {
-            var _loop1 = function () {
-                var _step_value = _slicedToArray(_step1.value, 2),
-                    buttonIndex = _step_value[0],
-                    isActive = _step_value[1]
-                isActive.addOnChangeCallback(function (context, value) {
-                    buttons.encoderAssign[buttonIndex].mLedValue.setProcessValue(context, +value)
-                })
-            }
-            for (
-                var _iterator1 = globalBooleanVariables2.isEncoderAssignmentActive
-                        .entries()
-                        [Symbol.iterator](),
-                    _step1;
-                !(_iteratorNormalCompletion1 = (_step1 = _iterator1.next()).done);
-                _iteratorNormalCompletion1 = true
-            )
-                _loop1()
-        } catch (err) {
-            _didIteratorError1 = true
-            _iteratorError1 = err
-        } finally {
-            try {
-                if (!_iteratorNormalCompletion1 && _iterator1.return != null) {
-                    _iterator1.return()
-                }
-            } finally {
-                if (_didIteratorError1) {
-                    throw _iteratorError1
-                }
-            }
+
+        var _iteratorNormalCompletion1 = true
+        var _loop1 = function () {
+            var _step_value = _slicedToArray(_step1.value, 2),
+                buttonIndex = _step_value[0],
+                isActive = _step_value[1]
+            isActive.addOnChangeCallback(function (context, value) {
+                buttons.encoderAssign[buttonIndex].mLedValue.setProcessValue(context, +value)
+            })
         }
-        var _iteratorNormalCompletion2 = true,
-            _didIteratorError2 = false,
-            _iteratorError2 = undefined
-        try {
-            for (
-                var _iterator2 = _toConsumableArray(
-                        [0, 3, 1, 4, 2, 5].map(function (index2) {
-                            return buttons.encoderAssign[index2]
-                        })
+        for (
+            var _iterator1 = globalBooleanVariables2.isEncoderAssignmentActive
+                    .entries()
+                    [Symbol.iterator](),
+                _step1;
+            !(_iteratorNormalCompletion1 = (_step1 = _iterator1.next()).done);
+            _iteratorNormalCompletion1 = true
+        )
+            _loop1()
+
+        var _iteratorNormalCompletion2 = true
+        for (
+            var _iterator2 = _toConsumableArray(
+                    [0, 3, 1, 4, 2, 5].map(function (index2) {
+                        return buttons.encoderAssign[index2]
+                    })
+                )
+                    .concat(
+                        [
+                            buttons.navigation.bank.left,
+                            buttons.navigation.bank.right,
+                            buttons.navigation.channel.left,
+                            buttons.navigation.channel.right,
+                            buttons.flip,
+                            buttons.edit,
+                            buttons.display,
+                            buttons.timeMode,
+                        ],
+                        buttons.function,
+                        buttons.number,
+                        buttons.modify,
+                        buttons.automation,
+                        buttons.utility,
+                        buttons.transport,
+                        [
+                            buttons.navigation.directions.up,
+                            buttons.navigation.directions.down,
+                            buttons.navigation.directions.left,
+                            buttons.navigation.directions.right,
+                            buttons.navigation.directions.center,
+                            buttons.scrub,
+                        ]
                     )
-                        .concat(
-                            [
-                                buttons.navigation.bank.left,
-                                buttons.navigation.bank.right,
-                                buttons.navigation.channel.left,
-                                buttons.navigation.channel.right,
-                                buttons.flip,
-                                buttons.edit,
-                                buttons.display,
-                                buttons.timeMode,
-                            ],
-                            buttons.function,
-                            buttons.number,
-                            buttons.modify,
-                            buttons.automation,
-                            buttons.utility,
-                            buttons.transport,
-                            [
-                                buttons.navigation.directions.up,
-                                buttons.navigation.directions.down,
-                                buttons.navigation.directions.left,
-                                buttons.navigation.directions.right,
-                                buttons.navigation.directions.center,
-                                buttons.scrub,
-                            ]
-                        )
-                        .entries()
-                        [Symbol.iterator](),
-                    _step2;
-                !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done);
-                _iteratorNormalCompletion2 = true
-            ) {
-                var _step_value = _slicedToArray(_step2.value, 2),
-                    index = _step_value[0],
-                    button = _step_value[1]
-                button.bindToNote(ports, 40 + index)
-            }
-        } catch (err) {
-            _didIteratorError2 = true
-            _iteratorError2 = err
-        } finally {
-            try {
-                if (!_iteratorNormalCompletion2 && _iterator2.return != null) {
-                    _iterator2.return()
-                }
-            } finally {
-                if (_didIteratorError2) {
-                    throw _iteratorError2
-                }
-            }
+                    .entries()
+                    [Symbol.iterator](),
+                _step2;
+            !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done);
+            _iteratorNormalCompletion2 = true
+        ) {
+            var _step_value = _slicedToArray(_step2.value, 2),
+                index = _step_value[0],
+                button = _step_value[1]
+            button.bindToNote(ports, 40 + index)
         }
+
         var _elements_displayLeds = elements.displayLeds,
             smpte = _elements_displayLeds.smpte,
             beats = _elements_displayLeds.beats,
@@ -1126,37 +1045,23 @@ function bindDeviceToMidi(device, globalBooleanVariables2, activationCallbacks2,
         ;[smpte, beats, solo].forEach(function (lamp, index) {
             lamp.bindToNote(ports.output, 113 + index)
         })
+
         elements.jogWheel.bindToControlChange(ports.input, 60)
-        var _iteratorNormalCompletion3 = true,
-            _didIteratorError3 = false,
-            _iteratorError3 = undefined
-        try {
-            for (
-                var _iterator3 = elements.footSwitches.entries()[Symbol.iterator](), _step3;
-                !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done);
-                _iteratorNormalCompletion3 = true
-            ) {
-                var _step_value1 = _slicedToArray(_step3.value, 2),
-                    index1 = _step_value1[0],
-                    footSwitch = _step_value1[1]
-                footSwitch.mSurfaceValue.mMidiBinding
-                    .setInputPort(ports.input)
-                    .bindToNote(0, 102 + index1)
-            }
-        } catch (err) {
-            _didIteratorError3 = true
-            _iteratorError3 = err
-        } finally {
-            try {
-                if (!_iteratorNormalCompletion3 && _iterator3.return != null) {
-                    _iterator3.return()
-                }
-            } finally {
-                if (_didIteratorError3) {
-                    throw _iteratorError3
-                }
-            }
+
+        var _iteratorNormalCompletion3 = true
+        for (
+            var _iterator3 = elements.footSwitches.entries()[Symbol.iterator](), _step3;
+            !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done);
+            _iteratorNormalCompletion3 = true
+        ) {
+            var _step_value1 = _slicedToArray(_step3.value, 2),
+                index1 = _step_value1[0],
+                footSwitch = _step_value1[1]
+            footSwitch.mSurfaceValue.mMidiBinding
+                .setInputPort(ports.input)
+                .bindToNote(0, 102 + index1)
         }
+
         elements.expressionPedal.mSurfaceValue.mMidiBinding
             .setInputPort(ports.input)
             .bindToControlChange(0, 46)
@@ -1238,36 +1143,21 @@ function bindControlButtons(page, controlSectionElements, channelElements, mixer
             'Channel and Rack Configuration '.concat(buttonIndex + 1)
         )
     })
-    var _iteratorNormalCompletion = true,
-        _didIteratorError = false,
-        _iteratorError = undefined
-    try {
-        for (
-            var _iterator = buttons.function[Symbol.iterator](), _step;
-            !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
-            _iteratorNormalCompletion = true
-        ) {
-            var button = _step.value
-            page.makeCommandBinding(
-                button.mSurfaceValue,
-                'MIDI Remote',
-                'Open MIDI Remote Mapping Assistant'
-            )
-        }
-    } catch (err) {
-        _didIteratorError = true
-        _iteratorError = err
-    } finally {
-        try {
-            if (!_iteratorNormalCompletion && _iterator.return != null) {
-                _iterator.return()
-            }
-        } finally {
-            if (_didIteratorError) {
-                throw _iteratorError
-            }
-        }
+
+    var _iteratorNormalCompletion = true
+    for (
+        var _iterator = buttons.function[Symbol.iterator](), _step;
+        !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
+        _iteratorNormalCompletion = true
+    ) {
+        var button = _step.value
+        page.makeCommandBinding(
+            button.mSurfaceValue,
+            'MIDI Remote',
+            'Open MIDI Remote Mapping Assistant'
+        )
     }
+
     page.makeCommandBinding(buttons.edit.mSurfaceValue, 'Edit', 'Edit Channel Settings').setSubPage(
         regularSubPage
     )
@@ -1397,6 +1287,7 @@ function bindJogWheelSection(page, controlSectionElements) {
     var jogWheelSubPageArea = page.makeSubPageArea('jogWeel')
     var scrubSubPage = jogWheelSubPageArea.makeSubPage('scrub')
     var jogSubPage = jogWheelSubPageArea.makeSubPage('jog')
+
     var scrubButton = controlSectionElements.buttons.scrub
     page.makeActionBinding(scrubButton.mSurfaceValue, jogWheelSubPageArea.mAction.mNext)
     jogSubPage.mOnActivate = function (context) {
@@ -1405,6 +1296,7 @@ function bindJogWheelSection(page, controlSectionElements) {
     scrubSubPage.mOnActivate = function (context) {
         scrubButton.mLedValue.setProcessValue(context, 0)
     }
+
     var _controlSectionElements_jogWheel = controlSectionElements.jogWheel,
         jogLeft = _controlSectionElements_jogWheel.mJogLeftValue,
         jogRight = _controlSectionElements_jogWheel.mJogRightValue
@@ -1462,35 +1354,18 @@ function bindDirectionButtons(page, controlSectionElements) {
 }
 
 function bindFootControl(page, controlSectionElements) {
-    var _iteratorNormalCompletion = true,
-        _didIteratorError = false,
-        _iteratorError = undefined
-    try {
-        for (
-            var _iterator = controlSectionElements.footSwitches[Symbol.iterator](), _step;
-            !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
-            _iteratorNormalCompletion = true
-        ) {
-            var footSwitch = _step.value
-            page.makeCommandBinding(
-                footSwitch.mSurfaceValue,
-                'MIDI Remote',
-                'Open MIDI Remote Mapping Assistant'
-            )
-        }
-    } catch (err) {
-        _didIteratorError = true
-        _iteratorError = err
-    } finally {
-        try {
-            if (!_iteratorNormalCompletion && _iterator.return != null) {
-                _iterator.return()
-            }
-        } finally {
-            if (_didIteratorError) {
-                throw _iteratorError
-            }
-        }
+    var _iteratorNormalCompletion = true
+    for (
+        var _iterator = controlSectionElements.footSwitches[Symbol.iterator](), _step;
+        !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
+        _iteratorNormalCompletion = true
+    ) {
+        var footSwitch = _step.value
+        page.makeCommandBinding(
+            footSwitch.mSurfaceValue,
+            'MIDI Remote',
+            'Open MIDI Remote Mapping Assistant'
+        )
     }
 }
 
@@ -1548,40 +1423,25 @@ function bindEncoders(
             var subPageName = ''.concat(pageName, ' ').concat(encoderPageIndex + 1)
             var subPage = subPageArea.makeSubPage(subPageName)
             var flipSubPage = subPageArea.makeSubPage(''.concat(subPageName, ' Flip'))
-            var _iteratorNormalCompletion = true,
-                _didIteratorError = false,
-                _iteratorError = undefined
-            try {
-                for (
-                    var _iterator = deviceButtons[Symbol.iterator](), _step;
-                    !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
-                    _iteratorNormalCompletion = true
-                ) {
-                    var _step_value = _step.value,
-                        flipButton = _step_value.flip
-                    page.makeActionBinding(
-                        flipButton.mSurfaceValue,
-                        flipSubPage.mAction.mActivate
-                    ).setSubPage(subPage)
-                    page.makeActionBinding(
-                        flipButton.mSurfaceValue,
-                        subPage.mAction.mActivate
-                    ).setSubPage(flipSubPage)
-                }
-            } catch (err) {
-                _didIteratorError = true
-                _iteratorError = err
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion && _iterator.return != null) {
-                        _iterator.return()
-                    }
-                } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError
-                    }
-                }
+
+            var _iteratorNormalCompletion = true
+            for (
+                var _iterator = deviceButtons[Symbol.iterator](), _step;
+                !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
+                _iteratorNormalCompletion = true
+            ) {
+                var _step_value = _step.value,
+                    flipButton = _step_value.flip
+                page.makeActionBinding(
+                    flipButton.mSurfaceValue,
+                    flipSubPage.mAction.mActivate
+                ).setSubPage(subPage)
+                page.makeActionBinding(
+                    flipButton.mSurfaceValue,
+                    subPage.mAction.mActivate
+                ).setSubPage(flipSubPage)
             }
+
             var onSubPageActivate = makeCallbackCollection(subPage, 'mOnActivate')
             onSubPageActivate.addCallback(function (context) {
                 segmentDisplayManager2.setAssignment(
@@ -1590,37 +1450,22 @@ function bindEncoders(
                         ? '  '
                         : ''.concat(encoderPageIndex + 1, '.').concat(pages.length)
                 )
-                var _iteratorNormalCompletion = true,
-                    _didIteratorError = false,
-                    _iteratorError = undefined
-                try {
-                    for (
-                        var _iterator = globalBooleanVariables2.isEncoderAssignmentActive
-                                .entries()
-                                [Symbol.iterator](),
-                            _step;
-                        !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
-                        _iteratorNormalCompletion = true
-                    ) {
-                        var _step_value = _slicedToArray(_step.value, 2),
-                            assignmentId = _step_value[0],
-                            isActive = _step_value[1]
-                        isActive.set(context, assignmentButtonId === assignmentId, true)
-                    }
-                } catch (err) {
-                    _didIteratorError = true
-                    _iteratorError = err
-                } finally {
-                    try {
-                        if (!_iteratorNormalCompletion && _iterator.return != null) {
-                            _iterator.return()
-                        }
-                    } finally {
-                        if (_didIteratorError) {
-                            throw _iteratorError
-                        }
-                    }
+
+                var _iteratorNormalCompletion = true
+                for (
+                    var _iterator = globalBooleanVariables2.isEncoderAssignmentActive
+                            .entries()
+                            [Symbol.iterator](),
+                        _step;
+                    !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
+                    _iteratorNormalCompletion = true
+                ) {
+                    var _step_value = _slicedToArray(_step.value, 2),
+                        assignmentId = _step_value[0],
+                        isActive = _step_value[1]
+                    isActive.set(context, assignmentButtonId === assignmentId, true)
                 }
+
                 globalBooleanVariables2.isFlipModeActive.set(context, false)
                 globalBooleanVariables2.isValueDisplayModeActive.set(context, false)
             })
@@ -1635,153 +1480,105 @@ function bindEncoders(
                           return assignmentsConfig(channel, channelIndex)
                       })
                     : assignmentsConfig
-            var _iteratorNormalCompletion1 = true,
-                _didIteratorError1 = false,
-                _iteratorError1 = undefined
-            try {
-                var _loop = function () {
-                    var _step_value = _slicedToArray(_step1.value, 2),
-                        channelIndex = _step_value[0],
-                        _step_value_ = _step_value[1],
-                        encoder = _step_value_.encoder,
-                        fader = _step_value_.fader
 
-                    var assignment = _objectSpread(
-                        {
-                            // consider that
-                            displayMode: 0 /* SingleDot */,
-                            encoderValue:
-                                page.mCustom.makeHostValueVariable('unassignedEncoderValue'),
-                            pushToggleValue: page.mCustom.makeHostValueVariable(
-                                'unassignedEncoderPushValue'
-                            ),
-                        },
-                        assignments[channelIndex]
-                    )
+            var _iteratorNormalCompletion1 = true
+            var _loop = function () {
+                var _step_value = _slicedToArray(_step1.value, 2),
+                    channelIndex = _step_value[0],
+                    _step_value_ = _step_value[1],
+                    encoder = _step_value_.encoder,
+                    fader = _step_value_.fader
 
-                    page.makeValueBinding(
-                        encoder.mEncoderValue,
-                        assignment.encoderValue
-                    ).setSubPage(subPage)
-                    if (config.enableAutoSelect) {
-                        page.makeValueBinding(
-                            fader.mTouchedValue,
-                            mixerBankChannels[channelIndex].mValue.mSelected
-                        )
-                            .filterByValue(1)
-                            .setSubPage(subPage)
-                    }
-                    if (assignment.pushToggleValue) {
-                        page.makeValueBinding(encoder.mPushValue, assignment.pushToggleValue)
-                            .setTypeToggle()
-                            .setSubPage(subPage)
-                    }
-                    page.makeValueBinding(fader.mSurfaceValue, assignment.encoderValue).setSubPage(
-                        flipSubPage
-                    )
-                    if (config.enableAutoSelect) {
-                        page.makeValueBinding(
-                            fader.mTouchedValue,
-                            mixerBankChannels[channelIndex].mValue.mSelected
-                        )
-                            .filterByValue(+areAssignmentsChannelRelated)
-                            .setSubPage(flipSubPage)
-                    }
-                    onSubPageActivate.addCallback(function (context) {
-                        encoder.mDisplayModeValue.setProcessValue(context, assignment.displayMode)
-                    })
-                }
-                for (
-                    var _iterator1 = channelElements.entries()[Symbol.iterator](), _step1;
-                    !(_iteratorNormalCompletion1 = (_step1 = _iterator1.next()).done);
-                    _iteratorNormalCompletion1 = true
+                var assignment = _objectSpread(
+                    {
+                        // consider that
+                        displayMode: 0 /* SingleDot */,
+                        encoderValue: page.mCustom.makeHostValueVariable('unassignedEncoderValue'),
+                        pushToggleValue: page.mCustom.makeHostValueVariable(
+                            'unassignedEncoderPushValue'
+                        ),
+                    },
+                    assignments[channelIndex]
                 )
-                    _loop()
-            } catch (err) {
-                _didIteratorError1 = true
-                _iteratorError1 = err
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion1 && _iterator1.return != null) {
-                        _iterator1.return()
-                    }
-                } finally {
-                    if (_didIteratorError1) {
-                        throw _iteratorError1
-                    }
+
+                page.makeValueBinding(encoder.mEncoderValue, assignment.encoderValue).setSubPage(
+                    subPage
+                )
+                if (config.enableAutoSelect) {
+                    page.makeValueBinding(
+                        fader.mTouchedValue,
+                        mixerBankChannels[channelIndex].mValue.mSelected
+                    )
+                        .filterByValue(1)
+                        .setSubPage(subPage)
                 }
+                if (assignment.pushToggleValue) {
+                    page.makeValueBinding(encoder.mPushValue, assignment.pushToggleValue)
+                        .setTypeToggle()
+                        .setSubPage(subPage)
+                }
+                page.makeValueBinding(fader.mSurfaceValue, assignment.encoderValue).setSubPage(
+                    flipSubPage
+                )
+                if (config.enableAutoSelect) {
+                    page.makeValueBinding(
+                        fader.mTouchedValue,
+                        mixerBankChannels[channelIndex].mValue.mSelected
+                    )
+                        .filterByValue(+areAssignmentsChannelRelated)
+                        .setSubPage(flipSubPage)
+                }
+                onSubPageActivate.addCallback(function (context) {
+                    encoder.mDisplayModeValue.setProcessValue(context, assignment.displayMode)
+                })
             }
+            for (
+                var _iterator1 = channelElements.entries()[Symbol.iterator](), _step1;
+                !(_iteratorNormalCompletion1 = (_step1 = _iterator1.next()).done);
+                _iteratorNormalCompletion1 = true
+            )
+                _loop()
+
             return {
                 subPage: subPage,
                 flipSubPage: flipSubPage,
             }
         })
-        var _iteratorNormalCompletion = true,
-            _didIteratorError = false,
-            _iteratorError = undefined
-        try {
+
+        var _iteratorNormalCompletion = true
+        for (
+            var _iterator = deviceButtons[Symbol.iterator](), _step;
+            !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
+            _iteratorNormalCompletion = true
+        ) {
+            var buttons = _step.value
+            var encoderAssignButtonValue = buttons.encoderAssign[assignmentButtonId].mSurfaceValue
+
+            page.makeActionBinding(
+                encoderAssignButtonValue,
+                createdSubPages[0].subPage.mAction.mActivate
+            )
+            var previousSubPages = createdSubPages[0]
+
+            var _iteratorNormalCompletion1 = true
             for (
-                var _iterator = deviceButtons[Symbol.iterator](), _step;
-                !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
-                _iteratorNormalCompletion = true
+                var _iterator1 = createdSubPages[Symbol.iterator](), _step1;
+                !(_iteratorNormalCompletion1 = (_step1 = _iterator1.next()).done);
+                _iteratorNormalCompletion1 = true
             ) {
-                var buttons = _step.value
-                var encoderAssignButtonValue =
-                    buttons.encoderAssign[assignmentButtonId].mSurfaceValue
+                var currentSubPages = _step1.value
                 page.makeActionBinding(
                     encoderAssignButtonValue,
-                    createdSubPages[0].subPage.mAction.mActivate
-                )
-                var previousSubPages = createdSubPages[0]
-                var _iteratorNormalCompletion1 = true,
-                    _didIteratorError1 = false,
-                    _iteratorError1 = undefined
-                try {
-                    for (
-                        var _iterator1 = createdSubPages[Symbol.iterator](), _step1;
-                        !(_iteratorNormalCompletion1 = (_step1 = _iterator1.next()).done);
-                        _iteratorNormalCompletion1 = true
-                    ) {
-                        var currentSubPages = _step1.value
-                        page.makeActionBinding(
-                            encoderAssignButtonValue,
-                            currentSubPages.subPage.mAction.mActivate
-                        ).setSubPage(previousSubPages.subPage)
-                        page.makeActionBinding(
-                            encoderAssignButtonValue,
-                            currentSubPages.subPage.mAction.mActivate
-                        ).setSubPage(previousSubPages.flipSubPage)
-                        previousSubPages = currentSubPages
-                    }
-                } catch (err) {
-                    _didIteratorError1 = true
-                    _iteratorError1 = err
-                } finally {
-                    try {
-                        if (!_iteratorNormalCompletion1 && _iterator1.return != null) {
-                            _iterator1.return()
-                        }
-                    } finally {
-                        if (_didIteratorError1) {
-                            throw _iteratorError1
-                        }
-                    }
-                }
-            }
-        } catch (err) {
-            _didIteratorError = true
-            _iteratorError = err
-        } finally {
-            try {
-                if (!_iteratorNormalCompletion && _iterator.return != null) {
-                    _iterator.return()
-                }
-            } finally {
-                if (_didIteratorError) {
-                    throw _iteratorError
-                }
+                    currentSubPages.subPage.mAction.mActivate
+                ).setSubPage(previousSubPages.subPage)
+                page.makeActionBinding(
+                    encoderAssignButtonValue,
+                    currentSubPages.subPage.mAction.mActivate
+                ).setSubPage(previousSubPages.flipSubPage)
+                previousSubPages = currentSubPages
             }
         }
+
         return createdSubPages
     }
 
@@ -1869,6 +1666,7 @@ function bindEncoders(
             areAssignmentsChannelRelated: false,
         },
     ])
+
     var mSends = page.mHostAccess.mTrackSelection.mMixerChannel.mSends
     var sendSlotsCount = midiremote_api.mDefaults.getNumberOfSendSlots()
     bindEncoderAssignments(3, [
@@ -1920,46 +1718,31 @@ function bindEncoders(
             1
         ),
         pluginSubPages = _bindEncoderAssignments[0]
-    var _iteratorNormalCompletion = true,
-        _didIteratorError = false,
-        _iteratorError = undefined
-    try {
+
+    var _iteratorNormalCompletion = true
+    for (
+        var _iterator = deviceButtons[Symbol.iterator](), _step;
+        !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
+        _iteratorNormalCompletion = true
+    ) {
+        var buttons = _step.value
         for (
-            var _iterator = deviceButtons[Symbol.iterator](), _step;
-            !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
-            _iteratorNormalCompletion = true
+            var _i = 0, _iter = [pluginSubPages.subPage, pluginSubPages.flipSubPage];
+            _i < _iter.length;
+            _i++
         ) {
-            var buttons = _step.value
-            for (
-                var _i = 0, _iter = [pluginSubPages.subPage, pluginSubPages.flipSubPage];
-                _i < _iter.length;
-                _i++
-            ) {
-                var subPage = _iter[_i]
-                page.makeActionBinding(
-                    buttons.encoderAssign[4].mSurfaceValue,
-                    parameterBankZone.mAction.mNextBank
-                ).setSubPage(subPage)
-            }
-        }
-    } catch (err) {
-        _didIteratorError = true
-        _iteratorError = err
-    } finally {
-        try {
-            if (!_iteratorNormalCompletion && _iterator.return != null) {
-                _iterator.return()
-            }
-        } finally {
-            if (_didIteratorError) {
-                throw _iteratorError
-            }
+            var subPage = _iter[_i]
+            page.makeActionBinding(
+                buttons.encoderAssign[4].mSurfaceValue,
+                parameterBankZone.mAction.mNextBank
+            ).setSubPage(subPage)
         }
     }
 
     var mQuickControls = page.mHostAccess.mTrackSelection.mMixerChannel.mQuickControls
     var mStripEffects =
         page.mHostAccess.mTrackSelection.mMixerChannel.mInsertAndStripEffects.mStripEffects
+
     bindEncoderAssignments(5, [
         {
             name: 'Quick Controls',
@@ -1997,17 +1780,18 @@ function bindEncoders(
 // src/mapping/index.ts
 function makeHostMapping(
     page,
-    devices2,
-    segmentDisplayManager2,
-    globalBooleanVariables2,
-    activationCallbacks2
+    devices,
+    segmentDisplayManager,
+    globalBooleanVariables,
+    activationCallbacks
 ) {
     var mixerBankZone = page.mHostAccess.mMixConsole
         .makeMixerBankZone()
         .excludeInputChannels()
         .excludeOutputChannels()
         .setFollowVisibility(true)
-    var mixerBankChannels = devices2
+
+    var mixerBankChannels = devices
         .flatMap(function (device) {
             return device.channelElements
         })
@@ -2032,8 +1816,9 @@ function makeHostMapping(
             page.makeValueBinding(channelElements.fader.mSurfaceValue, channel.mValue.mVolume)
             return channel
         })
-    bindEncoders(page, devices2, mixerBankChannels, segmentDisplayManager2, globalBooleanVariables2)
-    devices2.forEach(function (device) {
+
+    bindEncoders(page, devices, mixerBankChannels, segmentDisplayManager, globalBooleanVariables)
+    devices.forEach(function (device) {
         if (_instanceof(device, MainDevice)) {
             var controlSectionElements = device.controlSectionElements
             bindSegmentDisplaySection(page, controlSectionElements)
@@ -2052,19 +1837,20 @@ function makeHostMapping(
             bindFootControl(page, controlSectionElements)
         }
     })
+
     var isDriverActivated = new Map()
     var initialTransportLocatorPosition = new ContextStateVariable({
         time: '',
         timeFormat: '',
     })
 
-    activationCallbacks2.addCallback(function (context) {
+    activationCallbacks.addCallback(function (context) {
         isDriverActivated.set(context, true)
         var _initialTransportLocatorPosition_get = initialTransportLocatorPosition.get(context),
             time = _initialTransportLocatorPosition_get.time,
             timeFormat = _initialTransportLocatorPosition_get.timeFormat
-        segmentDisplayManager2.updateTime(context, time, timeFormat)
-        devices2.forEach(function (device) {
+        segmentDisplayManager.updateTime(context, time, timeFormat)
+        devices.forEach(function (device) {
             if (_instanceof(device, MainDevice)) {
                 var output = device.ports.output
                 output.sendNoteOn(context, 113, +/^(?:[\d]+\:){3}[\d]+$/.test(time))
@@ -2085,7 +1871,7 @@ function makeHostMapping(
                 timeFormat: timeFormat,
             })
         } else {
-            segmentDisplayManager2.updateTime(context, time, timeFormat)
+            segmentDisplayManager.updateTime(context, time, timeFormat)
         }
     }
 }
