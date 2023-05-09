@@ -25,7 +25,11 @@ var midiOutput = deviceDriver.mPorts.makeMidiOutput()
 
 // define all possible namings the devices MIDI ports could have
 // NOTE: Windows and MacOS handle port naming differently
-deviceDriver.makeDetectionUnit().detectPortPair(midiInput, midiOutput).expectInputNameContains('CC121').expectOutputNameContains('CC121')
+deviceDriver
+    .makeDetectionUnit()
+    .detectPortPair(midiInput, midiOutput)
+    .expectInputNameContains('CC121')
+    .expectOutputNameContains('CC121')
 
 var current_channel = '' // holds the name of the current channel, e.g. Audio 03
 var current_page = '' // holds the name of teh current binding page: 'Default', 'PreSection', 'Custom'
@@ -74,7 +78,10 @@ surfaceElements.AllBypass = deviceDriver.mSurface.makeButton(3, y_spaceing * 3.6
 // the current channel is required to make sure, that the HC LC of the PreSection are only turned on, when the value changes by the user, and not  when the channels was changed
 // thisi fader is bound to midi controller that does not exist on the CC121
 surfaceElements.fader = deviceDriver.mSurface.makeFader(0, 0, 0, 0)
-surfaceElements.fader.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToControlChange(0, 0xff) // dummy
+surfaceElements.fader.mSurfaceValue.mMidiBinding
+    .setInputPort(midiInput)
+    .setOutputPort(midiOutput)
+    .bindToControlChange(0, 0xff) // dummy
 
 // bind midi ports to surface elements
 surfaceElements.Q1.mSurfaceValue.mMidiBinding
@@ -149,17 +156,35 @@ surfaceElements.G4.mSurfaceValue.mMidiBinding
     .bindToControlChange(0, 0x43)
     .setTypeRelativeSignedBit()
 
-surfaceElements.B1.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 0x70)
+surfaceElements.B1.mSurfaceValue.mMidiBinding
+    .setInputPort(midiInput)
+    .setOutputPort(midiOutput)
+    .bindToNote(0, 0x70)
 
-surfaceElements.B2.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 0x71)
+surfaceElements.B2.mSurfaceValue.mMidiBinding
+    .setInputPort(midiInput)
+    .setOutputPort(midiOutput)
+    .bindToNote(0, 0x71)
 
-surfaceElements.B3.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 0x72)
+surfaceElements.B3.mSurfaceValue.mMidiBinding
+    .setInputPort(midiInput)
+    .setOutputPort(midiOutput)
+    .bindToNote(0, 0x72)
 
-surfaceElements.B4.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 0x73)
+surfaceElements.B4.mSurfaceValue.mMidiBinding
+    .setInputPort(midiInput)
+    .setOutputPort(midiOutput)
+    .bindToNote(0, 0x73)
 
-surfaceElements.EQType.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 0x74)
+surfaceElements.EQType.mSurfaceValue.mMidiBinding
+    .setInputPort(midiInput)
+    .setOutputPort(midiOutput)
+    .bindToNote(0, 0x74)
 
-surfaceElements.AllBypass.mSurfaceValue.mMidiBinding.setInputPort(midiInput).setOutputPort(midiOutput).bindToNote(0, 0x75)
+surfaceElements.AllBypass.mSurfaceValue.mMidiBinding
+    .setInputPort(midiInput)
+    .setOutputPort(midiOutput)
+    .bindToNote(0, 0x75)
 
 //-----------------------------------------------------------------------------
 // 3. HOST MAPPING - create mapping pages and host bindings
@@ -173,20 +198,64 @@ var page_default = deviceDriver.mMapping.makePage('Default EQ Mode')
 var page_default_hostSelectedTrackChannel = page_default.mHostAccess.mTrackSelection.mMixerChannel
 
 // the Q,F knobs and on/off buttons are available all the time
-page_default.makeValueBinding(surfaceElements.Q1.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand1.mQ)
-page_default.makeValueBinding(surfaceElements.Q2.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand2.mQ)
-page_default.makeValueBinding(surfaceElements.Q3.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand3.mQ)
-page_default.makeValueBinding(surfaceElements.Q4.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand4.mQ)
+page_default.makeValueBinding(
+    surfaceElements.Q1.mSurfaceValue,
+    page_default_hostSelectedTrackChannel.mChannelEQ.mBand1.mQ
+)
+page_default.makeValueBinding(
+    surfaceElements.Q2.mSurfaceValue,
+    page_default_hostSelectedTrackChannel.mChannelEQ.mBand2.mQ
+)
+page_default.makeValueBinding(
+    surfaceElements.Q3.mSurfaceValue,
+    page_default_hostSelectedTrackChannel.mChannelEQ.mBand3.mQ
+)
+page_default.makeValueBinding(
+    surfaceElements.Q4.mSurfaceValue,
+    page_default_hostSelectedTrackChannel.mChannelEQ.mBand4.mQ
+)
 
-page_default.makeValueBinding(surfaceElements.F1.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand1.mFreq)
-page_default.makeValueBinding(surfaceElements.F2.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand2.mFreq)
-page_default.makeValueBinding(surfaceElements.F3.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand3.mFreq)
-page_default.makeValueBinding(surfaceElements.F4.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand4.mFreq)
+page_default.makeValueBinding(
+    surfaceElements.F1.mSurfaceValue,
+    page_default_hostSelectedTrackChannel.mChannelEQ.mBand1.mFreq
+)
+page_default.makeValueBinding(
+    surfaceElements.F2.mSurfaceValue,
+    page_default_hostSelectedTrackChannel.mChannelEQ.mBand2.mFreq
+)
+page_default.makeValueBinding(
+    surfaceElements.F3.mSurfaceValue,
+    page_default_hostSelectedTrackChannel.mChannelEQ.mBand3.mFreq
+)
+page_default.makeValueBinding(
+    surfaceElements.F4.mSurfaceValue,
+    page_default_hostSelectedTrackChannel.mChannelEQ.mBand4.mFreq
+)
 
-page_default.makeValueBinding(surfaceElements.B1.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand1.mOn).setTypeToggle()
-page_default.makeValueBinding(surfaceElements.B2.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand2.mOn).setTypeToggle()
-page_default.makeValueBinding(surfaceElements.B3.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand3.mOn).setTypeToggle()
-page_default.makeValueBinding(surfaceElements.B4.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand4.mOn).setTypeToggle()
+page_default
+    .makeValueBinding(
+        surfaceElements.B1.mSurfaceValue,
+        page_default_hostSelectedTrackChannel.mChannelEQ.mBand1.mOn
+    )
+    .setTypeToggle()
+page_default
+    .makeValueBinding(
+        surfaceElements.B2.mSurfaceValue,
+        page_default_hostSelectedTrackChannel.mChannelEQ.mBand2.mOn
+    )
+    .setTypeToggle()
+page_default
+    .makeValueBinding(
+        surfaceElements.B3.mSurfaceValue,
+        page_default_hostSelectedTrackChannel.mChannelEQ.mBand3.mOn
+    )
+    .setTypeToggle()
+page_default
+    .makeValueBinding(
+        surfaceElements.B4.mSurfaceValue,
+        page_default_hostSelectedTrackChannel.mChannelEQ.mBand4.mOn
+    )
+    .setTypeToggle()
 
 // when EQ Type is pressed, the Gain knobs are exchanged with the EQ Type, so that the EQ Type can be changed with the G knobs
 // for this we create 2 sub pages, one for the Gain and another for the EQ Type
@@ -210,28 +279,52 @@ subPageType.mOnActivate = function (activeDevice) {
 
 // assign the knobs to the Gain and EQ Type functions
 page_default
-    .makeValueBinding(surfaceElements.G1.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand1.mGain)
+    .makeValueBinding(
+        surfaceElements.G1.mSurfaceValue,
+        page_default_hostSelectedTrackChannel.mChannelEQ.mBand1.mGain
+    )
     .setSubPage(subPageGain)
 page_default
-    .makeValueBinding(surfaceElements.G2.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand2.mGain)
+    .makeValueBinding(
+        surfaceElements.G2.mSurfaceValue,
+        page_default_hostSelectedTrackChannel.mChannelEQ.mBand2.mGain
+    )
     .setSubPage(subPageGain)
 page_default
-    .makeValueBinding(surfaceElements.G3.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand3.mGain)
+    .makeValueBinding(
+        surfaceElements.G3.mSurfaceValue,
+        page_default_hostSelectedTrackChannel.mChannelEQ.mBand3.mGain
+    )
     .setSubPage(subPageGain)
 page_default
-    .makeValueBinding(surfaceElements.G4.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand4.mGain)
+    .makeValueBinding(
+        surfaceElements.G4.mSurfaceValue,
+        page_default_hostSelectedTrackChannel.mChannelEQ.mBand4.mGain
+    )
     .setSubPage(subPageGain)
 page_default
-    .makeValueBinding(surfaceElements.G1.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand1.mFilterType)
+    .makeValueBinding(
+        surfaceElements.G1.mSurfaceValue,
+        page_default_hostSelectedTrackChannel.mChannelEQ.mBand1.mFilterType
+    )
     .setSubPage(subPageType)
 page_default
-    .makeValueBinding(surfaceElements.G2.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand2.mFilterType)
+    .makeValueBinding(
+        surfaceElements.G2.mSurfaceValue,
+        page_default_hostSelectedTrackChannel.mChannelEQ.mBand2.mFilterType
+    )
     .setSubPage(subPageType)
 page_default
-    .makeValueBinding(surfaceElements.G3.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand3.mFilterType)
+    .makeValueBinding(
+        surfaceElements.G3.mSurfaceValue,
+        page_default_hostSelectedTrackChannel.mChannelEQ.mBand3.mFilterType
+    )
     .setSubPage(subPageType)
 page_default
-    .makeValueBinding(surfaceElements.G4.mSurfaceValue, page_default_hostSelectedTrackChannel.mChannelEQ.mBand4.mFilterType)
+    .makeValueBinding(
+        surfaceElements.G4.mSurfaceValue,
+        page_default_hostSelectedTrackChannel.mChannelEQ.mBand4.mFilterType
+    )
     .setSubPage(subPageType)
 
 //-------------------------------------------------------------------------------------------------------------------------------
@@ -239,14 +332,22 @@ page_default
 var page_preSecion = deviceDriver.mMapping.makePage('Pre Section')
 
 // we want to control the current selected channel and bind everything to that one as well
-var page_preSecion_hostSelectedTrackChannel = page_preSecion.mHostAccess.mTrackSelection.mMixerChannel
+var page_preSecion_hostSelectedTrackChannel =
+    page_preSecion.mHostAccess.mTrackSelection.mMixerChannel
 
 //-------------------------------------------------------------------------------------------------------------------------------
 // Zoom Custom Values used in the Pre Section mapping page
-var zoomInVerticallyTrigger = deviceDriver.mSurface.makeCustomValueVariable('zoomInVerticallyTrigger')
-var zoomOutVerticallyTrigger = deviceDriver.mSurface.makeCustomValueVariable('zoomOutVerticallyTrigger')
-var zoomInHorizontallyTrigger = deviceDriver.mSurface.makeCustomValueVariable('zoomInHorizontallyTrigger')
-var zoomOutHorizontallyTrigger = deviceDriver.mSurface.makeCustomValueVariable('zoomOutHorizontallyTrigger')
+var zoomInVerticallyTrigger =
+    deviceDriver.mSurface.makeCustomValueVariable('zoomInVerticallyTrigger')
+var zoomOutVerticallyTrigger = deviceDriver.mSurface.makeCustomValueVariable(
+    'zoomOutVerticallyTrigger'
+)
+var zoomInHorizontallyTrigger = deviceDriver.mSurface.makeCustomValueVariable(
+    'zoomInHorizontallyTrigger'
+)
+var zoomOutHorizontallyTrigger = deviceDriver.mSurface.makeCustomValueVariable(
+    'zoomOutHorizontallyTrigger'
+)
 page_preSecion.makeCommandBinding(zoomInVerticallyTrigger, 'Zoom', 'Zoom In Vertically')
 page_preSecion.makeCommandBinding(zoomOutVerticallyTrigger, 'Zoom', 'Zoom Out Vertically')
 page_preSecion.makeCommandBinding(zoomInHorizontallyTrigger, 'Zoom', 'Zoom In')
@@ -256,40 +357,78 @@ page_preSecion.makeCommandBinding(zoomOutHorizontallyTrigger, 'Zoom', 'Zoom Out'
 var bindHorizontalZoomHostParameter = page_preSecion.mHostAccess.mControlRoom.mReferenceLevelValue
 var bindVerticalZoomHostParameter = page_preSecion.mHostAccess.mControlRoom.mTalkbackDimLevelValue
 // as we can turn left and right limmitles we could reach the min max of the parameter, which then allows to zoom in one direction only -> so we force them to be 0.5 -> for this we use CustomVariables to set the parameter programmatically
-var zoomHorizontalParameterTrigger = deviceDriver.mSurface.makeCustomValueVariable('zoomVerticalParameterTrigger')
+var zoomHorizontalParameterTrigger = deviceDriver.mSurface.makeCustomValueVariable(
+    'zoomVerticalParameterTrigger'
+)
 page_preSecion.makeValueBinding(zoomHorizontalParameterTrigger, bindHorizontalZoomHostParameter)
-var zoomVerticalParameterTrigger = deviceDriver.mSurface.makeCustomValueVariable('zoomVerticalParameterTrigger')
+var zoomVerticalParameterTrigger = deviceDriver.mSurface.makeCustomValueVariable(
+    'zoomVerticalParameterTrigger'
+)
 page_preSecion.makeValueBinding(zoomVerticalParameterTrigger, bindVerticalZoomHostParameter)
 
 // we assign the knobs from EQ1 and EQ2 to the pre secion LowCut and HighCut + channel gain
-page_preSecion.makeValueBinding(surfaceElements.Q1.mSurfaceValue, page_preSecion_hostSelectedTrackChannel.mPreFilter.mLowCutSlope)
-page_preSecion.makeValueBinding(surfaceElements.F1.mSurfaceValue, page_preSecion_hostSelectedTrackChannel.mPreFilter.mLowCutFreq)
+page_preSecion.makeValueBinding(
+    surfaceElements.Q1.mSurfaceValue,
+    page_preSecion_hostSelectedTrackChannel.mPreFilter.mLowCutSlope
+)
+page_preSecion.makeValueBinding(
+    surfaceElements.F1.mSurfaceValue,
+    page_preSecion_hostSelectedTrackChannel.mPreFilter.mLowCutFreq
+)
 page_preSecion
-    .makeValueBinding(surfaceElements.B1.mSurfaceValue, page_preSecion_hostSelectedTrackChannel.mPreFilter.mLowCutOn)
+    .makeValueBinding(
+        surfaceElements.B1.mSurfaceValue,
+        page_preSecion_hostSelectedTrackChannel.mPreFilter.mLowCutOn
+    )
     .setTypeToggle()
-page_preSecion.makeValueBinding(surfaceElements.Q2.mSurfaceValue, page_preSecion_hostSelectedTrackChannel.mPreFilter.mHighCutSlope)
-page_preSecion.makeValueBinding(surfaceElements.F2.mSurfaceValue, page_preSecion_hostSelectedTrackChannel.mPreFilter.mHighCutFreq)
+page_preSecion.makeValueBinding(
+    surfaceElements.Q2.mSurfaceValue,
+    page_preSecion_hostSelectedTrackChannel.mPreFilter.mHighCutSlope
+)
+page_preSecion.makeValueBinding(
+    surfaceElements.F2.mSurfaceValue,
+    page_preSecion_hostSelectedTrackChannel.mPreFilter.mHighCutFreq
+)
 page_preSecion
-    .makeValueBinding(surfaceElements.B2.mSurfaceValue, page_preSecion_hostSelectedTrackChannel.mPreFilter.mHighCutOn)
+    .makeValueBinding(
+        surfaceElements.B2.mSurfaceValue,
+        page_preSecion_hostSelectedTrackChannel.mPreFilter.mHighCutOn
+    )
     .setTypeToggle()
 
-page_preSecion.makeValueBinding(surfaceElements.G1.mSurfaceValue, page_preSecion_hostSelectedTrackChannel.mPreFilter.mGain)
+page_preSecion.makeValueBinding(
+    surfaceElements.G1.mSurfaceValue,
+    page_preSecion_hostSelectedTrackChannel.mPreFilter.mGain
+)
 // EQ Type button switches phase (0/180)
 page_preSecion
-    .makeValueBinding(surfaceElements.EQType.mSurfaceValue, page_preSecion_hostSelectedTrackChannel.mPreFilter.mPhaseSwitch)
+    .makeValueBinding(
+        surfaceElements.EQType.mSurfaceValue,
+        page_preSecion_hostSelectedTrackChannel.mPreFilter.mPhaseSwitch
+    )
     .setTypeToggle()
 
 // bind the quick controls, see comment above
-page_preSecion.makeValueBinding(surfaceElements.Q3.mSurfaceValue, page_preSecion_hostSelectedTrackChannel.mQuickControls.getByIndex(0))
-page_preSecion.makeValueBinding(surfaceElements.Q4.mSurfaceValue, page_preSecion_hostSelectedTrackChannel.mQuickControls.getByIndex(1))
-page_preSecion.makeValueBinding(surfaceElements.F3.mSurfaceValue, page_preSecion_hostSelectedTrackChannel.mQuickControls.getByIndex(2))
-page_preSecion.makeValueBinding(surfaceElements.F4.mSurfaceValue, page_preSecion_hostSelectedTrackChannel.mQuickControls.getByIndex(3))
-page_preSecion.makeValueBinding(surfaceElements.G3.mSurfaceValue, bindHorizontalZoomHostParameter).mOnValueChange = function (
-    activeDevice,
-    activeMapping,
-    value,
-    diffValue
-) {
+page_preSecion.makeValueBinding(
+    surfaceElements.Q3.mSurfaceValue,
+    page_preSecion_hostSelectedTrackChannel.mQuickControls.getByIndex(0)
+)
+page_preSecion.makeValueBinding(
+    surfaceElements.Q4.mSurfaceValue,
+    page_preSecion_hostSelectedTrackChannel.mQuickControls.getByIndex(1)
+)
+page_preSecion.makeValueBinding(
+    surfaceElements.F3.mSurfaceValue,
+    page_preSecion_hostSelectedTrackChannel.mQuickControls.getByIndex(2)
+)
+page_preSecion.makeValueBinding(
+    surfaceElements.F4.mSurfaceValue,
+    page_preSecion_hostSelectedTrackChannel.mQuickControls.getByIndex(3)
+)
+page_preSecion.makeValueBinding(
+    surfaceElements.G3.mSurfaceValue,
+    bindHorizontalZoomHostParameter
+).mOnValueChange = function (activeDevice, activeMapping, value, diffValue) {
     // we get some very small numbers, the reason is unknown, lets filter them out.
     if (diffValue > 0 && diffValue < 0.001) return
     if (diffValue < 0 && diffValue > -0.001) return
@@ -304,12 +443,10 @@ page_preSecion.makeValueBinding(surfaceElements.G3.mSurfaceValue, bindHorizontal
     // set the parameter back to 0.5, so we don not reach the upper or lower limmit; makes sure, that we can always turn left/right
     zoomHorizontalParameterTrigger.setProcessValue(activeDevice, 0.5)
 }
-page_preSecion.makeValueBinding(surfaceElements.G4.mSurfaceValue, bindVerticalZoomHostParameter).mOnValueChange = function (
-    activeDevice,
-    activeMapping,
-    value,
-    diffValue
-) {
+page_preSecion.makeValueBinding(
+    surfaceElements.G4.mSurfaceValue,
+    bindVerticalZoomHostParameter
+).mOnValueChange = function (activeDevice, activeMapping, value, diffValue) {
     // we get some very small numbers, the reason is unknown, lets filter them out.
     if (diffValue > 0 && diffValue < 0.001) return
     if (diffValue < 0 && diffValue > -0.001) return
@@ -325,10 +462,16 @@ page_preSecion.makeValueBinding(surfaceElements.G4.mSurfaceValue, bindVerticalZo
     zoomVerticalParameterTrigger.setProcessValue(activeDevice, 0.5)
 }
 page_preSecion
-    .makeValueBinding(surfaceElements.B3.mSurfaceValue, page_preSecion_hostSelectedTrackChannel.mQuickControls.getByIndex(6))
+    .makeValueBinding(
+        surfaceElements.B3.mSurfaceValue,
+        page_preSecion_hostSelectedTrackChannel.mQuickControls.getByIndex(6)
+    )
     .setTypeToggle()
 page_preSecion
-    .makeValueBinding(surfaceElements.B4.mSurfaceValue, page_preSecion_hostSelectedTrackChannel.mQuickControls.getByIndex(7))
+    .makeValueBinding(
+        surfaceElements.B4.mSurfaceValue,
+        page_preSecion_hostSelectedTrackChannel.mQuickControls.getByIndex(7)
+    )
     .setTypeToggle()
 
 // I want that the Low Cut and High Cut get enabled automatically, when the high or low cut frequencies change
@@ -336,7 +479,12 @@ page_preSecion
 // create a custom internal trigger variable that I can change programatically
 // this trigger is bound to the on switch of the Low Cut
 var preLowCutOnTrigger = deviceDriver.mSurface.makeCustomValueVariable('preLowCutOnTrigger')
-page_preSecion.makeValueBinding(preLowCutOnTrigger, page_preSecion_hostSelectedTrackChannel.mPreFilter.mLowCutOn).setTypeToggle()
+page_preSecion
+    .makeValueBinding(
+        preLowCutOnTrigger,
+        page_preSecion_hostSelectedTrackChannel.mPreFilter.mLowCutOn
+    )
+    .setTypeToggle()
 
 var lastacitveChannelLowCut // holds the last active channel name to detect a channel change
 var lastacitvePageLowCut // holds the last active page name to detect a mapping page change
@@ -375,7 +523,12 @@ surfaceElements.B1.mSurfaceValue.mOnProcessValueChange = function (activeDevice,
 
 // copy paste from LowCut but for HighCut
 var preHighCutOnTrigger = deviceDriver.mSurface.makeCustomValueVariable('preHighCutOnTrigger')
-page_preSecion.makeValueBinding(preHighCutOnTrigger, page_preSecion_hostSelectedTrackChannel.mPreFilter.mHighCutOn).setTypeToggle()
+page_preSecion
+    .makeValueBinding(
+        preHighCutOnTrigger,
+        page_preSecion_hostSelectedTrackChannel.mPreFilter.mHighCutOn
+    )
+    .setTypeToggle()
 var lastacitveChannelHighCut
 var lastacitvePageHighCut
 surfaceElements.F2.mSurfaceValue.mOnProcessValueChange = function (activeDevice, value) {
@@ -418,7 +571,10 @@ surfaceElements.B4.mSurfaceValue.mOnProcessValueChange = function (activeDevice,
 }
 
 // this is the hidden fader binding and event to handle the channel switches
-page_preSecion.makeValueBinding(surfaceElements.fader.mSurfaceValue, page_preSecion_hostSelectedTrackChannel.mValue.mVolume)
+page_preSecion.makeValueBinding(
+    surfaceElements.fader.mSurfaceValue,
+    page_preSecion_hostSelectedTrackChannel.mValue.mVolume
+)
 surfaceElements.fader.mSurfaceValue.mOnTitleChange = function (context, value, units) {
     if (Object.keys(value).length == 0) {
         // if the value has no object, we have no binding and therefor we are e.g. on a folder channel in the project windows
@@ -440,9 +596,18 @@ var page_custom = deviceDriver.mMapping.makePage('Custom')
 // All Bypass button allows to switch betweent the mapping pages directly on the CC121
 // the function buttons 1..3 are illuminated accordingly for visual feedback
 // 1=defaul, 2=pre secion, 3=custom
-page_default.makeActionBinding(surfaceElements.AllBypass.mSurfaceValue, page_preSecion.mAction.mActivate)
-page_preSecion.makeActionBinding(surfaceElements.AllBypass.mSurfaceValue, page_custom.mAction.mActivate)
-page_custom.makeActionBinding(surfaceElements.AllBypass.mSurfaceValue, page_default.mAction.mActivate)
+page_default.makeActionBinding(
+    surfaceElements.AllBypass.mSurfaceValue,
+    page_preSecion.mAction.mActivate
+)
+page_preSecion.makeActionBinding(
+    surfaceElements.AllBypass.mSurfaceValue,
+    page_custom.mAction.mActivate
+)
+page_custom.makeActionBinding(
+    surfaceElements.AllBypass.mSurfaceValue,
+    page_default.mAction.mActivate
+)
 
 page_default.mOnActivate = function (activeDevice) {
     current_page = 'Default'

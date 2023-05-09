@@ -18,11 +18,41 @@ function make_Sysex_displaySetTextOfColumn(columnIndex, textFieldIndex, textStri
 }
 
 function make_Sysex_setDisplayValueOfColumn(columnIndex, objectIndex, value) {
-    return [0xf0, 0x00, 0x20, 0x29, 0x02, 0x0a, 0x01, 0x02, columnIndex, 0x03, objectIndex, value, 0xf7]
+    return [
+        0xf0,
+        0x00,
+        0x20,
+        0x29,
+        0x02,
+        0x0a,
+        0x01,
+        0x02,
+        columnIndex,
+        0x03,
+        objectIndex,
+        value,
+        0xf7,
+    ]
 }
 
 function make_Sysex_setDisplayColorOfColumn(columnIndex, objectIndex, r, g, b) {
-    return [0xf0, 0x00, 0x20, 0x29, 0x02, 0x0a, 0x01, 0x02, columnIndex, 0x04, objectIndex, r, g, b, 0xf7]
+    return [
+        0xf0,
+        0x00,
+        0x20,
+        0x29,
+        0x02,
+        0x0a,
+        0x01,
+        0x02,
+        columnIndex,
+        0x04,
+        objectIndex,
+        r,
+        g,
+        b,
+        0xf7,
+    ]
 }
 
 function make_Sysex_setLEDColor(ledIndex, r, g, b) {

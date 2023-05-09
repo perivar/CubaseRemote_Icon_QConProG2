@@ -9,7 +9,11 @@ var helper = require('./helper')
 
 var midiremote_api = require('midiremote_api_v1')
 
-var deviceDriver = midiremote_api.makeDeviceDriver('Example', 'RealWorldDevice', 'Steinberg Media Technologies GmbH')
+var deviceDriver = midiremote_api.makeDeviceDriver(
+    'Example',
+    'RealWorldDevice',
+    'Steinberg Media Technologies GmbH'
+)
 
 var midiInput = deviceDriver.mPorts.makeMidiInput()
 var midiOutput = deviceDriver.mPorts.makeMidiOutput()
@@ -57,12 +61,21 @@ function makeFaderStrip(channelIndex, x, y) {
     faderStrip.btnSolo = surface.makeButton(x + 2 * channelIndex, y + 1, 2, 1)
     faderStrip.fader = surface.makeFader(x + 2 * channelIndex, y + 3, 2, 6).setTypeVertical()
 
-    faderStrip.btnMute.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToNote(0, 16 + channelIndex)
-    faderStrip.btnSolo.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToNote(0, 8 + channelIndex)
-    faderStrip.fader.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToPitchBend(channelIndex)
+    faderStrip.btnMute.mSurfaceValue.mMidiBinding
+        .setInputPort(midiInput)
+        .bindToNote(0, 16 + channelIndex)
+    faderStrip.btnSolo.mSurfaceValue.mMidiBinding
+        .setInputPort(midiInput)
+        .bindToNote(0, 8 + channelIndex)
+    faderStrip.fader.mSurfaceValue.mMidiBinding
+        .setInputPort(midiInput)
+        .bindToPitchBend(channelIndex)
 
     faderStrip.fader.mSurfaceValue.mOnProcessValueChange = function (context, newValue, oldValue) {
-        midiOutput.sendMidi(context, helper.sysex.setDisplayValueOfColumn(channelIndex, 0, newValue * 127))
+        midiOutput.sendMidi(
+            context,
+            helper.sysex.setDisplayValueOfColumn(channelIndex, 0, newValue * 127)
+        )
     }
 
     faderStrip.fader.mSurfaceValue.mOnDisplayValueChange = function (context, value, units) {
@@ -70,13 +83,28 @@ function makeFaderStrip(channelIndex, x, y) {
     }
 
     faderStrip.fader.mSurfaceValue.mOnTitleChange = function (context, objectTitle, valueTitle) {
-        midiOutput.sendMidi(context, helper.sysex.displaySetTextOfColumn(channelIndex, 0, objectTitle))
-        midiOutput.sendMidi(context, helper.sysex.displaySetTextOfColumn(channelIndex, 1, valueTitle))
+        midiOutput.sendMidi(
+            context,
+            helper.sysex.displaySetTextOfColumn(channelIndex, 0, objectTitle)
+        )
+        midiOutput.sendMidi(
+            context,
+            helper.sysex.displaySetTextOfColumn(channelIndex, 1, valueTitle)
+        )
     }
 
     faderStrip.fader.mSurfaceValue.mOnColorChange = function (context, r, g, b, a, isActive) {
         function updateRow(rowIdx, r, g, b, a) {
-            midiOutput.sendMidi(context, helper.sysex.setDisplayColorOfColumn(channelIndex, rowIdx, r * 127 * a, g * 127 * a, b * 127 * a))
+            midiOutput.sendMidi(
+                context,
+                helper.sysex.setDisplayColorOfColumn(
+                    channelIndex,
+                    rowIdx,
+                    r * 127 * a,
+                    g * 127 * a,
+                    b * 127 * a
+                )
+            )
         }
 
         function updateAllRows(r, g, b, a) {
@@ -100,7 +128,9 @@ function makeKnobStrip(knobIndex, x, y) {
         .setTypeRelativeSignedBit()
 
     knobStrip.button = surface.makeButton(x + 2 * knobIndex, y + 4, 2, 1)
-    knobStrip.button.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToControlChange(0, 51 + knobIndex)
+    knobStrip.button.mSurfaceValue.mMidiBinding
+        .setInputPort(midiInput)
+        .bindToControlChange(0, 51 + knobIndex)
 
     knobStrip.pad1 = surface.makeTriggerPad(x + 2 * knobIndex, y + 5, 2, 2)
     knobStrip.pad1.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToNote(0, 96 + knobIndex)
@@ -158,22 +188,34 @@ function makeSurfaceElements() {
     var surfaceElements = {}
 
     surfaceElements.btn_prevTrack = surface.makeButton(0, 7, 2, 1)
-    surfaceElements.btn_prevTrack.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToControlChange(0, 102)
+    surfaceElements.btn_prevTrack.mSurfaceValue.mMidiBinding
+        .setInputPort(midiInput)
+        .bindToControlChange(0, 102)
 
     surfaceElements.btn_nextTrack = surface.makeButton(2, 7, 2, 1)
-    surfaceElements.btn_nextTrack.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToControlChange(0, 103)
+    surfaceElements.btn_nextTrack.mSurfaceValue.mMidiBinding
+        .setInputPort(midiInput)
+        .bindToControlChange(0, 103)
 
     surfaceElements.btn_prevBinding = surface.makeButton(0, 3, 2, 1)
-    surfaceElements.btn_prevBinding.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToControlChange(0, 81)
+    surfaceElements.btn_prevBinding.mSurfaceValue.mMidiBinding
+        .setInputPort(midiInput)
+        .bindToControlChange(0, 81)
 
     surfaceElements.btn_nextBinding = surface.makeButton(0, 4, 2, 1)
-    surfaceElements.btn_nextBinding.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToControlChange(0, 82)
+    surfaceElements.btn_nextBinding.mSurfaceValue.mMidiBinding
+        .setInputPort(midiInput)
+        .bindToControlChange(0, 82)
 
     surfaceElements.btn_prevChannelBank = surface.makeButton(2, 3, 2, 1)
-    surfaceElements.btn_prevChannelBank.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToControlChange(0, 85)
+    surfaceElements.btn_prevChannelBank.mSurfaceValue.mMidiBinding
+        .setInputPort(midiInput)
+        .bindToControlChange(0, 85)
 
     surfaceElements.btn_nextChannelBank = surface.makeButton(2, 4, 2, 1)
-    surfaceElements.btn_nextChannelBank.mSurfaceValue.mMidiBinding.setInputPort(midiInput).bindToControlChange(0, 86)
+    surfaceElements.btn_nextChannelBank.mSurfaceValue.mMidiBinding
+        .setInputPort(midiInput)
+        .bindToControlChange(0, 86)
 
     surfaceElements.numStrips = 8
 
@@ -183,7 +225,12 @@ function makeSurfaceElements() {
     var xKnobStrip = 5
     var yKnobStrip = 0
 
-    surfaceElements.knobStripBlindPanel = surface.makeBlindPanel(xKnobStrip, yKnobStrip + 2, surfaceElements.numStrips * 2, 2)
+    surfaceElements.knobStripBlindPanel = surface.makeBlindPanel(
+        xKnobStrip,
+        yKnobStrip + 2,
+        surfaceElements.numStrips * 2,
+        2
+    )
 
     for (var i = 0; i < surfaceElements.numStrips; ++i) {
         surfaceElements.knobStrips[i] = makeKnobStrip(i, xKnobStrip, yKnobStrip)
@@ -219,15 +266,39 @@ makeTransportDisplayFeedback(surfaceElements.transport.btnRecord, 117, 5)
 function makePageWithDefaults(name) {
     var page = deviceDriver.mMapping.makePage(name)
 
-    page.makeActionBinding(surfaceElements.btn_prevTrack.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mPrevTrack)
-    page.makeActionBinding(surfaceElements.btn_nextTrack.mSurfaceValue, page.mHostAccess.mTrackSelection.mAction.mNextTrack)
+    page.makeActionBinding(
+        surfaceElements.btn_prevTrack.mSurfaceValue,
+        page.mHostAccess.mTrackSelection.mAction.mPrevTrack
+    )
+    page.makeActionBinding(
+        surfaceElements.btn_nextTrack.mSurfaceValue,
+        page.mHostAccess.mTrackSelection.mAction.mNextTrack
+    )
 
-    page.makeValueBinding(surfaceElements.transport.btnRewind.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRewind)
-    page.makeValueBinding(surfaceElements.transport.btnForward.mSurfaceValue, page.mHostAccess.mTransport.mValue.mForward)
-    page.makeValueBinding(surfaceElements.transport.btnStop.mSurfaceValue, page.mHostAccess.mTransport.mValue.mStop).setTypeToggle()
-    page.makeValueBinding(surfaceElements.transport.btnStart.mSurfaceValue, page.mHostAccess.mTransport.mValue.mStart).setTypeToggle()
-    page.makeValueBinding(surfaceElements.transport.btnCycle.mSurfaceValue, page.mHostAccess.mTransport.mValue.mCycleActive).setTypeToggle()
-    page.makeValueBinding(surfaceElements.transport.btnRecord.mSurfaceValue, page.mHostAccess.mTransport.mValue.mRecord).setTypeToggle()
+    page.makeValueBinding(
+        surfaceElements.transport.btnRewind.mSurfaceValue,
+        page.mHostAccess.mTransport.mValue.mRewind
+    )
+    page.makeValueBinding(
+        surfaceElements.transport.btnForward.mSurfaceValue,
+        page.mHostAccess.mTransport.mValue.mForward
+    )
+    page.makeValueBinding(
+        surfaceElements.transport.btnStop.mSurfaceValue,
+        page.mHostAccess.mTransport.mValue.mStop
+    ).setTypeToggle()
+    page.makeValueBinding(
+        surfaceElements.transport.btnStart.mSurfaceValue,
+        page.mHostAccess.mTransport.mValue.mStart
+    ).setTypeToggle()
+    page.makeValueBinding(
+        surfaceElements.transport.btnCycle.mSurfaceValue,
+        page.mHostAccess.mTransport.mValue.mCycleActive
+    ).setTypeToggle()
+    page.makeValueBinding(
+        surfaceElements.transport.btnRecord.mSurfaceValue,
+        page.mHostAccess.mTransport.mValue.mRecord
+    ).setTypeToggle()
 
     return page
 }
@@ -258,13 +329,28 @@ function makePageMixer() {
         subPageListSendLevel.push(subPageSendLevel)
     }
 
-    var hostMixerBankZone = page.mHostAccess.mMixConsole.makeMixerBankZone().excludeInputChannels().excludeOutputChannels()
+    var hostMixerBankZone = page.mHostAccess.mMixConsole
+        .makeMixerBankZone()
+        .excludeInputChannels()
+        .excludeOutputChannels()
 
-    page.makeActionBinding(surfaceElements.btn_prevChannelBank.mSurfaceValue, hostMixerBankZone.mAction.mPrevBank)
-    page.makeActionBinding(surfaceElements.btn_nextChannelBank.mSurfaceValue, hostMixerBankZone.mAction.mNextBank)
+    page.makeActionBinding(
+        surfaceElements.btn_prevChannelBank.mSurfaceValue,
+        hostMixerBankZone.mAction.mPrevBank
+    )
+    page.makeActionBinding(
+        surfaceElements.btn_nextChannelBank.mSurfaceValue,
+        hostMixerBankZone.mAction.mNextBank
+    )
 
-    page.makeActionBinding(surfaceElements.btn_prevBinding.mSurfaceValue, knobSubPageArea.mAction.mPrev)
-    page.makeActionBinding(surfaceElements.btn_nextBinding.mSurfaceValue, knobSubPageArea.mAction.mNext)
+    page.makeActionBinding(
+        surfaceElements.btn_prevBinding.mSurfaceValue,
+        knobSubPageArea.mAction.mPrev
+    )
+    page.makeActionBinding(
+        surfaceElements.btn_nextBinding.mSurfaceValue,
+        knobSubPageArea.mAction.mNext
+    )
 
     function bindChannelBankItem(index) {
         var channelBankItem = hostMixerBankZone.makeMixerBankChannel()
@@ -303,7 +389,10 @@ function makePageSelectedTrack() {
     var selectedTrackChannel = page.mHostAccess.mTrackSelection.mMixerChannel
 
     for (var idx = 0; idx < surfaceElements.knobStrips.length; ++idx)
-        page.makeValueBinding(surfaceElements.knobStrips[idx].knob.mSurfaceValue, selectedTrackChannel.mQuickControls.getByIndex(idx))
+        page.makeValueBinding(
+            surfaceElements.knobStrips[idx].knob.mSurfaceValue,
+            selectedTrackChannel.mQuickControls.getByIndex(idx)
+        )
 
     return page
 }

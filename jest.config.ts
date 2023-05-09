@@ -6,15 +6,15 @@ import { Config } from '@jest/types'
 const untranspiledModulePatterns = []
 
 const config: Config.InitialOptions = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  roots: ['icon'],
-  transform: {
-    '\\.[jt]sx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
-  },
-  testRegex: '/__tests__/.*.test.ts$',
-  transformIgnorePatterns: [`node_modules/(?!${untranspiledModulePatterns.join('|')})`],
-  verbose: true,
+    preset: 'ts-jest',
+    testEnvironment: 'node',
+    roots: ['icon'],
+    transform: {
+        '\\.[jt]sx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
+    },
+    testRegex: '/__tests__/.*.test.ts$',
+    transformIgnorePatterns: [`node_modules/(?!${untranspiledModulePatterns.join('|')})`],
+    verbose: true,
 }
 
 export default config
