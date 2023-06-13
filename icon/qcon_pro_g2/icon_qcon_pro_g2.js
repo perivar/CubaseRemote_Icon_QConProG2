@@ -4258,6 +4258,11 @@ function createElements(count, factoryFunction) {
     }
     return elements
 }
+function getArrayElements(array, indices) {
+    return indices.map(function (index) {
+        return array[index]
+    })
+}
 function makeCallbackCollection(object, callbackName) {
     var callbacks = []
     var callbackCollection = function () {
@@ -4623,7 +4628,7 @@ function decorateSurface(surface2) {
     }
     return decoratedSurface
 }
-// src/devices/icon_qcon-pro-g2.ts
+// src/device-configs/icon_qcon-pro-g2.ts
 var channelWidth = 3.75
 var channelElementsWidth = 4 + 8 * channelWidth
 var surfaceHeight = 39.5
@@ -4665,6 +4670,13 @@ function makeChannelElements(surface2, x) {
     })
 }
 var deviceConfig = {
+    configureMainDeviceDetectionPortPair: function configureMainDeviceDetectionPortPair(
+        detectionPortPair
+    ) {
+        detectionPortPair
+            .expectInputNameContains('iCON QCON Pro G2')
+            .expectOutputNameContains('iCON QCON Pro G2')
+    },
     createExtenderSurface: function createExtenderSurface(surface2, x) {
         var surfaceWidth = channelElementsWidth + 3.1
         surface2.makeBlindPanel(x, 0, surfaceWidth, surfaceHeight)
@@ -4695,11 +4707,14 @@ var deviceConfig = {
                 23.5 + buttonRowHeight * Math.floor(index / 6)
             )
         })
-        var getLowerControlButtons = function (indices) {
-            return indices.map(function (index) {
-                return lowerControlButtons[index]
-            })
-        }
+        var layer2FunctionButtons = createElements(8, function (index) {
+            return surface2.makeLedButton(
+                x + 3.5 + ((index % 4) + 2) * buttonDistance,
+                13 + buttonRowHeight * (Math.floor(index / 4) + 0.5) - 0.9,
+                1.8,
+                0.75
+            )
+        })
         return {
             width: surfaceWidth,
             channelElements: channelElements,
@@ -4709,12 +4724,7 @@ var deviceConfig = {
                 buttons: {
                     display: upperControlButtons[0],
                     timeMode: upperControlButtons[1],
-                    edit: surface2.makeLedButton(
-                        x + 3.5 + 5 * buttonDistance,
-                        13 + buttonRowHeight * 1.5 - 0.5,
-                        1.8,
-                        0.75
-                    ),
+                    edit: layer2FunctionButtons[7],
                     flip: makeSquareButton(surface2, x, 13 - buttonRowHeight),
                     scrub: makeSquareButton(surface2, x + 11.2, 28.75),
                     encoderAssign: createElements(6, function (index) {
@@ -4724,7 +4734,9 @@ var deviceConfig = {
                             13 + buttonRowHeight * 2
                         )
                     }),
-                    number: surface2.makeHiddenLedButtons(8),
+                    number: _toConsumableArray(layer2FunctionButtons.slice(0, 7)).concat([
+                        surface2.makeHiddenLedButton(),
+                    ]),
                     function: createElements(8, function (index) {
                         return makeSquareButton(
                             surface2,
@@ -4746,7 +4758,9 @@ var deviceConfig = {
                         lowerControlButtons[8],
                         lowerControlButtons[2],
                     ]),
-                    transport: _toConsumableArray(getLowerControlButtons([6, 7, 4])).concat(
+                    transport: _toConsumableArray(
+                        getArrayElements(lowerControlButtons, [6, 7, 4])
+                    ).concat(
                         [surface2.makeHiddenLedButton()], //Cycle
                         _toConsumableArray(
                             createElements(3, function (index) {
@@ -4758,7 +4772,7 @@ var deviceConfig = {
                                 )
                             })
                         ),
-                        _toConsumableArray(getLowerControlButtons([3, 5, 11, 10, 9]))
+                        _toConsumableArray(getArrayElements(lowerControlButtons, [3, 5, 11, 10, 9]))
                     ),
                     navigation: {
                         channel: {
@@ -4844,7 +4858,7 @@ var _LcdManager = /*#__PURE__*/ (function () {
             {
                 key: 'setChannelText',
                 value: function setChannelText(context, row, channelIndex, text) {
-                    while (text.length < _LcdManager.channelWidth) {
+                    while (text.length < 7) {
                         text += ' '
                     }
                     this.sendText(context, row * 56 + (channelIndex % 8) * 7, text)
@@ -5003,11 +5017,11 @@ var Devices = /*#__PURE__*/ (function () {
             )
         )
         if (this.devices.length === 1) {
-            driver2
-                .makeDetectionUnit()
-                .detectPortPair(this.devices[0].ports.input, this.devices[0].ports.output)
-                .expectInputNameContains('iCON QCON Pro G2')
-                .expectOutputNameContains('iCON QCON Pro G2')
+            deviceConfig2.configureMainDeviceDetectionPortPair(
+                driver2
+                    .makeDetectionUnit()
+                    .detectPortPair(this.devices[0].ports.input, this.devices[0].ports.output)
+            )
         }
     }
     _createClass(Devices, [
